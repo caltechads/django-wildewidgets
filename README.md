@@ -112,6 +112,20 @@ Create a file called `wildewidgets.py` in your app directory and create a new cl
                     [410, 920, 180, 3000, 730, 870, 920],
                     [870, 210, 940, 300, 900, 130, 650]]
 
+Then in your view code, use this class instead:
+
+In your view code, import the appropriate chart:
+
+    from .wildewidgets import TestChart
+
+    class HomeView(TemplateView):
+        template_name = "core/home.html"
+
+        def get_context_data(self, **kwargs):
+            kwargs['barchart'] = TestChart(width='500', height='400', thousands=True)
+            return super().get_context_data(**kwargs)    
+
+
 
 
 
