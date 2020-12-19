@@ -1,0 +1,23 @@
+{% if options.title %}
+  <div style="width:{{options.width}};margin:0 auto;">
+    <h3 class='text-center'>{{ options.title }}</h3>
+  </div>
+{% endif %}
+<div style="width:{{options.width}};margin:0 auto">
+  <div id="{{name}}" style="width:{{options.width}};height:{{options.height}};"></div>
+</div>
+<script type="text/javascript">
+  $(document).ready(function() {
+    {% if async %}
+    $.get('{% url "wildewidgets_json" %}?wildewidgetclass={{wildewidgetclass}}', function(data) {
+      var spec = data['data'];
+    {% else %}
+      var spec = {{data|safe}};
+    {% endif %}
+    var opt = {"renderer": "canvas", "actions": false};
+    vegaEmbed("#{{name}}", spec, opt);
+    {% if async %}
+    });
+    {% endif %}
+  });
+</script>

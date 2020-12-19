@@ -1,0 +1,129 @@
+<div class="wildewidget-chart-container">
+  <canvas id="{{name}}" width="{{options.width}}" height="{{options.height}}" style="margin:auto;"></canvas>
+</div>
+
+<script>
+
+  if (typeof abbreviateNumber == 'undefined') {
+    var SI_SYMBOL = ["", "K", "M", "G", "T", "P", "E"];
+    abbreviateNumber = function(number) {
+      var tier = Math.log10(number) / 3 | 0;
+      if(tier == 0) return number;
+      var suffix = SI_SYMBOL[tier];
+      var scale = Math.pow(10, tier * 3);
+      var scaled = number / scale;
+      return scaled.toFixed(1) + suffix;
+    }
+  }
+
+  $(document).ready(function() {
+    {% if async %}
+    $.get('{% url "wildewidgets_json" %}?wildewidgetclass={{wildewidgetclass}}', function(data) {
+    {% endif %}
+      var ctx = document.getElementById('{{name}}').getContext('2d');
+      var myChart = new Chart(ctx, {
+        type: "{{options.chart_type}}",
+        {% if async %}
+          data: data,
+        {% else %}
+          data: {
+            labels:{{labels|safe}},
+            datasets:{{datasets|safe}}
+          },
+        {% endif %}
+        options: {
+          responsive: false,
+          {% if options.title %}
+            title: {
+              display: true,
+              text: '{{options.title}}'
+            },
+          {% endif %}
+
+        legend: {
+          display: {% if options.legend %}true{% else %}false{% endif %},
+          position: '{{options.legend_position}}'
+        },
+
+          {% if options.money %}
+            tooltips: {
+              callbacks: {
+                label: function(tooltipItem, data) {
+                  var label = ''
+                  if (data.datasets[tooltipItem.datasetIndex].label) {
+                    label = data.datasets[tooltipItem.datasetIndex].label + ": "
+                  } 
+                  var value;
+                  {% if options.yAxes_name == 'xAxes' %}
+                    value = Math.round(tooltipItem.xLabel * 100) / 100
+                  {% else %}
+                    value = Math.round(tooltipItem.yLabel * 100) / 100
+                  {% endif %}
+                  value = value.toLocaleString()
+                  return label + '$' + value;
+                }
+              }
+            },
+          {% endif %}
+          {% if options.yAxes_name %}
+          scales: {
+            {{options.yAxes_name}}: [{
+              stacked: {% if options.stacked %}true{% else %}false{% endif %},
+              ticks: {
+                beginAtZero: true, 
+                {% if options.money or options.thousands %}
+                  callback: function(value, index, values) {
+                    {% if options.thousands %}
+                      value = abbreviateNumber(value);
+                      {% comment %} if (value > 1000) {
+                        value = value/1000 + 'K';
+                      }{% endcomment %}
+                    {% endif %}
+                    {% if options.money %}
+                      value = '$' + value;
+                    {% endif %}
+                    return value;
+                  }
+                {% endif %}
+              }
+            }],
+            {{options.xAxes_name}}: [{
+              display: {% if options.histogram %}false{% else %}true{% endif %},
+              stacked: {% if options.stacked %}true{% else %}false{% endif %},
+              {% if options.max %}
+              ticks: {
+                max: {{options.max}},
+              },
+              {% endif %}
+              // use these for histogram
+              {% if options.histogram %}
+                categoryPercentage: 1.0,
+                barPercentage: 1.0,
+              {% endif %}
+            },
+            {% if options.histogram %}
+            {
+              display: true,
+              {% if options.histogram_max %}
+              ticks: {
+                //autoSkip: false,
+                max: {{options.histogram_max}},
+              },
+              {% endif %}
+              gridLinesx : {
+                display : false
+              }
+            }
+            {% endif %}
+            ],
+          }
+          {% endif %}
+        }
+      });
+    {% if async %}
+    });
+    {% endif %}
+  });
+
+</script>
+

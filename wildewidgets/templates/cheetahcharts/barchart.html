@@ -1,0 +1,97 @@
+<div class="dashboard-chart-container">
+  <canvas id="{{name}}" width="{{width}}" height="{{height}}"></canvas>
+</div>
+
+<script>
+
+  $(document).ready(function() {
+    $.get('{% url json_url %}', function(data) {
+      var ctx = document.getElementById('{{name}}').getContext('2d');
+      var myChart = new Chart(ctx, {
+        type: "bar",
+        data: data,
+        {% comment %} datax: {
+          labels: {{labels|safe}},
+          datasets: [
+            {% for dataset in datasets %}
+              {
+                data:{{dataset.data|safe}},
+                {% if dataset.label %}
+                  label: '{{dataset.label}}',
+                {% endif %}
+                {% if dataset.backgroundcolor %}
+                  backgroundColor: '{{dataset.backgroundcolor}}',
+                {% endif %}
+                {% if dataset.bordercolor %}
+                  borderColor: '{{dataset.bordercolor}}',
+                {% endif %}
+                {% if dataset.borderwidth %}
+                  borderWidth: '{{dataset.borderwidth}}',
+                {% endif %}
+              },
+            {% endfor %}
+          ]
+        }, {% endcomment %}
+        options: {
+          {% if options.title %}
+            title: {
+              display: true,
+              text: '{{options.title}}'
+            },
+          {% endif %}
+
+          {% if not options.legend %}
+            legend: {
+              display: false
+            },
+          {% endif %}
+
+          {% if options.money %}
+            tooltips: {
+              callbacks: {
+                label: function(tooltipItem, data) {
+                  var label = ''
+                  if (data.datasets[tooltipItem.datasetIndex].label) {
+                    label = data.datasets[tooltipItem.datasetIndex].label + ": "
+                  } 
+                  var value = Math.round(tooltipItem.yLabel * 100) / 100
+                  value = value.toLocaleString()
+                  return label + '$' + value;
+                }
+              }
+            },
+          {% endif %}
+          scales: {
+            yAxes: [{
+              {% if options.stacked %}
+                stacked: true,
+              {% endif %}
+              ticks: {
+                beginAtZero: true, 
+                {% if options.money or options.thousands %}
+                  callback: function(value, index, values) {
+                    var adj = value;
+                    {% if options.thousands %}
+                      value = value/1000 + 'K';
+                    {% endif %}
+                    {% if options.money %}
+                      value = '$' + value;
+                    {% endif %}
+                    return value;
+                  }
+                {% endif %}
+              }
+            }],
+            xAxes: [{
+              {% if options.stacked %}
+                stacked: true,
+              {% endif %}
+            }],
+          }
+        }
+      });
+    });
+  });
+
+</script>
+

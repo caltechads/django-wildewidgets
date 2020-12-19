@@ -1,0 +1,77 @@
+<div class="wildewidget-chart-container">
+  <canvas id="{{name}}" width="{{options.width}}" height="{{options.height}}"></canvas>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4/dist/Chart.min.js"></script> 
+<script>
+
+  $(document).ready(function() {
+    $.get('{% url "wildewidgets_json" %}?wildewidgetclass={{wildewidgetclass}}', function(data) {
+      var ctx = document.getElementById('{{name}}').getContext('2d');
+      var myChart = new Chart(ctx, {
+        type: "{{options.chart_type}}",
+        data: data,
+        options: {
+          responsive: false,
+          {% if options.title %}
+            title: {
+              display: true,
+              text: '{{options.title}}'
+            },
+          {% endif %}
+
+        legend: {
+          display: {% if options.legend %}true{% else %}false{% endif %},
+          position: '{{options.legend_position}}'
+        },
+
+          {% if options.money %}
+            tooltips: {
+              callbacks: {
+                label: function(tooltipItem, data) {
+                  var label = ''
+                  if (data.datasets[tooltipItem.datasetIndex].label) {
+                    label = data.datasets[tooltipItem.datasetIndex].label + ": "
+                  } 
+                  var value = Math.round(tooltipItem.yLabel * 100) / 100
+                  value = value.toLocaleString()
+                  return label + '$' + value;
+                }
+              }
+            },
+          {% endif %}
+          {% if options.yAxes_name %}
+          scales: {
+            {{options.yAxes_name}}: [{
+              stacked: {{options.stacked}},
+              ticks: {
+                beginAtZero: true, 
+                {% if options.money or options.thousands %}
+                  callback: function(value, index, values) {
+                    var adj = value;
+                    {% if options.thousands %}
+                      value = value/1000 + 'K';
+                    {% endif %}
+                    {% if options.money %}
+                      value = '$' + value;
+                    {% endif %}
+                    return value;
+                  }
+                {% endif %}
+              }
+            }],
+            {{options.xAxes_name}}: [{
+              stacked: {{options.stacked}},
+              // use these for histogram
+              //categoryPercentage: 1.0,
+              //barPercentage: .98,
+            }],
+          }
+          {% endif %}
+        }
+      });
+    });
+  });
+
+</script>
+

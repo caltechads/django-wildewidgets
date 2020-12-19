@@ -1,0 +1,158 @@
+{% load i18n %}
+
+<div class="dashboard-table-container" style="width: {{width}};">
+  <div class="{{name}}-controls">
+    {% csrf_token %}
+    <div class="d-flex flex-row justify-content-between align-items-center">
+      <div class="btn-group controls" role="group" aria-label="Show/Hide Table Controls">
+        <a href="#" role="button" class="btn btn-secondary label-btn"  aria-disabled="true">Table Controls</a>
+        <button class="btn btn-outline-secondary" type="button" data-toggle="collapse"
+                data-target="#{{name}}__columns" aria-expanded="false" aria-controls="#{{name}}__columns">Columns</button>
+        {% if has_filters %}
+          <button class="btn btn-outline-secondary" type="button" data-toggle="collapse" data-target="#{{name}}__filters"
+                aria-expanded="false" aria-controls="#{{name}}__filters">Filter by</button>
+        {% endif %}
+      </div>
+    </div>
+    <div class="d-flex flex-column align-items-start border-left border-secondary mb-5">
+      <div id="{{name}}__columns" class="btn-group ml-3 mt-3 mw-auto toolbar__columns {{name}}__columns collapse" role="group" aria-label="Show/Hide Columns">
+        <a href="#" role="button" class="btn btn-info label-btn"  aria-disabled="true">Columns</a>
+        {% for key,item in header.items %}
+          {% if not forloop.first %}
+            <button type="button" data-toggle="button" aria-pressed="true" autocomplete="off" class="toggle-vis btn btn-outline-secondary {{item.visible|yesno:'active,'}}" data-column="{{forloop.counter0}}">{{item.verbose_name}}</button>
+          {% endif %}
+        {% endfor %}
+      </div>
+      <div id="{{name}}__filters" class="btn-group ml-3 mt-3 {{name}}__filters collapse" role="group" aria-label="Search Filters">
+        <a href="#" role="button" class="btn btn-info label-btn"  aria-disabled="true">Filter by</a>
+        {% for batch in filters %}
+          {% with field_counter=forloop.counter0 filter=batch.1 item=batch.0 %}
+            {% if filter %}              
+              <div class="btn-group" role="group">
+                <button id="{{item.field}}-group" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" class="btn btn-outline-secondary dropdown-toggle">{{item.verbose_name}}?: <span class="filter-target">Any</span></button>
+                <div class="dropdown-menu" aria-labelledby="{{item.field}}-group">
+                  <h6 class="dropdown-header">Filter by {{item.verbose_name}}?</h6>
+                  {% for choice in filter.choices %}
+                    <button class="dropdown-item" href="#" data-column="{{field_counter}}" data-search="{{choice.1}}">{{choice.0}}</button>
+                  {% endfor %}
+                </div>
+              </div>
+            {% endif %}
+          {% endwith %}
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <table class="wildewidgets-table table {{name}}">
+    <thead>
+      <tr>
+        {% for key,item in header.items %}
+          <th>{{item.verbose_name}}</th>
+        {% endfor %}
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in rows %}
+        <tr>
+        {% for column in row %}
+          <td>{{column}}</td>
+        {% endfor %}
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<script>
+  if (typeof dt_language == "undefined") {
+    var dt_language = {
+      "emptyTable":     "{% trans "No data available in table" %}",
+      "info":           "{% trans "Showing _START_ to _END_ of _TOTAL_ entries" %}",
+      "infoEmpty":      "{% trans "Showing 0 to 0 of 0 entries" %}",
+      "infoFiltered":   "{% trans "(filtered from _MAX_ total entries)" %}",
+      "infoPostFix":    "",
+      "thousands":      ",",
+      "lengthMenu":     "{% trans "Show _MENU_ entries" %}",
+      "loadingRecords": "{% trans "Loading..." %}",
+      "processing":     "{% trans "Processing..." %}",
+      "search":         "{% trans "Search:" %}",
+      "zeroRecords":    "{% trans "No matching records found" %}",
+      "paginate": {
+        "first":      "{% trans "First" %}",
+        "last":       "{% trans "Last" %}",
+        "next":       "{% trans "Next" %}",
+        "previous":   "{% trans "Previous" %}"
+      },
+      "aria": {
+        "sortAscending":  "{% trans ": activate to sort column ascending" %}",
+        "sortDescending": "{% trans ": activate to sort column descending" %}"
+      }
+    };
+  }
+  $(document).ready(function() {
+    var {{name}} = $('.{{name}}').DataTable({
+      language: dt_language,
+      {% comment %} searching: {{options.searchable|yesno:"true,false,true"}}, {% endcomment %}
+      paging: {{options.paging|yesno:"true,false,true"}},
+      fnDrawCallback: function(oSettings) {
+          if (oSettings.aoData.length < this.api().page.len()) {
+              $("#" + oSettings.sTableId + "_paginate").hide();
+              $("#" + oSettings.sTableId + "_info").hide();
+              $("#" + oSettings.sTableId + "_length").hide();
+          } else {
+              $("#" + oSettings.sTableId + "_paginate").show();
+              $("#" + oSettings.sTableId + "_info").show();
+              $("#" + oSettings.sTableId + "_length").show();
+          }
+      },
+      columns: [
+        {% for key,item in header.items %}
+          {
+            {% if async %}data: '{{item.field}}',{% endif %}
+            orderable: {{item.sortable|yesno:"true,false"}},
+            searchable: {{item.searchable|yesno:"true,false"}},
+            visible: {{item.visible|yesno:"true,false"}},
+            className: "dt-head-{{item.align}} dt-nowrap",
+          },
+        {% endfor %}
+      ],
+      {% if async %}
+        processing: true,
+        serverSide: true,
+        ajax: '{% url "wildewidgets_json" %}?wildewidgetclass={{tableclass}}'
+      {% endif %}
+    });
+
+    $('.{{name}}-controls button.toggle-vis').on('click', function (e) {
+        e.preventDefault();
+        var column = {{name}}.column( $(this).attr('data-column') );
+        column.visible( ! column.visible() );
+    });
+
+    $('.{{name}}-controls .dropdown-item').on('click', function(e) {
+      var searchstr = $(this).attr('data-search');
+      var column = $(this).attr('data-column');
+      var button_id = $(this).parent().attr('aria-labelledby');
+      var dropdown_button = $('#' + button_id);
+      e.preventDefault();
+      $(this).parent().find('.dropdown-item').removeClass('active');
+      dropdown_button.find('.filter-target').text($(this).text());
+      if (searchstr == "") {
+        dropdown_button.removeClass('active');
+        {{name}}.column(column).search('').draw();
+      } else {
+        if (!$(this).hasClass('active')) {
+          $(this).addClass('active');
+        }
+        if (!dropdown_button.hasClass('active')) {
+          dropdown_button.addClass('active');
+        }
+        {{name}}.column(column).search(searchstr).draw();
+      }
+  });
+
+  });
+
+
+</script>
