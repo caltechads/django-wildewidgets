@@ -114,8 +114,6 @@ Create a file called `wildewidgets.py` in your app directory and create a new cl
 
 Then in your view code, use this class instead:
 
-In your view code, import the appropriate chart:
-
     from .wildewidgets import TestChart
 
     class HomeView(TemplateView):
