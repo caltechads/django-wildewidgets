@@ -1,6 +1,6 @@
 # Django Wildewidgets
 
-django-wildewidgets is a Django app to help make charts, tables, and UI widgets 
+django-wildewidgets is a Django library designed to help you make charts, tables, and UI widgets 
 quickly and easily with libraries like Chartjs, Altair, and Datatables.
 
 ## Quick start
@@ -85,7 +85,7 @@ In your template, simply display the chart:
 
 ### With Ajax (the data will load after the page has been loaded)
 
-Create a file called `wildewidgets.py` in your app directory and create a new class. You'll need to either override `get_categories`, `get_dataset_labels` and `get_datasets`, or override `load`, where you can just call the functions you need to call to set up your chart:
+Create a file called `wildewidgets.py` in your app directory and create a new class derived from the chart class that you want. You'll need to either override `get_categories`, `get_dataset_labels` and `get_datasets`, or override `load`, where you can just call the functions you need to call to set up your chart:
 
     from wildewidgets import StackedBarChart
 
