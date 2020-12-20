@@ -8,6 +8,7 @@ quickly and easily with libraries like Chartjs, Altair, and Datatables.
  * [Quick Start](#quick-start)
  * [Business Charts Usage](#business-charts-usage)
  * [Scientific Charts Usage](#scientific-charts-and-graphs)
+ * [Tables](#tables)
 
 ## Quick start
 
@@ -67,7 +68,7 @@ and:
 
 ### Without Ajax
 
-With a chart that doesn't use ajax, the data will load before the page has been loaded.
+With a chart that doesn't use ajax, the data will load before the page has been loaded. Large datasets may cause the page to load too slowly, so this is best for smaller datasets.
 
 In your view code, import the appropriate chart:
 
@@ -100,7 +101,7 @@ In your template, simply display the chart:
 
 ### With Ajax
 
-With a chart that does use ajax, the data will load after the page has been loaded.
+With a chart that does use ajax, the data will load after the page has been loaded. This is the best choice for performance with large datasets, especially if you have multiple charts loading on a page. With ajax, the charts load in the background.
 
 Create a file called `wildewidgets.py` in your app directory and create a new class derived from the chart class that you want. You'll need to either override `get_categories`, `get_dataset_labels` and `get_datasets`, or override `load`, where you can just call the functions you need to call to set up your chart:
 
@@ -152,7 +153,7 @@ In your view code, import the AltairChart class, and the pandas and altair libra
 
     import pandas as pd
     import altair as alt
-    from cheetahcharts import AltairChart
+    from wildewidgets import AltairChart
 
 and define the chart in your view:
 
@@ -214,3 +215,67 @@ Then in your view code, use this class instead:
 In your template, display the chart:
 
     {{scichart}}
+
+## Tables
+
+### Without Ajax
+
+In your view code, import the DataTable:
+
+    from wildewidgets import DataTable
+
+and define the table in your view:
+
+    class TableView(TemplateView):
+        template_name = "core/tables.html"
+
+        def get_context_data(self, **kwargs):
+            table = DataTable()
+            table.add_column('time')
+            table.add_column('pressure')
+            table.add_column('temperature')
+            table.add_row(time=12, pressure=53, temperature=25)
+            table.add_row(time=13, pressure=63, temperature=24)
+            table.add_row(time=14, pressure=73, temperature=23)
+            kwargs['table'] = table
+            return super().get_context_data(**kwargs)
+
+In your template, display the chart:
+
+    {{table}}
+
+### With Ajax
+
+Create a file called `wildewidgets.py` in your app directory if it doesn't exist already and create a new class derived from the DataTable class. You'll need to provide a model, or override `get_initial_queryset`. Then add the fields that you want displayed in the table:
+
+    from wildewidgets import DataTable
+
+    class TestTable(CheetahTable):
+
+        model = Measurement
+
+        def __init__(self, *args, **kwargs):
+            if not "table_id" in kwargs:
+                kwargs["table_id"] = "data_measurement"
+            super().__init__(*args, **kwargs)
+            self.add_column('name')
+            self.add_column('time', searchable=False)
+            self.add_column('pressure')
+            self.add_column('temperature')
+            self.add_column('restricted', visible=False)
+            self.add_column('open', sortable=False)
+
+In your view code, use this class instead:
+
+    from .wildewidgets import TestTable
+
+    class TableView(TemplateView):
+    template_name = "core/tables.html"
+
+    def get_context_data(self, **kwargs):
+        kwargs['table'] = TestTable()
+        return super().get_context_data(**kwargs)
+
+In your template, display the chart:
+
+    {{table}}
