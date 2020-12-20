@@ -1,6 +1,6 @@
 # Django Wildewidgets
 
-django-wildewidgets is a Django library designed to help you make charts, tables, and UI widgets 
+django-wildewidgets is a Django library designed to help you make charts, graphs, tables, and UI widgets 
 quickly and easily with libraries like Chartjs, Altair, and Datatables.
 
 ## Quick start
@@ -9,6 +9,13 @@ Install:
 
     pip install django-wildewidgets
 
+If you plan on using [Altair charts](https://github.com/altair-viz/altair), run:
+
+    pip install altair
+
+If you plan on using [Datatables](https://https://datatables.net/), which use [django-datatables-view](https://bitbucket.org/pigletto/django-datatables-view/), run:
+
+    pip install django-datatables-view
 
 Add "wildewidgets" to your INSTALLED_APPS setting like this:
 
@@ -30,11 +37,11 @@ Include the wildewidgets URLconf in your project urls.py like this:
 
 Add the appropriate resources to your template files.
 
-For [ChartJS](https://www.chartjs.org/) (the regular business type charts), add the corresponding javascript file:
+For [ChartJS](https://www.chartjs.org/) (regular business type charts), add the corresponding javascript file:
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4/dist/Chart.min.js"></script> 
 
-For [Altair](https://github.com/altair-viz/altair) (the scientific charts), use:
+For [Altair](https://github.com/altair-viz/altair) (scientific charts), use:
 
     <script src="https://cdn.jsdelivr.net/npm/vega@5"></script>
     <script src="https://cdn.jsdelivr.net/npm/vega-lite@4"></script>
@@ -65,7 +72,7 @@ In your view code, import the appropriate chart:
         StackedBarChart, 
     )
 
-and define the chart:
+and define the chart in your view:
 
     class HomeView(TemplateView):
         template_name = "core/home.html"
@@ -123,7 +130,77 @@ Then in your view code, use this class instead:
             kwargs['barchart'] = TestChart(width='500', height='400', thousands=True)
             return super().get_context_data(**kwargs)    
 
+In your template, display the chart as before:
 
+    {{barchart}}
 
+## Scientific Charts and Graphs
 
+### Without Ajax
 
+In your view code, import the AltairChart class, and the pandas and altair libraries (the pandas library and other requirements will be automatically installed when installing the altair library):
+
+    import pandas as pd
+    import altair as alt
+    from cheetahcharts import AltairChart
+
+and define the chart in your view:
+
+class AltairView(TemplateView):
+    template_name = "core/altair.html"
+
+    def get_context_data(self, **kwargs):
+        data = pd.DataFrame({
+            'a': list('CCCDDDEEE'),
+            'b': [2, 7, 4, 1, 2, 6, 8, 4, 7]
+            }
+        )
+        spec = alt.Chart(data).mark_point().encode(
+            x='a',
+            y='b'
+        )
+        chart = AltairChart(title='Scientific Proof')
+        chart.set_data(spec)
+        kwargs['chart'] = chart
+        return super().get_context_data(**kwargs)
+
+In your template, display the chart:
+
+    {{chart}}
+
+### With Ajax
+
+Create a file called `wildewidgets.py` in your app directory if it doesn't exist already and create a new class derived from the AltairChart class. You'll need to either override the `load` method, where you'll define your altair chart:
+
+    import pandas as pd
+    import altair as alt
+    from wildewidgets import AltairChart
+
+    class SciChart(AltairChart):
+
+    def load(self):
+        data = pd.DataFrame({
+            'a': list('CCCDDDEEE'),
+            'b': [2, 7, 4, 1, 2, 6, 8, 4, 10]
+            }
+        )
+        spec = alt.Chart(data).mark_point().encode(
+            x='a',
+            y='b'
+        )
+        self.set_data(spec)
+
+Then in your view code, use this class instead:
+
+    from .wildewidgets import SciChart
+
+    class HomeView(TemplateView):
+        template_name = "core/altair.html"
+
+        def get_context_data(self, **kwargs):
+            kwargs['scichart'] = SciChart()
+            return super().get_context_data(**kwargs)    
+
+In your template, display the chart:
+
+    {{scichart}}
