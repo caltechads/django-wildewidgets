@@ -7,7 +7,7 @@ quickly and easily with libraries like Chartjs, Altair, and Datatables.
 
  * [Quick Start](#quick-start)
  * [Business Charts Usage](#business-charts-usage)
- * [Scientific Charts Usage](#scientific-charts-usage)
+ * [Scientific Charts Usage](#scientific-charts-and-graphs)
 
 ## Quick start
 
