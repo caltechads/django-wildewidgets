@@ -3,6 +3,12 @@
 django-wildewidgets is a Django library designed to help you make charts, graphs, tables, and UI widgets 
 quickly and easily with libraries like Chartjs, Altair, and Datatables.
 
+## Table of Contents
+
+ * [Quick Start](#quick-start)
+ * [Business Chart Usage](#business-chart-usage)
+ * [Scientific Chart Usage](#scientific-chart-usage)
+
 ## Quick start
 
 Install:
@@ -59,7 +65,9 @@ and:
 
 ## Business Charts Usage
 
-### Without Ajax (the data will load before the page has been loaded)
+### Without Ajax
+
+With a chart that doesn't use ajax, the data will load before the page has been loaded.
 
 In your view code, import the appropriate chart:
 
@@ -90,7 +98,9 @@ In your template, simply display the chart:
 
     {{barchart}}
 
-### With Ajax (the data will load after the page has been loaded)
+### With Ajax
+
+With a chart that does use ajax, the data will load after the page has been loaded.
 
 Create a file called `wildewidgets.py` in your app directory and create a new class derived from the chart class that you want. You'll need to either override `get_categories`, `get_dataset_labels` and `get_datasets`, or override `load`, where you can just call the functions you need to call to set up your chart:
 
