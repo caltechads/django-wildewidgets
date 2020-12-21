@@ -148,6 +148,40 @@ In your template, display the chart as before:
 
     {{barchart}}
 
+Histograms are built slightly differently. You'll need to call the object's `build` function, with arguments for a list of values, and the number of bins you want. The histogram will utilize ajax if the build function is called in the `load` function:
+
+    class TestHistogram(Histogram): # without ajax
+
+        def __init__(self, *args, **kwargs):
+            super().__init__(*args, **kwargs)
+            mu = 0
+            sigma = 50
+            nums = []
+            bin_count = 40
+            for i in range(10000):
+                temp = random.gauss(mu,sigma)
+                nums.append(temp)
+
+            self.build(nums, bin_count)
+
+
+    class TestHorizontalHistogram(HorizontalHistogram): # with ajax
+
+        def __init__(self, *args, **kwargs):
+            super().__init__(*args, **kwargs)
+            self.set_color(False)
+
+        def load(self):
+            mu = 100
+            sigma = 30
+            nums = []
+            bin_count = 50
+            for i in range(10000):
+                temp = random.gauss(mu,sigma)
+                nums.append(temp)
+
+            self.build(nums, bin_count)
+
 ## Scientific Charts and Graphs
 
 ### Without Ajax
@@ -361,7 +395,7 @@ You can specify custom filters by field:
             filter.add_choice("2000-3000", "level_3000")
             self.add_filter('pressure', filter)
 
-Generally, for these filters to work, you will have to override the default searching function:
+Generally, for these filters to work, you will have to override the default searching function for the corresponding field:
 
         def search_pressure_column(self, qs, column, value):
             if value=='level_1000':
@@ -384,7 +418,7 @@ Generally, for these filters to work, you will have to override the default sear
             qs = qs.filter(open=test)
             return qs
 
-You can change the default display of a particular column by overriding `render_<field>_column':
+You can change the default display of a particular column by overriding the corresponding `render` method:
 
         def render_date_column(self, row, column):
             return row.date.strftime("%B %-d, %Y")
@@ -395,9 +429,9 @@ You can change the default display of a particular column by overriding `render_
             else:
                 return ''
 
-You can also add custom fields that are not part of the model, but are calculated, by overriding `render_<field>_column':
+You can also add custom fields that are not part of the model, but are calculated, by overriding the corresponding `render` method:
 
-        def render_<fieldname>_column(self, row, column):
+        def render_overheated_column(self, row, column):
             if row.temperature > 1500:
                 return "Overheated"
             return "Normal"
