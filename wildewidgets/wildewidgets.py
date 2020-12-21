@@ -61,12 +61,12 @@ class CategoryChart(JSONDataView):
             'width': kwargs.get('width', '400'),
             'height': kwargs.get('height', '400'),
             "title":kwargs.get('title', None),
-            "legend":kwargs.get('legend', None),
+            "legend":kwargs.get('legend', False),
             "legend_position":kwargs.get('legend_position', "top"),
             "chart_type":kwargs.get('chart_type',None),
             "histogram":kwargs.get('histogram',False),
             "max":kwargs.get('max',None),
-            "thousands":kwargs.get('thousands',None),
+            "thousands":kwargs.get('thousands',False),
             "histogram_max":kwargs.get('histogram_max',None)
         }
         self.chart_id = kwargs.get('chart_id', None)
