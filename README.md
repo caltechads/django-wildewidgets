@@ -9,6 +9,9 @@ quickly and easily with libraries like Chartjs, Altair, and Datatables.
  * [Business Charts Usage](#business-charts-usage)
  * [Scientific Charts Usage](#scientific-charts-and-graphs)
  * [Tables](#tables)
+ * [Business Charts Options](#business-charts-options)
+ * [Scientific Charts Options](#scientific-charts-and-options)
+ * [Table Options](#table-options)
 
 ## Quick start
 
@@ -280,7 +283,7 @@ In your template, display the chart:
 
     {{table}}
 
-## Business Chart Options
+## Business Charts Options
 
 There are a number of available Charts:
 
@@ -303,7 +306,7 @@ There are a number of options you can set for a specific chart:
     thousands: if set to true, numbers are abbreviated as in 1K 5M, ... (default: False)
     money: whether or not the value is money (default: False)
 
-## Scientific Chart Options
+## Scientific Charts Options
 
 Most of the options of a scientific chart or graph are set in the Altair code, but there are a few that can be set here:
 
