@@ -7,8 +7,8 @@ quickly and easily with libraries like Chartjs, Altair, and Datatables.
 
  * [Quick Start](#quick-start)
  * [Business Charts Usage](#business-charts-usage)
- * [Scientific Charts Usage](#scientific-charts-and-graphs)
- * [Tables](#tables)
+ * [Scientific Charts Usage](#scientific-charts-and-graphs-usage)
+ * [Tables Usage](#tables-usage)
  * [Business Charts Options](#business-charts-options)
  * [Scientific Charts Options](#scientific-charts-and-options)
  * [Table Options](#table-options)
@@ -184,7 +184,7 @@ Histograms are built slightly differently. You'll need to call the object's `bui
 
             self.build(nums, bin_count)
 
-## Scientific Charts and Graphs
+## Scientific Charts and Graphs Usage
 
 ### Without Ajax
 
@@ -255,7 +255,7 @@ In your template, display the chart:
 
     {{scichart}}
 
-## Tables
+## Tables Usage
 
 ### Without Ajax
 
