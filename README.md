@@ -148,6 +148,8 @@ In your template, display the chart as before:
 
     {{barchart}}
 
+### Histograms
+
 Histograms are built slightly differently. You'll need to call the object's `build` function, with arguments for a list of values, and the number of bins you want. The histogram will utilize ajax if the build function is called in the `load` function:
 
     class TestHistogram(Histogram): # without ajax
