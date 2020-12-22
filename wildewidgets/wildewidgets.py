@@ -23,7 +23,7 @@ class WildewidgetDispatch(View):
             for config in configs:
                 check_file = os.path.join(config.path, "wildewidgets.py")
                 if os.path.isfile(check_file):
-                    module = importlib.import_module(f"{config.name}.charts")
+                    module = importlib.import_module(f"{config.name}.wildewidgets")
                     if hasattr(module, wildewidgetclass):
                         class_ = getattr(module, wildewidgetclass)
                         view = class_.as_view()
