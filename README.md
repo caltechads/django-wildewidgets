@@ -337,6 +337,7 @@ There are a number of options you can set for a specific chart:
     width: chart width in pixels (default: 400)
     height: chart height in pixels (default: 400)
     title: title text (default: None)
+    color: use color as opposed to grayscale (default: True)
     legend: whether or not to show the legend - True/False (default: False)
     legend-position: top, right, bottom, left (default: left)
     thousands: if set to true, numbers are abbreviated as in 1K 5M, ... (default: False)
