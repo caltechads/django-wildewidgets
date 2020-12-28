@@ -126,8 +126,13 @@
           if (firstPoint) {
             var label = myChart.data.labels[firstPoint._index];
             var value = myChart.data.datasets[firstPoint._datasetIndex].data[firstPoint._index];
-            var url = "{{options.url}}?label=" + label + "&value=" + value;
-            window.location.href = url;
+            var urlprefix = "{{options.url}}";
+            if (urlprefix.includes("?")) {
+              window.location.href = urlprefix + "&label=" + label + "&value=" + value;
+            } else {
+              window.location.href = urlprefix + "?label=" + label + "&value=" + value;
+            }
+            
           }
         });
       {% endif %}
