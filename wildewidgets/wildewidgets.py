@@ -67,7 +67,8 @@ class CategoryChart(JSONDataView):
             "histogram":kwargs.get('histogram',False),
             "max":kwargs.get('max',None),
             "thousands":kwargs.get('thousands',False),
-            "histogram_max":kwargs.get('histogram_max',None)
+            "histogram_max":kwargs.get('histogram_max',None),
+            "url":kwargs.get('url',None)
         }
         self.chart_id = kwargs.get('chart_id', None)
         self.categories = None

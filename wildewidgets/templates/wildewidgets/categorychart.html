@@ -120,6 +120,17 @@
           {% endif %}
         }
       });
+      {% if options.url %}
+        $('#{{name}}').click(function(event){
+          var firstPoint = myChart.getElementAtEvent(event)[0];
+          if (firstPoint) {
+            var label = myChart.data.labels[firstPoint._index];
+            var value = myChart.data.datasets[firstPoint._datasetIndex].data[firstPoint._index];
+            var url = "{{options.url}}?label=" + label + "&value=" + value;
+            window.location.href = url;
+          }
+        });
+      {% endif %}
     {% if async %}
     });
     {% endif %}
