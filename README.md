@@ -342,6 +342,7 @@ There are a number of options you can set for a specific chart:
     legend-position: top, right, bottom, left (default: left)
     thousands: if set to true, numbers are abbreviated as in 1K 5M, ... (default: False)
     money: whether or not the value is money (default: False)
+    url: a click on a segment of a chart will redirect to this URL, with parameters label and value
 
 ## Scientific Charts Options
 
