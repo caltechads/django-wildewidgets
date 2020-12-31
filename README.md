@@ -344,7 +344,17 @@ There are a number of options you can set for a specific chart:
     money: whether or not the value is money (default: False)
     url: a click on a segment of a chart will redirect to this URL, with parameters label and value
 
+### Colors
+
 You can also customize the colors by either overriding the class variable 'COLORS' or calling the member function set_colors. The format is a list of RGB tuples.
+
+### Fonts
+
+To customize the fonts globally, the available Django settings are:
+
+    CHARTJS_FONT_FAMILY = "'Vaud', sans-serif"
+    CHARTJS_TITLE_FONT_SIZE = '18'
+    CHARTJS_TITLE_FONT_STYLE = 'normal'
 
 ## Scientific Charts Options
 

@@ -21,6 +21,9 @@
     $.get('{% url "wildewidgets_json" %}?wildewidgetclass={{wildewidgetclass}}', function(data) {
     {% endif %}
       var ctx = document.getElementById('{{name}}').getContext('2d');
+      {% if options.chartjs_font_family %}
+        Chart.defaults.global.defaultFontFamily = "{{options.chartjs_font_family|safe}}";
+      {% endif %}
       var myChart = new Chart(ctx, {
         type: "{{options.chart_type}}",
         {% if async %}
@@ -37,7 +40,12 @@
             title: {
               display: true,
               text: '{{options.title}}',
-              fontSize: 18
+              {% if options.chartjs_title_font_size %}
+                fontSize: {{options.chartjs_title_font_size}},
+              {% endif %}
+              {% if options.chartjs_title_font_style %}
+                fontStyle: '{{options.chartjs_title_font_style}}',
+              {% endif %}
             },
           {% endif %}
 

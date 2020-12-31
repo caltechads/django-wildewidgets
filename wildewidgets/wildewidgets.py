@@ -6,6 +6,7 @@ import random
 import re
 
 from django.apps import apps
+from django.conf import settings
 from django import template
 from django.views.generic import View
 
@@ -76,6 +77,12 @@ class CategoryChart(JSONDataView):
         self.dataset_labels = []
         self.color = kwargs.get('color', True)
         self.colors = []
+        if hasattr(settings, 'CHARTJS_FONT_FAMILY'):
+            self.options['chartjs_font_family'] = settings.CHARTJS_FONT_FAMILY
+        if hasattr(settings, 'CHARTJS_TITLE_FONT_SIZE'):
+            self.options['chartjs_title_font_size'] = settings.CHARTJS_TITLE_FONT_SIZE
+        if hasattr(settings, 'CHARTJS_TITLE_FONT_STYLE'):
+            self.options['chartjs_title_font_style'] = settings.CHARTJS_TITLE_FONT_STYLE
 
     def set_categories(self, categories):
         self.categories = categories
