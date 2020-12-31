@@ -46,6 +46,9 @@
               {% if options.chartjs_title_font_style %}
                 fontStyle: '{{options.chartjs_title_font_style}}',
               {% endif %}
+              {% if options.chartjs_title_padding %}
+                padding: {{options.chartjs_title_padding}},
+              {% endif %}
             },
           {% endif %}
 

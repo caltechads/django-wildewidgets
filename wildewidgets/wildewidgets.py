@@ -83,6 +83,8 @@ class CategoryChart(JSONDataView):
             self.options['chartjs_title_font_size'] = settings.CHARTJS_TITLE_FONT_SIZE
         if hasattr(settings, 'CHARTJS_TITLE_FONT_STYLE'):
             self.options['chartjs_title_font_style'] = settings.CHARTJS_TITLE_FONT_STYLE
+        if hasattr(settings, 'CHARTJS_TITLE_PADDING'):
+            self.options['chartjs_title_padding'] = settings.CHARTJS_TITLE_PADDING
 
     def set_categories(self, categories):
         self.categories = categories

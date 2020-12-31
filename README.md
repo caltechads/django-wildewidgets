@@ -355,6 +355,7 @@ To customize the fonts globally, the available Django settings are:
     CHARTJS_FONT_FAMILY = "'Vaud', sans-serif"
     CHARTJS_TITLE_FONT_SIZE = '18'
     CHARTJS_TITLE_FONT_STYLE = 'normal'
+    CHARTJS_TITLE_PADDING = '0'
 
 ## Scientific Charts Options
 
