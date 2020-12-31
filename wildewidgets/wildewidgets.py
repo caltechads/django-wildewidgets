@@ -75,6 +75,7 @@ class CategoryChart(JSONDataView):
         self.datasets = []
         self.dataset_labels = []
         self.color = kwargs.get('color', True)
+        self.colors = []
 
     def set_categories(self, categories):
         self.categories = categories
@@ -88,6 +89,9 @@ class CategoryChart(JSONDataView):
 
     def set_color(self, color):
         self.color = color
+
+    def set_colors(self, colors):
+        self.colors = colors
 
     def get_content(self):
         if self.chart_id:
@@ -116,7 +120,9 @@ class CategoryChart(JSONDataView):
         return context
 
     def get_color_iterator(self):
-        if self.color:
+        if self.colors:
+            return iter(self.colors)
+        elif self.color:
             return iter(self.COLORS)
         else:
             return iter(self.GRAYS)
