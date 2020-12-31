@@ -344,6 +344,8 @@ There are a number of options you can set for a specific chart:
     money: whether or not the value is money (default: False)
     url: a click on a segment of a chart will redirect to this URL, with parameters label and value
 
+You can also customize the colors by either overriding the class variable 'COLORS' or calling the member function set_colors. The format is a list of RGB tuples.
+
 ## Scientific Charts Options
 
 Most of the options of a scientific chart or graph are set in the Altair code, but there are a few that can be set here:
