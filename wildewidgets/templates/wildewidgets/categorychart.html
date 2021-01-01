@@ -52,10 +52,10 @@
             },
           {% endif %}
 
-        legend: {
-          display: {% if options.legend %}true{% else %}false{% endif %},
-          position: '{{options.legend_position}}'
-        },
+          legend: {
+            display: {% if options.legend %}true{% else %}false{% endif %},
+            position: '{{options.legend_position}}'
+          },
 
           {% if options.money %}
             tooltips: {
