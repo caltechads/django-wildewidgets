@@ -5,14 +5,26 @@ import os
 import random
 import re
 
+from django import template
 from django.apps import apps
 from django.conf import settings
-from django import template
+from django.http import JsonResponse
 from django.views.generic import View
 
 from django_datatables_view.base_datatable_view import BaseDatatableView
 
-from json_views.views import JSONDataView
+
+class JSONDataView(View):
+
+    def get(self, request, *args, **kwargs):
+        context = self.get_context_data()
+        return self.render_to_response(context)
+
+    def get_context_data(self, **kwargs):
+        return {}
+
+    def render_to_response(self, context, **response_kwargs):
+        return JsonResponse(context)
 
 
 class WildewidgetDispatch(View):
@@ -352,7 +364,6 @@ class AltairChart(JSONDataView):
         context = super().get_context_data(**kwargs)
         self.load()
         context.update({"data": self.data})
-        print(context)
         return context
 
     def set_data(self, spec, set_size=True):
@@ -701,7 +712,6 @@ class BasicMenu():
         self.menu[title] = url
         if active:
             self.active = title
-            print('activating', title)
 
     def get_content(self):
         context = {
