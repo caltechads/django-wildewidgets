@@ -11,7 +11,10 @@ from django.conf import settings
 from django.http import JsonResponse
 from django.views.generic import View
 
-from django_datatables_view.base_datatable_view import BaseDatatableView
+try: 
+    from django_datatables_view.base_datatable_view import BaseDatatableView
+except ModuleNotFoundError:
+    pass
 
 
 class JSONDataView(View):
