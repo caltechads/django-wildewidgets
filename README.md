@@ -370,6 +370,7 @@ Most of the options of a scientific chart or graph are set in the Altair code, b
 There are a few options you can set for a table:
 
     title: title text (default: None)
+    page_length: number of rows to initially display
 
 You can add further options to particular columns when you call `add_column`:
 
