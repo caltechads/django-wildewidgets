@@ -452,3 +452,7 @@ You can also add custom fields that are not part of the model, but are calculate
             if row.temperature > 1500:
                 return "Overheated"
             return "Normal"
+
+If you want to add a column that has a foreign key, rather than a value, include the printable attribute of the foreign key's model. For example, if you want a column to show a user's first_name, use:
+
+    self.add_column('user__first_name', verbose_name='First Name')

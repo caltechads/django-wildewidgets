@@ -8,6 +8,7 @@ import re
 from django import template
 from django.apps import apps
 from django.conf import settings
+from django.db.models import Q
 from django.http import JsonResponse
 from django.views.generic import View
 
@@ -551,6 +552,8 @@ class DatatableAJAXView(BaseDatatableView):
         :rtype: QuerySet
         """
         query = self.search_query(qs, value)
+        print(query)
+        print()
         qs = qs.filter(query).distinct()
         return qs
 
