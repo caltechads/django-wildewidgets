@@ -289,7 +289,7 @@ Create a file called `wildewidgets.py` in your app directory if it doesn't exist
 
     from wildewidgets import DataTable
 
-    class TestTable(CheetahTable):
+    class TestTable(DataTable):
 
         model = Measurement
 
@@ -381,7 +381,7 @@ You can add further options to particular columns when you call `add_column`:
 
 You can specify custom filters by field:
 
-    class TestTable(CheetahTable):
+    class TestTable(DataTable):
 
         model = Measurement
 
@@ -396,17 +396,17 @@ You can specify custom filters by field:
             self.add_column('restricted', visible=False)
             self.add_column('open', sortable=False)
 
-            filter = CheetahTableFilter()
+            filter = DataTableFilter()
             filter.add_choice("True", "True")
             filter.add_choice("False", "False")
             self.add_filter('restricted', filter)
 
-            filter = CheetahTableFilter()
+            filter = DataTableFilter()
             filter.add_choice("True", "True")
             filter.add_choice("False", "False")
             self.add_filter('open', filter)
 
-            filter = CheetahTableFilter()
+            filter = DataTableFilter()
             filter.add_choice("< 1000", "level_1000")
             filter.add_choice("1000-2000", "level_2000")
             filter.add_choice("2000-3000", "level_3000")
