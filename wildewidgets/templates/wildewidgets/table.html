@@ -95,6 +95,7 @@
       language: dt_language,
       {% comment %} searching: {{options.searchable|yesno:"true,false,true"}}, {% endcomment %}
       paging: {{options.paging|yesno:"true,false,true"}},
+      {% if options.page_length %}pageLength: {{options.page_length}},{% endif %}
       fnDrawCallback: function(oSettings) {
           if (oSettings.aoData.length < this.api().page.len()) {
               $("#" + oSettings.sTableId + "_paginate").hide();

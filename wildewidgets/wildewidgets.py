@@ -552,8 +552,6 @@ class DatatableAJAXView(BaseDatatableView):
         :rtype: QuerySet
         """
         query = self.search_query(qs, value)
-        print(query)
-        print()
         qs = qs.filter(query).distinct()
         return qs
 
@@ -646,7 +644,8 @@ class DataTable(DatatableAJAXView):
             'height': kwargs.get('height', '400'),
             "title":kwargs.get('title', None),
             "searchable":kwargs.get('searchable', True),
-            "paging":kwargs.get('paging', True)
+            "paging":kwargs.get('paging', True),
+            "page_length":kwargs.get('page_length', None),
         }
         self.table_id = kwargs.get('table_id', None)
         self.column_fields = {}
