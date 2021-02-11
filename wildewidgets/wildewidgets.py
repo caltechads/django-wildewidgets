@@ -613,7 +613,7 @@ if datatables_is_defined:
 
     class DataTableColumn():
 
-        def __init__(self, field, verbose_name=None, searchable=False, sortable=False, align='left', visible=True):
+        def __init__(self, field, verbose_name=None, searchable=False, sortable=False, align='left', head_align='left', visible=True):
             self.field = field
             if verbose_name:
                 self.verbose_name = verbose_name
@@ -622,6 +622,7 @@ if datatables_is_defined:
             self.searchable = searchable
             self.sortable = sortable
             self.align = align
+            self.head_align = head_align
             self.visible = visible
 
 
@@ -654,8 +655,8 @@ if datatables_is_defined:
             self.column_filters = {}
             self.data = []
 
-        def add_column(self, field, verbose_name=None, searchable=True, sortable=True, align='left', visible=True):
-            self.column_fields[field] = DataTableColumn(field=field, verbose_name=verbose_name, searchable=searchable, sortable=sortable, align=align, visible=visible)
+        def add_column(self, field, verbose_name=None, searchable=True, sortable=True, align='left', head_align='left', visible=True):
+            self.column_fields[field] = DataTableColumn(field=field, verbose_name=verbose_name, searchable=searchable, sortable=sortable, align=align, head_align=head_align, visible=visible)
 
         def add_filter(self, field, filter):
             self.column_filters[field] = filter

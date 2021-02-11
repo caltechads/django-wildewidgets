@@ -44,7 +44,7 @@
     </div>
   </div>
 
-  <table class="wildewidgets-table table {{name}}">
+  <table id="{{name}}" class="wildewidgets-table table {{name}}">
     <thead>
       <tr>
         {% for key,item in header.items %}
@@ -114,7 +114,7 @@
             orderable: {{item.sortable|yesno:"true,false"}},
             searchable: {{item.searchable|yesno:"true,false"}},
             visible: {{item.visible|yesno:"true,false"}},
-            className: "dt-head-{{item.align}} dt-nowrap",
+            className: "dt-body-{{item.align}} dt-head-{{item.head_align}}",
           },
         {% endfor %}
       ],
