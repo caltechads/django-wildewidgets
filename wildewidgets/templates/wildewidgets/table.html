@@ -97,14 +97,14 @@
       paging: {{options.paging|yesno:"true,false,true"}},
       {% if options.page_length %}pageLength: {{options.page_length}},{% endif %}
       fnDrawCallback: function(oSettings) {
-          if (oSettings.aoData.length < this.api().page.len()) {
+          if (oSettings.aoData.length < this.api().page.len() && this.api().page.info().pages == 1) {
               $("#" + oSettings.sTableId + "_paginate").hide();
               $("#" + oSettings.sTableId + "_info").hide();
-              $("#" + oSettings.sTableId + "_length").hide();
+              // $("#" + oSettings.sTableId + "_length").hide();
           } else {
               $("#" + oSettings.sTableId + "_paginate").show();
               $("#" + oSettings.sTableId + "_info").show();
-              $("#" + oSettings.sTableId + "_length").show();
+              // $("#" + oSettings.sTableId + "_length").show();
           }
       },
       columns: [
