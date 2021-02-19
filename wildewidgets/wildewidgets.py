@@ -560,7 +560,7 @@ if datatables_is_defined:
         def filter_queryset(self, qs):
             """
             We're overriding the default filter_queryset(method) here so we can implement proper searches on our
-            pseudo-columns "responded" and "disabled", and do column specific searches, as wel as doing
+            pseudo-columns "responded" and "disabled", and do column specific searches, as well as doing
             general searches across our regular CharField columns.
             """
             column_searches = self.column_specific_searches()
@@ -719,12 +719,57 @@ class BasicMenu():
         self.active = None
         if args:
             for item in self.items:
-                self.add_menu_item(item[0], reverse_lazy(item[1]), item[0] == args[0])
+                data = {}
+                if type(item[1]) == str:
+                    data['url'] = reverse_lazy(item[1])
+                    data['extra'] = ''
+                    data['kind'] = 'item'
 
-    def add_menu_item(self, title, url, active=False):
-        self.menu[title] = url
+                    if len(item) > 2:
+                        extra = item[2]
+                        if type(extra) == dict:
+                            extra_list = []
+                            for k,v in extra.items():
+                                extra_list.append(f"{k}={v}")
+                            extra = f"?{'&'.join(extra_list)}"
+                            data['extra'] = extra
+                elif type(item[1]) == list:
+                    data = self.parse_submemu(item[1])
+
+                self.add_menu_item(item[0], data, item[0] == args[0])
+
+    def add_menu_item(self, title, data, active=False):
+        self.menu[title] = data
         if active:
             self.active = title
+
+    def parse_submemu(self, items):
+        data = {
+            'kind':'submenu'            
+        }
+        sub_menu_items = []
+        for item in items:
+            subdata = {
+                'title':item[0],
+                'url':reverse_lazy(item[1]),
+                'extra':''
+            }
+
+            if len(item) > 2:
+                subdata['extra'] = self._get_extra(item[2])
+            sub_menu_items.append(subdata)
+
+        data['items'] = sub_menu_items
+        return data
+
+    def _get_extra(self, extra_item):
+        if type(extra_item) == dict:
+            extra_list = []
+            for k,v in extra_item.items():
+                extra_list.append(f"{k}={v}")
+            extra = f"?{'&'.join(extra_list)}"
+            return extra
+        return ''
 
     def get_content(self):
         context = {

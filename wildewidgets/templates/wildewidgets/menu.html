@@ -5,13 +5,30 @@
 
       <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav mr-auto">
-          {% for item, url in menu.items %}
-          <li class="nav-item">
-            <a class="nav-link {% if item == active %}active{% endif %}" href="{{url}}">
-              {{item}}
-              {% if item == active %}<span class="sr-only">(current)</span>{% endif %}
-              </a>
-          </li>
+          {% for item,data in menu.items %}
+            {% if data.kind == 'item' %}
+              <li class="nav-item">
+                <a class="nav-link {% if item == active %}active{% endif %}" href="{{data.url}}{{data.extra}}">
+                  {{item}}
+                  {% if item == active %}<span class="sr-only">(current)</span>{% endif %}
+                  </a>
+              </li>
+            {% elif data.kind == 'submenu' %}
+              <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle {% if item == active %}active{% endif %}" href="#" id="wildewidget_submenu_{{item|cut:' '}}" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                  {{item}}
+                </a>
+                <div class="dropdown-menu" aria-labelledby="wildewidget_submenu_{{item|cut:' '}}">
+                  {% for subitem in data.items %}
+                    <a class="dropdown-item" href="{{subitem.url}}{{subitem.extra}}">{{subitem.title}}</a>
+                  {% endfor %}
+                </div>
+              </li>
+            {% else %}
+              <li class="nav-item">
+                <a class='nav-link' href='#'>{{data.kind}}</a>
+              </li>
+            {% endif %}
           {% endfor %}
         </ul>
       </div>
