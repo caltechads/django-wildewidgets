@@ -1,5 +1,7 @@
+import base64
 from functools import lru_cache
 import importlib
+import json
 import math
 import os
 import random
@@ -33,9 +35,49 @@ class JSONDataView(View):
         return JsonResponse(context)
 
 
-class WildewidgetDispatch(View):
+class WidgetInitKwargsMixin():
+
+    def __init__(self, *args, **kwargs):
+        super().__init__()
+        self.extra_data = {
+            "args": args,
+            "kwargs": kwargs
+        }
+
+    def get_encoded_extra_data(self):
+        data_json = json.dumps(self.extra_data)
+        payload_bytes = base64.b64encode(data_json.encode())
+        payload = payload_bytes.decode()
+        return payload
+
+    def get_decoded_extra_data(self, request):
+        encoded_extra_data = request.GET.get("extra_data", None)
+        if not encoded_extra_data:
+            return None
+        extra_bytes = encoded_extra_data.encode()
+        payload_bytes = base64.b64decode(extra_bytes)
+        payload = json.loads(payload_bytes.decode())
+        return payload
+
+    def convert_extra(self, extra_item, first=True):
+        if first:
+            start = '?'
+        else:
+            start = '&'
+        if type(extra_item) == dict:
+            extra_list = []
+            for k,v in extra_item.items():
+                extra_list.append(f"{k}={v}")
+            extra = f"{start}{'&'.join(extra_list)}"
+            return extra
+        return ''
+
+
+class WildewidgetDispatch(WidgetInitKwargsMixin, View):
 
     def dispatch(self, request, *args, **kwargs):
+        # initkwargs = {}
+
         wildewidgetclass = request.GET.get('wildewidgetclass', None)
         if wildewidgetclass:
             configs = apps.get_app_configs()
@@ -45,8 +87,14 @@ class WildewidgetDispatch(View):
                     module = importlib.import_module(f"{config.name}.wildewidgets")
                     if hasattr(module, wildewidgetclass):
                         class_ = getattr(module, wildewidgetclass)
-                        view = class_.as_view()
-                        return view(request, *args, **kwargs)
+                        extra_data = self.get_decoded_extra_data(request)
+                        initargs = extra_data['args']
+                        initkwargs = extra_data['kwargs']
+                        instance = class_(*initargs, **initkwargs)
+                        instance.request = request
+                        instance.args = initargs
+                        instance.kwargs = initkwargs
+                        return instance.dispatch(request, *args, **kwargs)
 
 
 class CategoryChart(JSONDataView):
@@ -636,7 +684,7 @@ if datatables_is_defined:
             self.choices.append((label, value))
             
 
-    class DataTable(DatatableAJAXView):
+    class DataTable(WidgetInitKwargsMixin, DatatableAJAXView):
 
         template_file = 'wildewidgets/table.html'
 
@@ -692,6 +740,7 @@ if datatables_is_defined:
             context['options'] = self.options
             context['name'] = f"datatable_table_{table_id}"
             context["tableclass"] = self.__class__.__name__
+            context["extra_data"] = self.get_encoded_extra_data()
             content = html_template.render(context)
             return content
 
@@ -708,7 +757,7 @@ if datatables_is_defined:
             self.data.append(row)
 
 
-class BasicMenu():
+class BasicMenu(WidgetInitKwargsMixin):
 
     template_file = "wildewidgets/menu.html"
     navbar_classes = "navbar-expand-lg navbar-dark bg-secondary"
@@ -756,20 +805,11 @@ class BasicMenu():
             }
 
             if len(item) > 2:
-                subdata['extra'] = self._get_extra(item[2])
+                subdata['extra'] = self.convert_extra(item[2])
             sub_menu_items.append(subdata)
 
         data['items'] = sub_menu_items
         return data
-
-    def _get_extra(self, extra_item):
-        if type(extra_item) == dict:
-            extra_list = []
-            for k,v in extra_item.items():
-                extra_list.append(f"{k}={v}")
-            extra = f"?{'&'.join(extra_list)}"
-            return extra
-        return ''
 
     def get_content(self):
         context = {

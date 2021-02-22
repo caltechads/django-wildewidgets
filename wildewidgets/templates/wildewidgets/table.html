@@ -121,7 +121,7 @@
       {% if async %}
         processing: true,
         serverSide: true,
-        ajax: '{% url "wildewidgets_json" %}?wildewidgetclass={{tableclass}}'
+        ajax: '{% url "wildewidgets_json" %}?wildewidgetclass={{tableclass}}{% if extra_data %}&extra_data={{extra_data}}{% endif %}'
       {% endif %}
     });
 
