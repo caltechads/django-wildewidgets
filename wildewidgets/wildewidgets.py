@@ -699,6 +699,7 @@ if datatables_is_defined:
                 "page_length":kwargs.get('page_length', None),
             }
             self.table_id = kwargs.get('table_id', None)
+            self.async_if_empty = kwargs.get('async', True)
             self.column_fields = {}
             self.column_filters = {}
             self.data = []
@@ -729,7 +730,7 @@ if datatables_is_defined:
             else:
                 table_id = random.randrange(0,1000)
             template_file = self.template_file
-            if self.data:
+            if self.data or not self.async_if_empty:
                 context = self.build_context()
             else:
                 context = {"async":True}
