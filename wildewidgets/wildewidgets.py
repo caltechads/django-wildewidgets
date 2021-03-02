@@ -53,7 +53,7 @@ class WidgetInitKwargsMixin():
     def get_decoded_extra_data(self, request):
         encoded_extra_data = request.GET.get("extra_data", None)
         if not encoded_extra_data:
-            return None
+            return {}
         extra_bytes = encoded_extra_data.encode()
         payload_bytes = base64.b64decode(extra_bytes)
         payload = json.loads(payload_bytes.decode())
@@ -88,8 +88,8 @@ class WildewidgetDispatch(WidgetInitKwargsMixin, View):
                     if hasattr(module, wildewidgetclass):
                         class_ = getattr(module, wildewidgetclass)
                         extra_data = self.get_decoded_extra_data(request)
-                        initargs = extra_data['args']
-                        initkwargs = extra_data['kwargs']
+                        initargs = extra_data.get('args', [])
+                        initkwargs = extra_data.get('kwargs', {})
                         instance = class_(*initargs, **initkwargs)
                         instance.request = request
                         instance.args = initargs
