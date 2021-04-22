@@ -10,8 +10,10 @@ from .wildewidgets import (
     HorizontalHistogram,
     HorizontalStackedBarChart,
     LightMenu,
+    MenuMixin,
     PieChart,
     StackedBarChart, 
+    TemplateWidget,
     WildewidgetDispatch,
 )
 

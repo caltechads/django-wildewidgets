@@ -828,3 +828,64 @@ class BasicMenu(WidgetInitKwargsMixin):
 
 class LightMenu(BasicMenu):
     navbar_classes = "navbar-expand-lg navbar-light"
+
+
+class MenuMixin():
+    menu_class = None
+    submenu_class = None
+    
+    def get_menu_class(self):
+        if self.menu_class:
+            return self.menu_class
+        return None
+        
+    def get_menu(self):
+        menu_class = self.get_menu_class()
+        if menu_class:
+            menu_item = None
+            if self.menu_item:
+                menu_item = self.menu_item
+            return menu_class(self.menu_item)
+        return None
+        
+    def get_submenu_class(self):
+        if self.submenu_class:
+            return self.submenu_class
+        return None
+        
+    def get_submenu(self):
+        submenu_class = self.get_submenu_class()
+        if submenu_class:
+            submenu_item = None
+            if self.submenu_item:
+                submenu_item = self.submenu_item
+            return submenu_class(submenu_item)
+        return None
+    
+    def get_context_data(self, **kwargs):
+        menu = self.get_menu()
+        submenu = self.get_submenu()
+        if menu:
+            kwargs['menu'] = menu
+        if submenu:
+            kwargs['submenu'] = submenu
+        return super().get_context_data(**kwargs)
+
+
+class TemplateWidget():
+    template_name = None
+    
+    def get_content(self, **kwargs):
+        if not self.template_name:
+            return None
+        context = self.get_context_data(**kwargs)
+        html_template = template.loader.get_template(self.template_name)
+        content = html_template.render(context)
+        return content
+
+    def __str__(self):
+        return self.get_content()
+
+    def get_context_data(self, **kwargs):
+        return kwargs
+    
