@@ -43,11 +43,11 @@
     </div>
   </div>
 
-  <table id="{{name}}" class="wildewidgets-table table {{name}}" style="width: {{options.width}};">
+  <table id="{{name}}" class="wildewidgets-table table {{options.small|yesno:'table-sm,,'}} {{name}}" style="width: {{options.width}};">
     <thead>
       <tr>
         {% for key,item in header.items %}
-          <th>{{item.verbose_name}}</th>
+          <th>{{item.verbose_name|safe}}</th>
         {% endfor %}
       </tr>
     </thead>
@@ -113,7 +113,7 @@
             orderable: {{item.sortable|yesno:"true,false"}},
             searchable: {{item.searchable|yesno:"true,false"}},
             visible: {{item.visible|yesno:"true,false"}},
-            className: "dt-body-{{item.align}} dt-head-{{item.head_align}}",
+            className: "dt-body-{{item.align}} dt-head-{{item.head_align}} {{item.wrap|yesno:",dt-body-nowrap,"}}",
           },
         {% endfor %}
       ],

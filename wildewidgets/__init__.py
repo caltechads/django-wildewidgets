@@ -17,10 +17,9 @@ from .wildewidgets import (
     WildewidgetDispatch,
 )
 
-try:
-    from .wildewidgets import (
-        DataTable,
-        DataTableFilter,
-    )
-except ImportError:
-    pass
+
+from .tables import (
+    DataTable,
+    DataTableFilter,
+)
+
