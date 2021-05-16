@@ -23,10 +23,6 @@ If you plan on using [Altair charts](https://github.com/altair-viz/altair), run:
 
     pip install altair
 
-If you plan on using [Datatables](https://https://datatables.net/), which use [django-datatables-view](https://bitbucket.org/pigletto/django-datatables-view/), run:
-
-    pip install django-datatables-view
-
 Add "wildewidgets" to your INSTALLED_APPS setting like this:
 
     INSTALLED_APPS = [
