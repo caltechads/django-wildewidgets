@@ -120,7 +120,7 @@
       {% if async %}
         processing: true,
         serverSide: true,
-        ajax: '{% url "wildewidgets_json" %}?wildewidgetclass={{tableclass}}{% if extra_data %}&extra_data={{extra_data}}{% endif %}'
+        ajax: '{% url "wildewidgets_json" %}?wildewidgetclass={{tableclass}}{% if extra_data %}&extra_data={{extra_data}}{% endif %}&csrf_token={{csrf_token}}'
       {% endif %}
     });
 

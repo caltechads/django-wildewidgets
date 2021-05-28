@@ -55,6 +55,7 @@ class JSONResponseMixin(object):
 
     def get(self, request, *args, **kwargs):
         self.request = request
+        self.csrf_token = self.request.GET.get('csrf_token', None)
         response = None
 
         func_val = self.get_context_data(**kwargs)
@@ -729,6 +730,8 @@ class DataTable(WidgetInitKwargsMixin, DatatableAJAXView):
         context['name'] = f"datatable_table_{table_id}"
         context["tableclass"] = self.__class__.__name__
         context["extra_data"] = self.get_encoded_extra_data()
+        if 'csrf_token' in kwargs:
+            context["csrf_token"] = kwargs['csrf_token']
         content = html_template.render(context)
         return content
 

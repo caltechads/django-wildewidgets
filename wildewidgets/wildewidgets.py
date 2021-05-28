@@ -73,6 +73,7 @@ class WildewidgetDispatch(WidgetInitKwargsMixin, View):
         # initkwargs = {}
 
         wildewidgetclass = request.GET.get('wildewidgetclass', None)
+        csrf_token = request.GET.get('csrf_token', '')
         if wildewidgetclass:
             configs = apps.get_app_configs()
             for config in configs:
@@ -86,6 +87,7 @@ class WildewidgetDispatch(WidgetInitKwargsMixin, View):
                         initkwargs = extra_data.get('kwargs', {})
                         instance = class_(*initargs, **initkwargs)
                         instance.request = request
+                        instance.csrf_token = csrf_token
                         instance.args = initargs
                         instance.kwargs = initkwargs
                         return instance.dispatch(request, *args, **kwargs)
@@ -162,7 +164,7 @@ class CategoryChart(JSONDataView):
     def set_colors(self, colors):
         self.colors = colors
 
-    def get_content(self):
+    def get_content(self, **kwargs):
         if self.chart_id:
             chart_id = self.chart_id
         else:
@@ -391,7 +393,7 @@ class AltairChart(JSONDataView):
             "title":kwargs.get('title', None)
         }
 
-    def get_content(self):
+    def get_content(self, **kwargs):
         chart_id = random.randrange(0,1000)
         template_file = self.template_file
         if self.data:
@@ -481,7 +483,7 @@ class BasicMenu(WidgetInitKwargsMixin):
         data['items'] = sub_menu_items
         return data
 
-    def get_content(self):
+    def get_content(self, **kwargs):
         context = {
             'menu':self.menu, 
             'active':self.active,
