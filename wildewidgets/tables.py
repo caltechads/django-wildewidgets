@@ -1,5 +1,6 @@
 from functools import lru_cache
 import json
+import random
 import re
 
 from django import template
