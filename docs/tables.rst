@@ -10,7 +10,7 @@ Usage
 Without Ajax
 ------------
 
-In your view code, import the DataTable::
+In your view code, import ``DataTable``::
 
     from wildewidgets import DataTable
 

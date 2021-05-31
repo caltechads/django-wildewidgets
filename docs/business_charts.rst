@@ -2,7 +2,7 @@
 Business Charts
 ***************
 
-Business charts use a subset of ChartJS to build basic charts. Types included are Bar, Horizontal Bar, Stacked Bar, Pie, Doughnut, and Histogram.
+Business charts use a subset of ChartJS to build basic charts. Types include Bar, Horizontal Bar, Stacked Bar, Pie, Doughnut, and Histogram.
 
 Usage
 =====
