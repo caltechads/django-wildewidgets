@@ -50,17 +50,17 @@ Create a file called ``wildewidgets.py`` in your app directory if it doesn't exi
 
     class SciChart(AltairChart):
 
-    def load(self):
-        data = pd.DataFrame({
-            'a': list('CCCDDDEEE'),
-            'b': [2, 7, 4, 1, 2, 6, 8, 4, 10]
-            }
-        )
-        spec = alt.Chart(data).mark_point().encode(
-            x='a',
-            y='b'
-        )
-        self.set_data(spec)
+        def load(self):
+            data = pd.DataFrame({
+                'a': list('CCCDDDEEE'),
+                'b': [2, 7, 4, 1, 2, 6, 8, 4, 10]
+                }
+            )
+            spec = alt.Chart(data).mark_point().encode(
+                x='a',
+                y='b'
+            )
+            self.set_data(spec)
 
 Then in your view code, use this class instead::
 
