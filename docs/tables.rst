@@ -61,11 +61,11 @@ In your view code, use this class instead::
     from .wildewidgets import TestTable
 
     class TableView(TemplateView):
-    template_name = "core/tables.html"
+        template_name = "core/tables.html"
 
-    def get_context_data(self, **kwargs):
-        kwargs['table'] = TestTable()
-        return super().get_context_data(**kwargs)
+        def get_context_data(self, **kwargs):
+            kwargs['table'] = TestTable()
+            return super().get_context_data(**kwargs)
 
 In your template, display the chart::
 
