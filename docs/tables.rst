@@ -77,7 +77,10 @@ Options
 There are a few options you can set for a table::
 
     title: title text (default: None)
+    paging: whether or not to allow paging
     page_length: number of rows to initially display
+    small: reduced row height
+    buttons: whether or not to show export buttons
 
 You can add further options to particular columns when you call ``add_column``::
 

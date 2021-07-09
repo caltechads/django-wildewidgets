@@ -91,6 +91,15 @@
   }
   $(document).ready(function() {
     var {{name}} = $('.{{name}}').DataTable({
+        dom: 'l{{options.buttons|yesno:"B,'',''"}}frtip',
+        {% if options.buttons %}
+        buttons: [
+            { extend: 'copy', className: 'btn btn-info btn-sm ml-5' },
+            { extend: 'csv', className: 'btn btn-info btn-sm' },
+            { extend: 'pdf', className: 'btn btn-info btn-sm' },
+            { extend: 'print', className: 'btn btn-info btn-sm' }
+        ],
+        {% endif %}
       language: dt_language,
       {% comment %} searching: {{options.searchable|yesno:"true,false,true"}}, {% endcomment %}
       paging: {{options.paging|yesno:"true,false,true"}},
