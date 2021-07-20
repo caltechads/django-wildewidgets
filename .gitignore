@@ -3,4 +3,5 @@ dist
 build
 __pycache__
 .vscode
+*.code-workspace
 docs/_build

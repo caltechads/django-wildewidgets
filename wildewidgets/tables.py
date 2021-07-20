@@ -680,6 +680,7 @@ class DataTable(WidgetInitKwargsMixin, DatatableAJAXView):
             "page_length":kwargs.get('page_length', None),
             "small":kwargs.get('small', False),
             "buttons":kwargs.get('buttons', False),
+            "striped":kwargs.get('striped', False),
         }
         self.table_id = kwargs.get('table_id', None)
         self.async_if_empty = kwargs.get('async', True)
