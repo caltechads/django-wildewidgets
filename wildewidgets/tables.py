@@ -12,6 +12,7 @@ except ImportError as e:
     from django.utils.encoding import force_text  # Django 1.5 / python3
 from django.utils.functional import Promise
 from django.utils.cache import add_never_cache_headers
+from django.urls import reverse, reverse_lazy
 from django.views.generic.base import TemplateView
 from django.db.models import Q
 from django.utils.html import escape, format_html
@@ -666,8 +667,8 @@ class DataTableFilter():
         
 
 class DataTable(WidgetInitKwargsMixin, DatatableAJAXView):
-
     template_file = 'wildewidgets/table.html'
+    actions = False
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -708,6 +709,8 @@ class DataTable(WidgetInitKwargsMixin, DatatableAJAXView):
         return context
 
     def get_content(self, **kwargs):
+        if self.actions:
+            self.add_column(field='actions', searchable=False, sortable=False)
         has_filters = False
         filters = []
         for key, item in self.column_fields.items():
@@ -749,3 +752,91 @@ class DataTable(WidgetInitKwargsMixin, DatatableAJAXView):
             else:
                 row.append('')
         self.data.append(row)
+
+    def get_action_button(self, row, label, url_name, method='get', attr='id'):
+        base = reverse_lazy(url_name)
+        if method == 'get':
+            url = f"{base}?{attr}={row.id}"
+        else:
+            url = base
+        return self.get_action_button_with_url(row, label, url, method, attr)
+
+    def get_action_button_with_url(self, row, label, url, method='get', attr='id'):
+        if method == 'get':
+            return f"<a href='{url}' class='btn btn-secondary btn-sm mr-3'>{label}</a>"
+        token_input = f'<input type="hidden" name="csrfmiddlewaretoken" value="{self.csrf_token}">'
+        id_input = f'<input type="hidden" name="{attr}" value="{row.id}">'
+        button = f'<input type=submit value="{label}" class="btn btn-secondary btn-sm mr-3">'
+        form = f"<form class='form form-inline' action={url} method='post'>{token_input}{id_input}{button}</form>"
+        return form
+
+    def render_actions_column(self, row, column):        
+        response = "<div class='d-flex flex-row'>"
+        if hasattr(row, 'get_absolute_url'):
+            url = row.get_absolute_url()
+            view_button = self.get_action_button_with_url(row, 'View', url)
+            response += view_button
+        if not type(self.actions) == bool:
+            for action in self.actions:
+                print("Action:", action)
+                if not len(action) > 1:
+                    continue
+                label = action[0]
+                url_name = action[1]
+                if len(action) > 2:
+                    method = action[2]
+                else:
+                    method = 'get'
+                if len(action) > 3:
+                    attr = action[3]
+                else:
+                    attr = 'id'
+                    response += self.get_action_button(row, label, url_name, method, attr)
+        response += "</div>"
+        return response
+
+
+class BasicModelTable(DataTable):
+    fields = None
+    hidden = []
+    verbose_names = {}
+
+    def __init__(self, *args, **kwargs): # model, fields=None):
+        super().__init__(*args, **kwargs)
+        
+        self.model_fields = {}
+        self.field_names = []
+        for field in self.model._meta.get_fields():
+            if field.name == 'id':
+                continue
+            self.model_fields[field.name] = field
+            self.field_names.append(field.name)
+
+        if not self.fields or self.fields == '__sll__':
+            self.load_all_fields()
+        else:
+            for field_name in self.fields:
+                self.load_field(field_name)
+
+    def load_field(self, field_name):
+        if field_name in self.model_fields:
+            field = self.model_fields[field_name]
+            verbose_name = field.name.replace('_',' ')
+            kwargs = {}
+            if verbose_name == field.verbose_name:
+                kwargs['verbose_name'] = verbose_name.capitalize()
+            else:
+                kwargs['verbose_name'] = field.verbose_name
+            if field_name in self.hidden:
+                kwargs['visible'] = False
+            self.add_column(field_name, **kwargs)
+        else:
+            if field_name in self.verbose_names:
+                verbose_name = self.verbose_names[field_name]
+            else:
+                verbose_name = field_name.replace('_',' ').replace('__', ' ').capitalize()
+            self.add_column(field_name, verbose_name=verbose_name)
+
+    def load_all_fields(self):
+        for field_name in self.field_names:
+            self.load_field(field_name)

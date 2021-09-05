@@ -19,6 +19,7 @@ from .wildewidgets import (
 
 
 from .tables import (
+    BasicModelTable,
     DataTable,
     DataTableFilter,
 )
