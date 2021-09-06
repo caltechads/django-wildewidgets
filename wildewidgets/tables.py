@@ -787,6 +787,9 @@ class DataTable(WidgetInitKwargsMixin, DatatableAJAXView):
         button = f'<input type=submit value="{label}" class="btn btn-secondary btn-smx mr-3">'
         form = f"<form class='form form-inline' action={url} method='post'>{token_input}{id_input}{button}</form>"
         return form
+        
+    def get_conditional_action_buttons(self, row):
+        return ''        
 
     def render_actions_column(self, row, column):        
         response = "<div class='d-flex flex-row'>"
@@ -809,6 +812,7 @@ class DataTable(WidgetInitKwargsMixin, DatatableAJAXView):
                 else:
                     attr = 'id'
                     response += self.get_action_button(row, label, url_name, method, attr)
+        response += self.get_conditional_action_buttons(row)
         response += "</div>"
         return response
         
