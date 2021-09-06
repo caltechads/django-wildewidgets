@@ -681,7 +681,7 @@ class DataTable(WidgetInitKwargsMixin, DatatableAJAXView):
     template_file = 'wildewidgets/table.html'
     actions = False
     form_actions = None
-    form_url = None
+    form_url = ''
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
