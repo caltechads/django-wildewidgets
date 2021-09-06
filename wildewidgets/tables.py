@@ -675,6 +675,8 @@ class DataTableForm():
             self.is_visible = False
         self.actions = table.form_actions
         self.url = table.form_url
+        if self.url:
+            self.url = reverse_lazy(self.url)
         
 
 class DataTable(WidgetInitKwargsMixin, DatatableAJAXView):
