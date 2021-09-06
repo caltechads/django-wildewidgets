@@ -231,8 +231,8 @@ class DatatableMixin(object):
         """ Renders a column on a row. column can be given in a module notation eg. document.invoice.type
         """
         value = self._render_column(row, column)
-        if value and hasattr(row, 'get_absolute_url'):
-            return format_html('<a href="{}">{}</a>', row.get_absolute_url(), value)
+        # if value and hasattr(row, 'get_absolute_url'):
+        #     return format_html('<a href="{}">{}</a>', row.get_absolute_url(), value)
         return value
 
     def ordering(self, qs):
@@ -664,11 +664,24 @@ class DataTableFilter():
 
     def add_choice(self, label, value):
         self.choices.append((label, value))
+
+
+class DataTableForm():
+    
+    def __init__(self, table):
+        if table.form_actions:
+            self.is_visible = True
+        else:
+            self.is_visible = False
+        self.actions = table.form_actions
+        self.url = table.form_url
         
 
 class DataTable(WidgetInitKwargsMixin, DatatableAJAXView):
     template_file = 'wildewidgets/table.html'
     actions = False
+    form_actions = None
+    form_url = None
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -688,6 +701,8 @@ class DataTable(WidgetInitKwargsMixin, DatatableAJAXView):
         self.column_fields = {}
         self.column_filters = {}
         self.data = []
+        if self.form_actions:
+            self.column_fields['checkbox'] = DataTableColumn(field='checkbox', verbose_name=' ', searchable=False, sortable=False)
         
     def get_order_columnsx(self):
         cols = []
@@ -736,6 +751,7 @@ class DataTable(WidgetInitKwargsMixin, DatatableAJAXView):
         context['name'] = f"datatable_table_{table_id}"
         context["tableclass"] = self.__class__.__name__
         context["extra_data"] = self.get_encoded_extra_data()
+        context["form"] = DataTableForm(self)
         if 'csrf_token' in kwargs:
             context["csrf_token"] = kwargs['csrf_token']
         content = html_template.render(context)
@@ -763,10 +779,10 @@ class DataTable(WidgetInitKwargsMixin, DatatableAJAXView):
 
     def get_action_button_with_url(self, row, label, url, method='get', attr='id'):
         if method == 'get':
-            return f"<a href='{url}' class='btn btn-secondary btn-sm mr-3'>{label}</a>"
+            return f"<a href='{url}' class='btn btn-secondary btn-smx mr-3'>{label}</a>"
         token_input = f'<input type="hidden" name="csrfmiddlewaretoken" value="{self.csrf_token}">'
         id_input = f'<input type="hidden" name="{attr}" value="{row.id}">'
-        button = f'<input type=submit value="{label}" class="btn btn-secondary btn-sm mr-3">'
+        button = f'<input type=submit value="{label}" class="btn btn-secondary btn-smx mr-3">'
         form = f"<form class='form form-inline' action={url} method='post'>{token_input}{id_input}{button}</form>"
         return form
 
@@ -778,7 +794,6 @@ class DataTable(WidgetInitKwargsMixin, DatatableAJAXView):
             response += view_button
         if not type(self.actions) == bool:
             for action in self.actions:
-                print("Action:", action)
                 if not len(action) > 1:
                     continue
                 label = action[0]
@@ -794,6 +809,9 @@ class DataTable(WidgetInitKwargsMixin, DatatableAJAXView):
                     response += self.get_action_button(row, label, url_name, method, attr)
         response += "</div>"
         return response
+        
+    def render_checkbox_column(self, row, column):
+        return f"<input type='checkbox' name='checkbox' value='{row.id}'>"
 
 
 class BasicModelTable(DataTable):
