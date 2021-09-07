@@ -213,7 +213,7 @@ As an example::
             form_actions = [('action1', 'Action 1'), ('action2', 'Action 2')]
             form_url = 'core:action_test'
 
-If you have `form_actions`, you will need to use the wildewidgets template to display the table, in order to get the csrf token included:
+If you have `form_actions`, you will need to use the wildewidgets templatetag to display the table, in order to have the csrf token included:
 
 In your template, load the wildewidgets templatetag::
 
