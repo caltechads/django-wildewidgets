@@ -17,10 +17,12 @@ from .wildewidgets import (
     WildewidgetDispatch,
 )
 
-
 from .tables import (
     BasicModelTable,
     DataTable,
     DataTableFilter,
 )
 
+from .views import (
+    TableActionFormView,
+)

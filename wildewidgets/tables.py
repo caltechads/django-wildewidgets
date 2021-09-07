@@ -675,8 +675,6 @@ class DataTableForm():
             self.is_visible = False
         self.actions = table.form_actions
         self.url = table.form_url
-        if self.url:
-            self.url = reverse_lazy(self.url)
         
 
 class DataTable(WidgetInitKwargsMixin, DatatableAJAXView):
@@ -771,20 +769,20 @@ class DataTable(WidgetInitKwargsMixin, DatatableAJAXView):
                 row.append('')
         self.data.append(row)
 
-    def get_action_button(self, row, label, url_name, method='get', attr='id'):
+    def get_action_button(self, row, label, url_name, method='get', color_class='secondary', attr='id'):
         base = reverse_lazy(url_name)
         if method == 'get':
             url = f"{base}?{attr}={row.id}"
         else:
             url = base
-        return self.get_action_button_with_url(row, label, url, method, attr)
+        return self.get_action_button_with_url(row, label, url, method, color_class, attr)
 
-    def get_action_button_with_url(self, row, label, url, method='get', attr='id'):
+    def get_action_button_with_url(self, row, label, url, method='get', color_class='secondary', attr='id'):
         if method == 'get':
-            return f"<a href='{url}' class='btn btn-secondary btn-smx mr-3'>{label}</a>"
+            return f"<a href='{url}' class='btn btn-{color_class} btn-smx mr-3'>{label}</a>"
         token_input = f'<input type="hidden" name="csrfmiddlewaretoken" value="{self.csrf_token}">'
         id_input = f'<input type="hidden" name="{attr}" value="{row.id}">'
-        button = f'<input type=submit value="{label}" class="btn btn-secondary btn-smx mr-3">'
+        button = f'<input type=submit value="{label}" class="btn btn-{color_class} btn-smx mr-3">'
         form = f"<form class='form form-inline' action={url} method='post'>{token_input}{id_input}{button}</form>"
         return form
         
@@ -808,10 +806,14 @@ class DataTable(WidgetInitKwargsMixin, DatatableAJAXView):
                 else:
                     method = 'get'
                 if len(action) > 3:
+                    color_class = action[3]
+                else:
+                    color_class = 'secondary'
+                if len(action) > 4:
                     attr = action[3]
                 else:
                     attr = 'id'
-                    response += self.get_action_button(row, label, url_name, method, attr)
+                    response += self.get_action_button(row, label, url_name, method, color_class, attr)
         response += self.get_conditional_action_buttons(row)
         response += "</div>"
         return response
