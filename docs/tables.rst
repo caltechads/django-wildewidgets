@@ -223,8 +223,15 @@ Then display the table::
 
     {% wildewidgets table %}
 
-Table Form View
----------------
+You can also have a conditional action button that only shows up on rows that meet your criteria. To do this, you must override ``get_conditional_action_buttons``::
+
+        def get_conditional_action_buttons(self, row):
+            if condition:
+                return self.get_action_button(row, 'Action', 'core:myaction')
+            return ''
+
+Table Form View Processing
+--------------------------
 
 To process the table form submissions, override `TableActionFormView`, and implement `process_form_action`::
 
