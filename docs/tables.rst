@@ -30,7 +30,7 @@ and define the table in your view::
             kwargs['table'] = table
             return super().get_context_data(**kwargs)
 
-In your template, display the chart::
+In your template, display the table::
 
     {{table}}
 
@@ -67,7 +67,7 @@ In your view code, use this class instead::
             kwargs['table'] = TestTable()
             return super().get_context_data(**kwargs)
 
-In your template, display the chart::
+In your template, display the table::
 
     {{table}}
 
@@ -212,6 +212,16 @@ As an example::
             actions = [('Nag', 'core:nag', 'post')]
             form_actions = [('action1', 'Action 1'), ('action2', 'Action 2')]
             form_url = 'core:action_test'
+
+If you have `form_actions`, you will need to use the wildewidgets template to display the table, in order to get the csrf token included:
+
+In your template, load the wildewidgets templatetag::
+
+    {% load <your other tags> wildewidgets %}
+
+Then display the table::
+
+    {% wildewidgets table %}
 
 Table Form View
 ---------------
