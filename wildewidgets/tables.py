@@ -838,7 +838,7 @@ class BasicModelTable(DataTable):
             self.model_fields[field.name] = field
             self.field_names.append(field.name)
 
-        if not self.fields or self.fields == '__sll__':
+        if not self.fields or self.fields == '__all__':
             self.load_all_fields()
         else:
             for field_name in self.fields:
@@ -849,7 +849,9 @@ class BasicModelTable(DataTable):
             field = self.model_fields[field_name]
             verbose_name = field.name.replace('_',' ')
             kwargs = {}
-            if verbose_name == field.verbose_name:
+            if field_name in self.verbose_names:
+                kwargs['verbose_name'] = self.verbose_names[field_name]
+            elif verbose_name == field.verbose_name:
                 kwargs['verbose_name'] = verbose_name.capitalize()
             else:
                 kwargs['verbose_name'] = field.verbose_name
