@@ -168,3 +168,61 @@ If you want to add a column that has a foreign key, rather than a value, include
 
     self.add_column('user__first_name', verbose_name='First Name')
 
+
+Basic Model Table
+=================
+
+If you have a basic model and want a standard table layout, you can make a derived class of `BasicModelTable` and set some class variables.
+
+Options
+-------
+
+There are some mandatory options, and some optional ones.
+
+    model 
+        (required) the Django model class
+
+    fields
+        (optional) list of model fields. If not included, `__all__` will be assumed. This can include fields from related objects in the form `related_field__field`.
+
+    hidden
+        (optional) list of model fields that are included in `fields`, but won't be displayed by default.
+
+    verbose_names
+        (optional) dictionary of verbose names with `field` as the key. By default, the model field's verbose name will be used.
+
+    actions
+        (optional) list of tuples of action buttons. If this exists, an Action column will be appended to the table, and buttons will be added for each tuple. The tuples are in the form `('Label', 'url-name', 'get (default/post'), 'bootstrap color class (default secondary)', 'id attribute (default id)')`.
+
+    form_actions
+        (optional) if you want the table to be a form that can act on the rows, include the form actions here in the form of a list of tuples that correspond to the value and label of the select options. If this exists, a column of checkboxes will be prepended to the table.
+
+    form_url
+        (optional) the form `action` url.
+
+As an example::
+
+        from wildewidgets import BasicModelTable
+
+        class TestTable(BasicModelTable):
+            model = SpecialGroup
+            fields = ['group', 'account__description', 'group_type', 'name', 'description', 'network_id']        
+            hidden = ['name', 'network_id']
+            verbose_names = {'account__description':'Account'}
+            actions = [('Nag', 'core:nag', 'post')]
+            form_actions = [('action1', 'Action 1'), ('action2', 'Action 2')]
+            form_url = 'core:action_test'
+
+Table Form View
+---------------
+
+To process the table form submissions, override `TableActionFormView`, and implement `process_form_action`::
+
+        class ActionTestView(TableActionFormView):
+            url = reverse_lazy('core:home')
+
+            def process_form_action(self, action, items):    
+                for item in items:
+                    print(action, item)
+
+The `action` will be the value passed as the first item of the tuple in the form_actions attribute. The `items` will be a list of ids corresponding to the objects listed in the rows that have their checkbox checked.
