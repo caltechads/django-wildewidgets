@@ -192,7 +192,7 @@ There are some mandatory options, and some optional ones.
         (optional) dictionary of verbose names with `field` as the key. By default, the model field's verbose name will be used.
 
     actions
-        (optional) list of tuples of action buttons. If this exists, an Action column will be appended to the table, and buttons will be added for each tuple. The tuples are in the form `('Label', 'url-name', 'get (default/post'), 'bootstrap color class (default secondary)', 'id attribute (default id)')`.
+        (optional) list of tuples of action buttons. If this exists, an Action column will be appended to the table, and buttons will be added for each tuple. The tuples are in the form `('Label', 'url-name', 'get (default)/post', 'bootstrap color class (default secondary)', 'id attribute (default id)')`.
 
     form_actions
         (optional) if you want the table to be a form that can act on the rows, include the form actions here in the form of a list of tuples that correspond to the value and label of the select options. If this exists, a column of checkboxes will be prepended to the table.
