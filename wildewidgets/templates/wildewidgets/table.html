@@ -38,7 +38,7 @@
       <div id="{{name}}__columns" class="btn-group ml-3 mt-3 mw-auto toolbar__columns {{name}}__columns collapse" role="group" aria-label="Show/Hide Columns">
         <a href="#" role="button" class="btn btn-info label-btn"  aria-disabled="true">Columns</a>
         {% for key,item in header.items %}
-          {% if not forloop.first %}
+          {% if not forloop.firstx %}
             <button type="button" data-toggle="button" aria-pressed="true" autocomplete="off" class="toggle-vis btn btn-outline-secondary {{item.visible|yesno:'active,'}}" data-column="{{forloop.counter0}}">{{item.verbose_name}}</button>
           {% endif %}
         {% endfor %}

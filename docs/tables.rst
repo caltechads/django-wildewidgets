@@ -211,7 +211,7 @@ As an example::
             verbose_names = {'account__description':'Account'}
             actions = [('Nag', 'core:nag', 'post')]
             form_actions = [('action1', 'Action 1'), ('action2', 'Action 2')]
-            form_url = 'core:action_test'
+            form_url = reverse_lazy('core:action_test')
 
 If you have `form_actions`, you will need to use the wildewidgets templatetag to display the table, in order to have the csrf token included:
 
