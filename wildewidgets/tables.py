@@ -826,8 +826,18 @@ class BasicModelTable(DataTable):
     fields = None
     hidden = []
     verbose_names = {}
+    page_length = None
+    small = None
+    buttons = None
+    striped = None
 
-    def __init__(self, *args, **kwargs): # model, fields=None):
+    def __init__(self, *args, **kwargs):
+        for field in ['page_length', 'small', 'buttons', 'striped']:
+            value = getattr(self, field, None)
+            if value:
+                kwargs[field] = value
+        print(kwargs)
+        kwargs['buttons'] = True
         super().__init__(*args, **kwargs)
         
         self.model_fields = {}

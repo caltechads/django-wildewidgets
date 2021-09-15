@@ -200,6 +200,18 @@ There are some mandatory options, and some optional ones.
     form_url
         (optional) the form `action` url.
 
+    page_length
+        (optional) set the page length of the table.
+
+    small
+        (optional) use a table with thinner rows.
+
+    buttons
+        (optional) display the print buttons.
+
+    striped
+        (optional) use a table with striped rows.
+
 As an example::
 
         from wildewidgets import BasicModelTable
