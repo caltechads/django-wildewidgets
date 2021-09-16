@@ -836,8 +836,6 @@ class BasicModelTable(DataTable):
             value = getattr(self, field, None)
             if value:
                 kwargs[field] = value
-        print(kwargs)
-        kwargs['buttons'] = True
         super().__init__(*args, **kwargs)
         
         self.model_fields = {}
