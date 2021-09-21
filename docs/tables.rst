@@ -90,6 +90,9 @@ You can add further options to particular columns when you call ``add_column``::
     align: how the value is aligned (default: left)
     visible: whether the column is initially visible (default: True)
 
+Filters
+=======
+
 You can specify custom filters by field::
 
     class TestTable(DataTable):
