@@ -810,10 +810,10 @@ class DataTable(WidgetInitKwargsMixin, DatatableAJAXView):
                 else:
                     color_class = 'secondary'
                 if len(action) > 4:
-                    attr = action[3]
+                    attr = action[4]
                 else:
                     attr = 'id'
-                    response += self.get_action_button(row, label, url_name, method, color_class, attr)
+                response += self.get_action_button(row, label, url_name, method, color_class, attr)
         response += self.get_conditional_action_buttons(row)
         response += "</div>"
         return response
@@ -867,11 +867,15 @@ class BasicModelTable(DataTable):
                 kwargs['visible'] = False
             self.add_column(field_name, **kwargs)
         else:
+            kwargs = {}
             if field_name in self.verbose_names:
                 verbose_name = self.verbose_names[field_name]
             else:
                 verbose_name = field_name.replace('_',' ').replace('__', ' ').capitalize()
-            self.add_column(field_name, verbose_name=verbose_name)
+            kwargs['verbose_name'] = verbose_name
+            if field_name in self.hidden:
+                kwargs['visible'] = False
+            self.add_column(field_name, **kwargs)
 
     def load_all_fields(self):
         for field_name in self.field_names:
