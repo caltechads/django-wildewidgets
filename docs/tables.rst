@@ -191,6 +191,12 @@ There are some mandatory options, and some optional ones.
     hidden
         (optional) list of model fields that are included in `fields`, but won't be displayed by default.
 
+    unsortable
+        (optional) list of model fields that are unsortable.
+
+    unsearchable
+        (optional) list of model fields that are unsearchable.
+
     verbose_names
         (optional) dictionary of verbose names with `field` as the key. By default, the model field's verbose name will be used.
 
