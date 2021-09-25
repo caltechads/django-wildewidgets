@@ -830,6 +830,8 @@ class BasicModelTable(DataTable):
     small = None
     buttons = None
     striped = None
+    unsortable = []
+    unsearchable = []
 
     def __init__(self, *args, **kwargs):
         for field in ['page_length', 'small', 'buttons', 'striped']:
@@ -865,6 +867,10 @@ class BasicModelTable(DataTable):
                 kwargs['verbose_name'] = field.verbose_name
             if field_name in self.hidden:
                 kwargs['visible'] = False
+            if field_name in self.unsearchable:
+                kwargs['searchable'] = False
+            if field_name in self.unsortable:
+                kwargs['sortable'] = False
             self.add_column(field_name, **kwargs)
         else:
             kwargs = {}
@@ -875,6 +881,10 @@ class BasicModelTable(DataTable):
             kwargs['verbose_name'] = verbose_name
             if field_name in self.hidden:
                 kwargs['visible'] = False
+            if field_name in self.unsearchable:
+                kwargs['searchable'] = False
+            if field_name in self.unsortable:
+                kwargs['sortable'] = False
             self.add_column(field_name, **kwargs)
 
     def load_all_fields(self):
