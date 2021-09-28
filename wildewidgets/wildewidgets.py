@@ -93,7 +93,7 @@ class WildewidgetDispatch(WidgetInitKwargsMixin, View):
                         return instance.dispatch(request, *args, **kwargs)
 
 
-class CategoryChart(JSONDataView):
+class CategoryChart(WidgetInitKwargsMixin, JSONDataView):
 
     COLORS = [
         (0,59,76),
@@ -119,7 +119,7 @@ class CategoryChart(JSONDataView):
     ]
     template_file = 'wildewidgets/categorychart.html'
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs):        
         self.options = {
             'width': kwargs.get('width', '400'),
             'height': kwargs.get('height', '400'),
@@ -147,6 +147,7 @@ class CategoryChart(JSONDataView):
             self.options['chartjs_title_font_style'] = settings.CHARTJS_TITLE_FONT_STYLE
         if hasattr(settings, 'CHARTJS_TITLE_PADDING'):
             self.options['chartjs_title_padding'] = settings.CHARTJS_TITLE_PADDING
+        super().__init__(*args, **kwargs)
 
     def set_categories(self, categories):
         self.categories = categories
@@ -178,6 +179,7 @@ class CategoryChart(JSONDataView):
         context['options'] = self.options
         context['name'] = f"chart_{chart_id}"
         context["wildewidgetclass"] = self.__class__.__name__
+        context["extra_data"] = self.get_encoded_extra_data()
         content = html_template.render(context)
         return content
 

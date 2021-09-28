@@ -18,7 +18,7 @@
 
   $(document).ready(function() {
     {% if async %}
-    $.get('{% url "wildewidgets_json" %}?wildewidgetclass={{wildewidgetclass}}', function(data) {
+    $.get('{% url "wildewidgets_json" %}?wildewidgetclass={{wildewidgetclass}}{% if extra_data %}&extra_data={{extra_data}}{% endif %}', function(data) {
     {% endif %}
       var ctx = document.getElementById('{{name}}').getContext('2d');
       {% if options.chartjs_font_family %}
