@@ -472,11 +472,19 @@ class BasicMenu(WidgetInitKwargsMixin):
         }
         sub_menu_items = []
         for item in items:
-            subdata = {
-                'title':item[0],
-                'url':reverse_lazy(item[1]),
-                'extra':''
-            }
+            if not type(item) == tuple:
+                continue
+            if item[0] == 'divider':
+                subdata = {
+                    'divider':True
+                }
+            else:
+                subdata = {                    
+                    'title':item[0],
+                    'url':reverse_lazy(item[1]),
+                    'extra':'',
+                    'divider':False
+                }
 
             if len(item) > 2:
                 subdata['extra'] = self.convert_extra(item[2])

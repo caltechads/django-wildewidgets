@@ -20,7 +20,11 @@
                 </a>
                 <div class="dropdown-menu" aria-labelledby="wildewidget_submenu_{{item|cut:' '}}">
                   {% for subitem in data.items %}
-                    <a class="dropdown-item" href="{{subitem.url}}{{subitem.extra}}">{{subitem.title}}</a>
+                    {% if subitem.divider %}
+                      <div class="dropdown-divider"></div>
+                    {% else %}
+                      <a class="dropdown-item" href="{{subitem.url}}{{subitem.extra}}">{{subitem.title}}</a>
+                    {% endif %}
                   {% endfor %}
                 </div>
               </li>
