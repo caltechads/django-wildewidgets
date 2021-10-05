@@ -221,6 +221,10 @@ There are some mandatory options, and some optional ones.
     striped
         (optional) use a table with striped rows.
 
+    field_types
+        (optional) dictionary of field types with `field` as the key. Current valid types are `currency`.
+
+
 As an example::
 
         from wildewidgets import BasicModelTable

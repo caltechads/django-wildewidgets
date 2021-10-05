@@ -832,6 +832,7 @@ class BasicModelTable(DataTable):
     striped = None
     unsortable = []
     unsearchable = []
+    field_types = {}
 
     def __init__(self, *args, **kwargs):
         for field in ['page_length', 'small', 'buttons', 'striped']:
@@ -890,3 +891,15 @@ class BasicModelTable(DataTable):
     def load_all_fields(self):
         for field_name in self.field_names:
             self.load_field(field_name)
+
+    def render_currency_type_column(self, value):
+        return f"${value}"
+
+    def render_column(self, row, column):
+        value = super().render_column(row, column)
+        if column in self.field_types:
+            field_type = self.field_types[column]
+            attr_name = f"render_{field_type}_type_column"
+            if hasattr(self, attr_name):
+                return getattr(self, attr_name)(value)
+        return value
