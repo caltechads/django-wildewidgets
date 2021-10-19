@@ -13,6 +13,7 @@ from .wildewidgets import (
     MenuMixin,
     PieChart,
     StackedBarChart, 
+    TabbedWidget,
     TemplateWidget,
     WildewidgetDispatch,
 )

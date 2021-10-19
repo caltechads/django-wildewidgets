@@ -569,4 +569,18 @@ class TemplateWidget():
 
     def get_context_data(self, **kwargs):
         return kwargs
+
+
+class TabbedWidget(TemplateWidget):
+    template_name = 'wildewidgets/tabbed_widget.html'
+
+    def __init__(self, *args, **kwargs):
+        self.tabs = []
+
+    def add_tab(self, name, widget):
+        self.tabs.append((name,widget))
+
+    def get_context_data(self, **kwargs):
+        kwargs['tabs'] = self.tabs
+        return kwargs
     

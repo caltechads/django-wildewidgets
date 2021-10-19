@@ -1,0 +1,32 @@
+{% load wildewidgets %}
+
+<ul class="nav nav-tabs mb-5">
+{% for tab in tabs %}
+<li class="nav-item">
+  <a 
+    class="nav-link {% if forloop.first %}active{% endif %}" 
+    id="{{tab.0|slugify}}-tab" 
+    data-toggle="tab" 
+    href="#nav-{{tab.0|slugify}}" 
+    role="tab" 
+    aria-controls="nav-{{tab.0|slugify}}" 
+    aria-selected="{{forloop.first|yesno:'true,false,false'}}"
+  >
+    {{tab.0}}
+  </a>
+</li>
+{% endfor %}
+</ul>
+
+<div class="tab-content" id="nav-tabContent">
+  {% for tab in tabs %}
+    <div 
+      class="tab-pane fade {% if forloop.first %}show active{% endif %}" 
+      id="nav-{{tab.0|slugify}}" 
+      role="tabpanel" 
+      aria-labelledby="nav-{{tab.0|slugify}}-tab"
+    >
+      {% wildewidgets tab.1 %}
+    </div>
+  {% endfor %}
+</div>
