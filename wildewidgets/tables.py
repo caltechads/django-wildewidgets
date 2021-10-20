@@ -769,17 +769,38 @@ class DataTable(WidgetInitKwargsMixin, DatatableAJAXView):
                 row.append('')
         self.data.append(row)
 
-    def get_action_button(self, row, label, url_name, method='get', color_class='secondary', attr='id'):
-        base = reverse_lazy(url_name)
-        if method == 'get':
-            url = f"{base}?{attr}={row.id}"
+    def get_action_button(self, 
+            row, 
+            label, 
+            url_name, 
+            method='get', 
+            color_class='secondary', 
+            attr='id', 
+            js_function_name=None):
+        if url_name:
+            base = reverse_lazy(url_name)
+            if method == 'get':
+                url = f"{base}?{attr}={row.id}"
+            else:
+                url = base
         else:
-            url = base
-        return self.get_action_button_with_url(row, label, url, method, color_class, attr)
+            url = "javascript:void(0)"
+        return self.get_action_button_with_url(row, label, url, method, color_class, attr, js_function_name)
 
-    def get_action_button_with_url(self, row, label, url, method='get', color_class='secondary', attr='id'):
+    def get_action_button_with_url(self, 
+            row, 
+            label, 
+            url, 
+            method='get', 
+            color_class='secondary', 
+            attr='id', 
+            js_function_name=None):
         if method == 'get':
-            return f"<a href='{url}' class='btn btn-{color_class} btn-smx mr-3'>{label}</a>"
+            if js_function_name:
+                link_extra = f"onclick='{js_function_name}({row.id});'"
+            else:
+                link_extra = ""
+            return f"<a href='{url}' class='btn btn-{color_class} btn-smx mr-3' {link_extra}>{label}</a>"
         token_input = f'<input type="hidden" name="csrfmiddlewaretoken" value="{self.csrf_token}">'
         id_input = f'<input type="hidden" name="{attr}" value="{row.id}">'
         button = f'<input type=submit value="{label}" class="btn btn-{color_class} btn-smx mr-3">'
@@ -813,7 +834,11 @@ class DataTable(WidgetInitKwargsMixin, DatatableAJAXView):
                     attr = action[4]
                 else:
                     attr = 'id'
-                response += self.get_action_button(row, label, url_name, method, color_class, attr)
+                if len(action) > 5:
+                    js_function_name = action[5]
+                else:
+                    js_function_name = ''
+                response += self.get_action_button(row, label, url_name, method, color_class, attr, js_function_name)
         response += self.get_conditional_action_buttons(row)
         response += "</div>"
         return response
