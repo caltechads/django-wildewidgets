@@ -22,6 +22,7 @@ from .tables import (
     BasicModelTable,
     DataTable,
     DataTableFilter,
+    TableView,
 )
 
 from .views import (
