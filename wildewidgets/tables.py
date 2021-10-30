@@ -931,7 +931,7 @@ class BasicModelTable(DataTable):
         return value
         
 
-class TableViewMixin(TemplateView):
+class TableView(TemplateView):
     table_class = None
 
     def get_context_data(self, **kwargs):
