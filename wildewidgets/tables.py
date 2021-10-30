@@ -4,6 +4,7 @@ import random
 import re
 
 from django import template
+from django.core.exceptions import ImproperlyConfigured
 from django.core.serializers.json import DjangoJSONEncoder
 from django.http import HttpResponse
 try:
@@ -928,3 +929,15 @@ class BasicModelTable(DataTable):
             if hasattr(self, attr_name):
                 return getattr(self, attr_name)(value)
         return value
+        
+
+class TableViewMixin(TemplateView):
+    table_class = None
+
+    def get_context_data(self, **kwargs):
+        if not self.table_class:
+            raise ImproperlyConfigured(
+                "You must set a table_class attribute on {}".format(self.__class__.__name__)
+            )
+        kwargs['table'] = self.table_class()
+        return super().get_context_data(**kwargs)
