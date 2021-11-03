@@ -731,9 +731,10 @@ class DataTable(WidgetInitKwargsMixin, DatatableAJAXView):
     def add_filter(self, field, filter):
         self.column_filters[field] = filter
 
-    def add_style(self, styler):
-        styler.test_index = self.column_fields.keys().index(styler.test_cell)
-        styler.target_index = self.column_fields.keys().index(styler.target_cell)
+    def add_styler(self, styler):
+        styler.test_index = list(self.column_fields.keys()).index(styler.test_cell)
+        if styler.target_cell:
+            styler.target_index = list(self.column_fields.keys()).index(styler.target_cell)
         self.column_styles.append(styler)        
 
     def build_context(self):
