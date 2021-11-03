@@ -667,6 +667,18 @@ class DataTableFilter():
         self.choices.append((label, value))
 
 
+class DataTableStyler():
+    
+    def __init__(self, is_row, test_cell, cell_value, css_class, target_cell=None):
+        self.is_row = is_row
+        self.test_cell = test_cell
+        self.cell_value = cell_value
+        self.css_class = css_class
+        self.target_cell = target_cell
+        self.test_index = 0
+        self.target_index = 0
+
+
 class DataTableForm():
     
     def __init__(self, table):
@@ -701,6 +713,7 @@ class DataTable(WidgetInitKwargsMixin, DatatableAJAXView):
         self.async_if_empty = kwargs.get('async', True)
         self.column_fields = {}
         self.column_filters = {}
+        self.column_styles = []
         self.data = []
         if self.form_actions:
             self.column_fields['checkbox'] = DataTableColumn(field='checkbox', verbose_name=' ', searchable=False, sortable=False)
@@ -717,6 +730,11 @@ class DataTable(WidgetInitKwargsMixin, DatatableAJAXView):
 
     def add_filter(self, field, filter):
         self.column_filters[field] = filter
+
+    def add_style(self, styler):
+        styler.test_index = self.column_fields.keys().index(styler.test_cell)
+        styler.target_index = self.column_fields.keys().index(styler.target_cell)
+        self.column_styles.append(styler)        
 
     def build_context(self):
         context = {
@@ -747,6 +765,7 @@ class DataTable(WidgetInitKwargsMixin, DatatableAJAXView):
         html_template = template.loader.get_template(template_file)
         context['header'] = self.column_fields
         context['filters'] = filters
+        context['stylers'] = self.column_styles
         context['has_filters'] = has_filters
         context['options'] = self.options
         context['name'] = f"datatable_table_{table_id}"

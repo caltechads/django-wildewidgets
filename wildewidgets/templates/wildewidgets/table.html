@@ -151,6 +151,20 @@
           },
         {% endfor %}
       ],
+      ,
+      createdRow: function(row,data,index,cells) {
+        {% for key,item in stylers.items %}
+        if (data[{{item.test_index}}]=="{{item.cell_value}}") {
+          {% if item.is_row %}
+          $(row).addClass('{{item.css_class}}');
+          {% else %}
+          cells[{{item.target_index}}].classList.add('{{item.css_class}}');
+          {% endif %}            
+        
+        {% endif %}
+        }
+        {% endfor %}
+      },
       {% if async %}
         processing: true,
         serverSide: true,
