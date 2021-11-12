@@ -17,6 +17,7 @@ quickly and easily with libraries like Chartjs, Altair, and Datatables.
    business_charts
    scientific_charts
    tables
+   widgets
 
 Indices and tables
 ==================
