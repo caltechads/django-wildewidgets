@@ -22,6 +22,13 @@ If you plan on using `Altair charts <https://github.com/altair-viz/altair>`_, ru
 Configure
 ---------
 
+Add "wildewidgets" to your INSTALLED_APPS setting like this:
+
+    INSTALLED_APPS = [
+        ...
+        'wildewidgets',
+    ]
+
 Include the wildewidgets URLconf in your project urls.py like this::
 
     from wildewidgets import WildewidgetDispatch
