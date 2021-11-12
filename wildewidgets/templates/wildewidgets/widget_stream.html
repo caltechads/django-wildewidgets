@@ -1,0 +1,7 @@
+{% load wildewidgets %}
+
+{% for widget,css_class in widgets %}
+<div class="wildewidgets_widget {{ css_class }}">
+  {% wildewidgets widget %}
+</div>
+{% endfor %}

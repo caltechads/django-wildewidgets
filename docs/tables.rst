@@ -81,6 +81,7 @@ There are a few options you can set for a table::
     page_length: number of rows to initially display
     small: reduced row height
     buttons: whether or not to show export buttons
+    hide_controls: whether or not to hide the table controls
 
 You can add further options to particular columns when you call ``add_column``::
 
@@ -148,6 +149,49 @@ Generally, for these filters to work, you will have to override the default sear
             test = value=='True'
             qs = qs.filter(open=test)
             return qs
+
+Stylers
+=======
+
+You can add custom styling via css classes to rows and columns based on column values using the DataTableStyle class. For example, to style a row::
+
+    class TestTable(DataTable):
+
+        model = Measurement
+
+        def __init__(self, *args, **kwargs):
+            if not "table_id" in kwargs:
+                kwargs["table_id"] = "data_measurement"
+            super().__init__(*args, **kwargs)
+            self.add_column('name')
+            self.add_column('time', searchable=False)
+            self.add_column('pressure')
+            self.add_column('temperature')
+            self.add_column('restricted', visible=False)
+            self.add_column('open', sortable=False)
+
+            styler = DataTableStyle(True, 'restricted', 'True', 'bg-red-lt')
+            self.add_styler(styler)
+
+This will add the 'bg-red-lt' class to the row if the 'restricted' column is True. The arguments are:
+
+    is_row
+        If true, the style will be applied to the row, otherwise, it will be applied to the cell.
+
+    test_cell
+        The name of the column to test.
+
+    cell_value
+        The value to test against.
+
+    css_class
+        The css class to apply.
+
+    target_cell
+        If the styler is applied to a cell, this is the name of the column to apply the style to.
+
+Custom Rendering
+================
 
 You can change the default display of a particular column by overriding the corresponding ``render`` method::
 
@@ -221,9 +265,17 @@ There are some mandatory options, and some optional ones.
     striped
         (optional) use a table with striped rows.
 
+    hide_controls: 
+        (optional) whether or not to hide the table controls
+
     field_types
         (optional) dictionary of field types with `field` as the key. Current valid types are `currency`.
 
+    alignment:
+        (optional) dictionary of alignments with `field` as the key. Valid values are `left`, `right`, and `center`.
+
+    bool_icons:
+        (optional) dictionary of icons with `field` as the key. Values are in the form of a list or one or two tuples. The first tuple contains the bootstrap icon (minus the 'bi-') to show if the value is True, and the css class of the icon. The second tuple contains the bootstrap icon (minus the 'bi-') to show if the value is False, and the css class of the icon.
 
 As an example::
 

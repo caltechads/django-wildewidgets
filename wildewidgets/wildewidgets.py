@@ -583,4 +583,105 @@ class TabbedWidget(TemplateWidget):
     def get_context_data(self, **kwargs):
         kwargs['tabs'] = self.tabs
         return kwargs
-    
+ 
+
+class HeaderWithControls(TemplateWidget):
+    template_name = 'core/header_with_controls.html'
+    header_level = 1
+    header_text = None
+    css_class = None
+    css_id = None
+    badge_text = None
+    badge_class = "warning"
+
+    def get_context_data(self, **kwargs):
+        kwargs['header_level'] = self.header_level
+        kwargs['header_text'] = self.header_text
+        kwargs['css_class'] = self.css_class
+        kwargs['css_id'] = self.css_id
+        kwargs['badge_text'] = self.badge_text
+        kwargs['badge_class'] = self.badge_class
+        return kwargs
+
+
+class HeaderWithLinkButton(HeaderWithControls):
+    template_name = 'core/header_with_link_button.html'
+    url = None
+    link_text = None
+    button_class = "primary"
+
+    def get_context_data(self, **kwargs):
+        kwargs = super().get_context_data(**kwargs)
+        kwargs['url'] = self.url
+        kwargs['link_text'] = self.link_text
+        kwargs['button_class'] = self.button_class
+        return kwargs
+
+
+class HeaderWithFormButton(HeaderWithControls):
+    template_name = 'core/header_with_form_button.html'
+    url = None
+    button_text = None
+
+    def get_context_data(self, **kwargs):
+        kwargs = super().get_context_data(**kwargs)
+        kwargs['url'] = self.url
+        kwargs['button_text'] = self.link_text
+        return kwargs
+
+
+class HeaderWithModalButton(HeaderWithControls):
+    template_name = 'core/header_with_modal_button.html'
+    modal_id = None
+    button_text = None
+    button_class = "primary"
+
+    def get_context_data(self, **kwargs):
+        kwargs = super().get_context_data(**kwargs)
+        kwargs['modal_id'] = self.modal_id
+        kwargs['button_text'] = self.button_text
+        kwargs['button_class'] = self.button_class
+        return kwargs
+
+
+class ModalWidget(TemplateWidget):
+    template_name = 'core/modal.html'
+    modal_id = None
+    modal_title = None
+
+    def get_context_data(self, **kwargs):
+        kwargs = super().get_context_data(**kwargs)
+        kwargs['modal_id'] = self.modal_id
+        kwargs['modal_title'] = self.modal_title
+        return kwargs
+
+
+class CrispyFormModalWidget(ModalWidget):
+    template_name = 'core/crispy_form_modal.html'
+    form_class = None
+    form = None
+
+    def get_context_data(self, **kwargs):
+        kwargs = super().get_context_data(**kwargs)
+        if self.form_class:
+            kwargs['form'] = self.form_class()
+        elif self.form:
+            kwargs['form'] = self.form
+        else:
+            raise ImproperlyConfigured("Either 'form_class' or 'form' must be set")
+        return kwargs
+
+
+class WidgetStream(TemplateWidget):
+    template_name = 'core/widget_stream.html'
+
+    def __init__(self):
+        self.widgets = []
+
+    def add_widget(self, widget, css_class=None):
+        self.widgets.append((widget, css_class))
+
+    def get_context_data(self, **kwargs):
+        kwargs = super().get_context_data(**kwargs)
+        kwargs['widgets'] = self.widgets
+        return kwargs

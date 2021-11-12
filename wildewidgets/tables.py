@@ -1,11 +1,14 @@
+from datetime import datetime, date
 from functools import lru_cache
 import json
 import random
 import re
 
 from django import template
+from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 from django.core.serializers.json import DjangoJSONEncoder
+from django.db import models
 from django.http import HttpResponse
 try:
     from django.utils.encoding import force_unicode as force_text  # Django < 1.5
@@ -695,12 +698,13 @@ class DataTable(WidgetInitKwargsMixin, DatatableAJAXView):
     actions = False
     form_actions = None
     form_url = ''
+    hide_controls = False
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.options = {
-            'width': kwargs.get('width', '400'),
-            'height': kwargs.get('height', '400'),
+            'width': kwargs.get('width', '100%'),
+            'height': kwargs.get('height', None),
             "title":kwargs.get('title', None),
             "searchable":kwargs.get('searchable', True),
             "paging":kwargs.get('paging', True),
@@ -708,6 +712,7 @@ class DataTable(WidgetInitKwargsMixin, DatatableAJAXView):
             "small":kwargs.get('small', False),
             "buttons":kwargs.get('buttons', False),
             "striped":kwargs.get('striped', False),
+            "hide_controls":self.hide_controls
         }
         self.table_id = kwargs.get('table_id', None)
         self.async_if_empty = kwargs.get('async', True)
@@ -879,6 +884,8 @@ class BasicModelTable(DataTable):
     unsortable = []
     unsearchable = []
     field_types = {}
+    alignment = {}
+    bool_icons = {}
 
     def __init__(self, *args, **kwargs):
         for field in ['page_length', 'small', 'buttons', 'striped']:
@@ -888,6 +895,7 @@ class BasicModelTable(DataTable):
         super().__init__(*args, **kwargs)
         
         self.model_fields = {}
+        self.related_fields = {}
         self.field_names = []
         for field in self.model._meta.get_fields():
             if field.name == 'id':
@@ -901,6 +909,56 @@ class BasicModelTable(DataTable):
             for field_name in self.fields:
                 self.load_field(field_name)
 
+        for field_name in self.fields:
+            if not field_name in self.model_fields:
+                field = self.get_related_field(self.model, field_name)
+                if field:
+                    self.related_fields[field_name] = field
+
+    def get_related_model(self, current_model, field_name):
+        field = current_model._meta.get_field(field_name)
+        return field.related_model
+
+    def get_related_field(self, current_model, name):
+        name_fields = name.split('__')
+        if len(name_fields) == 1:
+            return None
+        for field in name_fields[:-1]:
+            current_model = self.get_related_model(current_model, field)
+        if current_model:
+            try:
+                final_field = current_model._meta.get_field(name_fields[-1])
+            except:
+                final_field = None
+        else:
+            final_field = None
+        return final_field
+
+    def get_field(self, field_name):
+        if field_name in self.model_fields:
+            field = self.model_fields[field_name]
+        elif field_name in self.related_fields:
+            field = self.related_fields[field_name]
+        else:
+            field = None
+        return field
+
+    def set_standard_column_attributes(self, field_name, kwargs):
+        if field_name in self.hidden:
+            kwargs['visible'] = False
+        if field_name in self.unsearchable:
+            kwargs['searchable'] = False
+        if field_name in self.unsortable:
+            kwargs['sortable'] = False
+        if field_name in self.alignment:
+            kwargs['align'] = self.alignment[field_name]
+        else:
+            field = self.get_field(field_name)
+            if isinstance(field, (models.TextField, models.CharField)):
+                kwargs['align'] = 'left'
+            else:
+                kwargs['align'] = 'right'            
+
     def load_field(self, field_name):
         if field_name in self.model_fields:
             field = self.model_fields[field_name]
@@ -912,12 +970,7 @@ class BasicModelTable(DataTable):
                 kwargs['verbose_name'] = verbose_name.capitalize()
             else:
                 kwargs['verbose_name'] = field.verbose_name
-            if field_name in self.hidden:
-                kwargs['visible'] = False
-            if field_name in self.unsearchable:
-                kwargs['searchable'] = False
-            if field_name in self.unsortable:
-                kwargs['sortable'] = False
+            self.set_standard_column_attributes(field_name, kwargs)
             self.add_column(field_name, **kwargs)
         else:
             kwargs = {}
@@ -926,12 +979,7 @@ class BasicModelTable(DataTable):
             else:
                 verbose_name = field_name.replace('_',' ').replace('__', ' ').capitalize()
             kwargs['verbose_name'] = verbose_name
-            if field_name in self.hidden:
-                kwargs['visible'] = False
-            if field_name in self.unsearchable:
-                kwargs['searchable'] = False
-            if field_name in self.unsortable:
-                kwargs['sortable'] = False
+            self.set_standard_column_attributes(field_name, kwargs)
             self.add_column(field_name, **kwargs)
 
     def load_all_fields(self):
@@ -941,13 +989,53 @@ class BasicModelTable(DataTable):
     def render_currency_type_column(self, value):
         return f"${value}"
 
+    def render_bool_type_column(self, value):
+        if value=="True":
+            return "<i class='bi-check-lg text-success'><span style='display:none'>True</span></i>"
+        return ""
+
+    def render_bool_icon_column(self, value, icon_data):
+        if len(icon_data) == 0:
+            return value
+        if value=="True":
+            return f"<i class='bi-{icon_data[0][0]} {icon_data[0][1]}'><span style='display:none'>True</span></i>"
+        if len(icon_data) > 1:
+            return f"<i class='bi-{icon_data[1][0]} {icon_data[1][1]}'><span style='display:none'>False</span></i>"
+        return ""
+
+    def render_datetime_type_column(self, value):
+        datetime_format = "%m/%d/%Y %H:%M"
+        if hasattr(settings, 'WILDEWIDGETS_DATETIME_FORMAT'):
+            datetime_format = settings.WILDEWIDGETS_DATETIME_FORMAT
+        return value.strftime(datetime_format)
+
+    def render_date_type_column(self, value):
+        date_format = "%m/%d/%Y"
+        if hasattr(settings, 'WILDEWIDGETS_DATE_FORMAT'):
+            date_format = settings.WILDEWIDGETS_DATE_FORMAT
+        return value.strftime(date_format)
+
     def render_column(self, row, column):
         value = super().render_column(row, column)
+        if column in self.model_fields:
+            field = self.model_fields[column]
+        elif column in self.related_fields:
+            field = self.related_fields[column]
+        else:
+            field = None
         if column in self.field_types:
             field_type = self.field_types[column]
             attr_name = f"render_{field_type}_type_column"
             if hasattr(self, attr_name):
+                if attr_name in ['date', 'datetime']:
+                    value = getattr(row, column)
                 return getattr(self, attr_name)(value)
+        elif isinstance(field, models.DateTimeField):
+            return self.render_datetime_type_column(getattr(row,column))
+        elif isinstance(field, models.DateField):
+            return self.render_date_type_column(getattr(row,column))
+        elif column in self.bool_icons:
+            return self.render_bool_icon_column(value, self.bool_icons[column])
         return value
         
 
