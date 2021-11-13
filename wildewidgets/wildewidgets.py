@@ -10,6 +10,7 @@ import re
 from django import template
 from django.apps import apps
 from django.conf import settings
+from django.core.exceptions import ImproperlyConfigured
 from django.db.models import Q
 from django.http import JsonResponse
 from django.urls import reverse_lazy
@@ -585,8 +586,8 @@ class TabbedWidget(TemplateWidget):
         return kwargs
  
 
-class HeaderWithControls(TemplateWidget):
-    template_name = 'core/header_with_controls.html'
+class BasicHeader(TemplateWidget):
+    template_name = 'wildewidgets/header_with_controls.html'
     header_level = 1
     header_text = None
     css_class = None
@@ -604,8 +605,8 @@ class HeaderWithControls(TemplateWidget):
         return kwargs
 
 
-class HeaderWithLinkButton(HeaderWithControls):
-    template_name = 'core/header_with_link_button.html'
+class HeaderWithLinkButton(BasicHeader):
+    template_name = 'wildewidgets/header_with_link_button.html'
     url = None
     link_text = None
     button_class = "primary"
@@ -618,8 +619,8 @@ class HeaderWithLinkButton(HeaderWithControls):
         return kwargs
 
 
-class HeaderWithFormButton(HeaderWithControls):
-    template_name = 'core/header_with_form_button.html'
+class HeaderWithFormButton(BasicHeader):
+    template_name = 'wildewidgets/header_with_form_button.html'
     url = None
     button_text = None
 
@@ -630,8 +631,8 @@ class HeaderWithFormButton(HeaderWithControls):
         return kwargs
 
 
-class HeaderWithModalButton(HeaderWithControls):
-    template_name = 'core/header_with_modal_button.html'
+class HeaderWithModalButton(BasicHeader):
+    template_name = 'wildewidgets/header_with_modal_button.html'
     modal_id = None
     button_text = None
     button_class = "primary"
@@ -645,7 +646,7 @@ class HeaderWithModalButton(HeaderWithControls):
 
 
 class ModalWidget(TemplateWidget):
-    template_name = 'core/modal.html'
+    template_name = 'wildewidgets/modal.html'
     modal_id = None
     modal_title = None
 
@@ -657,7 +658,7 @@ class ModalWidget(TemplateWidget):
 
 
 class CrispyFormModalWidget(ModalWidget):
-    template_name = 'core/crispy_form_modal.html'
+    template_name = 'wildewidgets/crispy_form_modal.html'
     form_class = None
     form = None
 
@@ -673,7 +674,7 @@ class CrispyFormModalWidget(ModalWidget):
 
 
 class WidgetStream(TemplateWidget):
-    template_name = 'core/widget_stream.html'
+    template_name = 'wildewidgets/widget_stream.html'
 
     def __init__(self):
         self.widgets = []

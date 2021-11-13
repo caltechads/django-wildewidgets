@@ -9,7 +9,7 @@ There are a number of general purpose widgets available, along with some support
 * MenuMixin - Used for view classes that utilize menus.
 * TemplateWidget - A generic widget that gives you full control over both the content and the layout.
 * TabbedWidget - A widget that contains other widgets in a tabbed interface.
-* HeaderWithControls - A header widget that is a base class for widgets with right justified controls.
+* BasicHeader - A header widget that is a base class for widgets with right justified controls.
 * HeaderWithLinkButton - A header widget with a link button on the right.
 * HeaderWithModalButton - A header widget with a modal button on the right.
 * ModalWidget - A Bootstrap modal dialog widget base class.
@@ -28,7 +28,7 @@ A basic menu requires only one class variable defined, `items`::
             ('Uploads','core:uploads'),
         ]
 
-The `items` variable is a list of tuples, where the first element is the menu item text and the second element is the URL name.
+The `items` variable is a list of tuples, where the first element is the menu item text and the second element is the URL name. If the `items` variable is defined dynamically in `__init__`, a third optional element in the tuple is a dictionary of get arguments.
 
 View Mixin
 ----------
@@ -54,7 +54,7 @@ Then the view won't need to define these variables::
 Sub Menus
 ---------
 
-Typically, a `LightMenu`` is used as a submenu, below the main menu. The view class then becomes::
+Typically, a `LightMenu`` is used as a submenu, below the main menu. The view class, or menu mixin, then becomes::
 
     class TestView(MenuMixin, TemplateView):
         menu_class = MainMenu
