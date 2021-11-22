@@ -4,4 +4,8 @@ from .wildewidgets import *
 
 from .tables import *
 
+from .menus import *
+
+from .ui import *
+
 from .views import *

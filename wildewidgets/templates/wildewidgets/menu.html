@@ -1,16 +1,18 @@
+  
   <nav class="navbar {{navbar_classes}}">
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
 
-      <div class="collapse navbar-collapse" id="navbarSupportedContent">
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <div class="{{navbar_container}}">
         <ul class="navbar-nav mr-auto">
           {% for item,data in menu.items %}
             {% if data.kind == 'item' %}
               <li class="nav-item">
                 <a class="nav-link {% if item == active %}active{% endif %}" href="{{data.url}}{{data.extra}}">
                   {{item}}
-                  {% if item == active %}<span class="sr-only">(current)</span>{% endif %}
+                  {% if item == active %}<span class="sr-only visually-hidden visually-hidden-focusable">(current)</span>{% endif %}
                   </a>
               </li>
             {% elif data.kind == 'submenu' %}
@@ -36,5 +38,6 @@
           {% endfor %}
         </ul>
       </div>
+    </div>
 
   </nav>

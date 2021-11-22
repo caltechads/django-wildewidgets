@@ -1,0 +1,24 @@
+{% load wildewidgets %}
+
+<div class="card">
+  {% if header or header_text %}
+    <div class="card-header">
+      {% if header_text %}
+        {{ header_text}}
+      {% elif header %}
+        {% wildewidgets header %}
+      {% endif %}
+    </div>
+  {% endif %}
+  <div class="card-body">
+    {% if title %}
+      <div class="card-title">{{ title }}</div>
+      {% if subtitle %}
+        <div class="card-subtitle">{{ subtitle }}</div>
+      {% endif %}
+    {% endif %}
+    <div class="{{widget_css}}">
+      {% wildewidgets widget %}
+    </div>
+  </div>
+</div>
