@@ -1,3 +1,13 @@
+import random
+
+try:
+    from pygments import highlight
+    from pygments.lexers import get_lexer_by_name
+    from pygments.formatters import HtmlFormatter
+except ModuleNotFoundError:
+    # Only needed if using syntax highlighting
+    pass
+
 from django import template
 from django.core.exceptions import ImproperlyConfigured
 from django.urls import reverse_lazy
@@ -34,12 +44,14 @@ class TabbedWidget(TemplateWidget):
 
     def get_context_data(self, **kwargs):
         kwargs['tabs'] = self.tabs
+        kwargs['identifier'] = random.randrange(0,1000)
         return kwargs
  
 
 class BasicHeader(TemplateWidget):
     template_name = 'wildewidgets/header_with_controls.html'
     header_level = 1
+    header_type = 'h'
     header_text = None
     css_class = None
     css_id = None
@@ -47,6 +59,11 @@ class BasicHeader(TemplateWidget):
     badge_class = "warning"
 
     def get_context_data(self, **kwargs):
+        if self.header_type == 'h':
+            kwargs['header_class'] = f"h{self.header_level}"
+        elif self.header_type == 'display':
+            kwargs['header_class'] = f"display-{self.header_level}"
+
         kwargs['header_level'] = self.header_level
         kwargs['header_text'] = self.header_text
         kwargs['css_class'] = self.css_class
@@ -164,3 +181,28 @@ class CardWidget(TemplateWidget):
     def add_widget(self, widget, css_class=None):
         self.widget = widget
         self.widget_css = css_class
+
+
+class CodeWidget(TemplateWidget):
+    template_name = 'wildewidgets/code_widget.html'
+    language = None
+    code = ""
+    Line_numbers = False
+    css_class = None
+
+    def __init__(self, *args, **kwargs):        
+        if 'code' in kwargs:
+            self.code = kwargs['code']
+        if 'language' in kwargs:
+            self.language = kwargs['language']
+
+    def get_context_data(self, **kwargs):
+        kwargs = super().get_context_data(**kwargs)
+        if not self.language:
+            raise ImproperlyConfigured("You must define a language.")
+        lexer = get_lexer_by_name(self.language)
+        formatter = HtmlFormatter(linenos=self.Line_numbers, cssclass="wildewidgets_highlight")
+        kwargs['code'] = highlight(self.code, lexer, formatter)
+        kwargs['css_class'] = self.css_class
+        return kwargs
+

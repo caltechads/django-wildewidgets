@@ -5,11 +5,11 @@
 <li class="nav-item">
   <a 
     class="nav-link {% if forloop.first %}active{% endif %}" 
-    id="{{tab.0|slugify}}-tab" 
+    id="{{tab.0|slugify}}-{{identifier}}-tab" 
     data-toggle="tab" 
-    href="#nav-{{tab.0|slugify}}" 
+    href="#nav-{{tab.0|slugify}}-{{identifier}}" 
     role="tab" 
-    aria-controls="nav-{{tab.0|slugify}}" 
+    aria-controls="nav-{{tab.0|slugify}}-{{identifier}}" 
     aria-selected="{{forloop.first|yesno:'true,false,false'}}"
   >
     {{tab.0}}
@@ -22,9 +22,9 @@
   {% for tab in tabs %}
     <div 
       class="tab-pane fade {% if forloop.first %}show active{% endif %}" 
-      id="nav-{{tab.0|slugify}}" 
+      id="nav-{{tab.0|slugify}}-{{identifier}}" 
       role="tabpanel" 
-      aria-labelledby="nav-{{tab.0|slugify}}-tab"
+      aria-labelledby="nav-{{tab.0|slugify}}-{{identifier}}-tab"
     >
       {% wildewidgets tab.1 %}
     </div>

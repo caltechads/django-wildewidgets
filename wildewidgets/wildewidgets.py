@@ -118,14 +118,17 @@ class CategoryChart(WidgetInitKwargsMixin, JSONDataView):
         (105,107,115),
     ]
     template_file = 'wildewidgets/categorychart.html'
+    legend = False
+    legend_position = "top"
+    color = True
 
     def __init__(self, *args, **kwargs):        
         self.options = {
             'width': kwargs.get('width', '400px'),
             'height': kwargs.get('height', '400px'),
             "title":kwargs.get('title', None),
-            "legend":kwargs.get('legend', False),
-            "legend_position":kwargs.get('legend_position', "top"),
+            "legend":kwargs.get('legend', self.legend),
+            "legend_position":kwargs.get('legend_position', self.legend_position),
             "chart_type":kwargs.get('chart_type',None),
             "histogram":kwargs.get('histogram',False),
             "max":kwargs.get('max',None),
@@ -137,7 +140,7 @@ class CategoryChart(WidgetInitKwargsMixin, JSONDataView):
         self.categories = None
         self.datasets = []
         self.dataset_labels = []
-        self.color = kwargs.get('color', True)
+        self.color = kwargs.get('color', self.color)
         self.colors = []
         if hasattr(settings, 'CHARTJS_FONT_FAMILY'):
             self.options['chartjs_font_family'] = settings.CHARTJS_FONT_FAMILY
