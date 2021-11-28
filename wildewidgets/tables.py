@@ -699,6 +699,7 @@ class DataTable(WidgetInitKwargsMixin, DatatableAJAXView):
     form_actions = None
     form_url = ''
     hide_controls = False
+    table_id = None
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -714,7 +715,7 @@ class DataTable(WidgetInitKwargsMixin, DatatableAJAXView):
             "striped":kwargs.get('striped', False),
             "hide_controls":self.hide_controls
         }
-        self.table_id = kwargs.get('table_id', None)
+        self.table_id = kwargs.get('table_id', self.table_id)
         self.async_if_empty = kwargs.get('async', True)
         self.column_fields = {}
         self.column_filters = {}
