@@ -389,7 +389,7 @@ class HorizontalHistogram(Histogram):
 class AltairChart(JSONDataView):
     template_file = 'wildewidgets/altairchart.html'
     title = None
-    width = "400px"
+    width = "100%"
     height = "300px"
 
     def __init__(self, *args, **kwargs):
