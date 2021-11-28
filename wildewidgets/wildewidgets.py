@@ -387,15 +387,17 @@ class HorizontalHistogram(Histogram):
 
 
 class AltairChart(JSONDataView):
-
     template_file = 'wildewidgets/altairchart.html'
+    title = None
+    width = "400px"
+    height = "300px"
 
     def __init__(self, *args, **kwargs):
         self.data = None
         self.options = {
-            'width': kwargs.get('width', '400px'),
-            'height': kwargs.get('height', '300px'),
-            "title":kwargs.get('title', None)
+            'width': kwargs.get('width', self.width),
+            'height': kwargs.get('height', self.height),
+            "title":kwargs.get('title', self.title)
         }
 
     def get_content(self, **kwargs):
