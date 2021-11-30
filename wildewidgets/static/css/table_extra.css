@@ -1,0 +1,15 @@
+table {
+    color: #666 !important;
+  }
+  table.wildewidgets-table {
+    margin-top: 5px;
+  }
+  td, th, tbody {
+    border-bottom-color: #eee !important;
+  }
+  table.dataTable.no-footer {
+    border-bottom: 1px solid #eee;
+  }
+  tbody {
+    border-top: 1px solid #eee !important;
+  }
