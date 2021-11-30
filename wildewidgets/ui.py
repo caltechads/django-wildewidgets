@@ -44,7 +44,7 @@ class TabbedWidget(TemplateWidget):
 
     def get_context_data(self, **kwargs):
         kwargs['tabs'] = self.tabs
-        kwargs['identifier'] = random.randrange(0,1000)
+        kwargs['identifier'] = random.randrange(0,10000)
         return kwargs
  
 
