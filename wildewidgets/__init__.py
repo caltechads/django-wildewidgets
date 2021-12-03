@@ -8,4 +8,6 @@ from .menus import *
 
 from .ui import *
 
+from .apexcharts import *
+
 from .views import *

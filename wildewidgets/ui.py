@@ -35,6 +35,7 @@ class TemplateWidget():
 
 class TabbedWidget(TemplateWidget):
     template_name = 'wildewidgets/tabbed_widget.html'
+    slug_suffix = None
 
     def __init__(self, *args, **kwargs):
         self.tabs = []
@@ -44,7 +45,9 @@ class TabbedWidget(TemplateWidget):
 
     def get_context_data(self, **kwargs):
         kwargs['tabs'] = self.tabs
-        kwargs['identifier'] = random.randrange(0,10000)
+        if not self.slug_suffix:
+            self.slug_suffix = random.randrange(0,10000)
+        kwargs['identifier'] = self.slug_suffix
         return kwargs
  
 

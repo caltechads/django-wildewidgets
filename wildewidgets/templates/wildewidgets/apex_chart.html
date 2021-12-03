@@ -1,0 +1,9 @@
+<div id='chart_{{css_id}}'></div>
+
+<script>
+  $(document).ready(function() {
+    var options_{{css_id}} = {{options|safe}};
+    var chart_{{css_id}} = new ApexCharts(document.querySelector("#chart_{{css_id}}"), options_{{css_id}});
+    chart_{{css_id}}.render();
+  });
+</script>

@@ -15,6 +15,9 @@ There are a number of general purpose widgets available, along with some support
 * ModalWidget - A Bootstrap modal dialog widget base class.
 * CrispyFormModalWidget - A Boostrap modal dialog containing a crispy form.
 * WidgetStream - A container widget that contains a list of child widgets that are displayed sequentially.
+* CardWidget - A Bootstrap card widget that displays a child widget in its body.
+* CodeWidget - A widget that contains a block of syntax highlighted code.
+* MarkdownWidget - A widget that contains a block of rendered markdown text.
 
 Menu
 ====

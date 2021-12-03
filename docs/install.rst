@@ -51,7 +51,7 @@ For `Altair <https://github.com/altair-viz/altair>`_ (scientific charts), use::
     <script src="https://cdn.jsdelivr.net/npm/vega-lite@4"></script>
     <script src="https://cdn.jsdelivr.net/npm/vega-embed@6"></script>  
 
-And for `DataTables <https://github.com/DataTables/DataTables>`_, use::
+For `DataTables <https://github.com/DataTables/DataTables>`_, use::
 
     <script src="https://cdn.datatables.net/1.10.21/js/jquery.dataTables.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.8.4/moment.min.js"></script>
@@ -71,3 +71,14 @@ If you want to add the export buttons to a DataTable, also add::
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.70/pdfmake.min.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.70/vfs_fonts.min.js"></script>
     
+and, if using `Tabler <https://tabler.io>`_, include::
+
+    <link rel="stylesheet" href="{% static 'css/table_extra.css' %}"> 
+
+For `ApexCharts <https://apexcharts.com>`_, use::
+
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+
+If you plan on using `CodeWidget`, you'll need to include the following to get syntax highlighting::
+
+    <link rel="stylesheet" href="{% static 'css/highlighting.css' %}">

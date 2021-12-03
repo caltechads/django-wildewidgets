@@ -52,7 +52,7 @@ For [Altair](https://github.com/altair-viz/altair) (scientific charts), use:
     <script src="https://cdn.jsdelivr.net/npm/vega-lite@4"></script>
     <script src="https://cdn.jsdelivr.net/npm/vega-embed@6"></script>  
 
-And for [DataTables](https://github.com/DataTables/DataTables), use:
+For [DataTables](https://github.com/DataTables/DataTables), use:
 
     <script src="https://cdn.datatables.net/1.10.21/js/jquery.dataTables.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.8.4/moment.min.js"></script>
@@ -61,6 +61,18 @@ And for [DataTables](https://github.com/DataTables/DataTables), use:
 and:
 
     <link href="https://cdn.datatables.net/1.10.21/css/jquery.dataTables.min.css" rel="stylesheet" />
+
+and, if using [Tabler](https://tabler.io), include:
+
+    <link rel="stylesheet" href="{% static 'css/table_extra.css' %}"> 
+
+For [ApexCharts](https://apexcharts.com), use:
+
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+
+If you plan on using CodeWidget, you'll need to include the following to get syntax highlighting:
+
+    <link rel="stylesheet" href="{% static 'css/highlighting.css' %}"> 
 
 ## Documentation
 
