@@ -1,7 +1,11 @@
 import json
 import random
 
-from .wildewidgets import WidgetInitKwargsMixin
+from django import template
+from django.http import JsonResponse
+from django.views.generic import View
+
+from .wildewidgets import WidgetInitKwargsMixin, JSONDataView
 from .ui import TemplateWidget
 
 
@@ -23,39 +27,85 @@ class ApexDatasetBase():
         return options
 
 
-class ApexChartBase(WidgetInitKwargsMixin, TemplateWidget):
+class ApexJSONMixin():
+    """
+    A mixin class adding AJAX support to Apex Charts
+
+    Methods
+    -------
+    set_series(series)
+        Set the series attribute.
+    """
+    template_name = 'wildewidgets/apex_json.html'
+
+    def dispatch(self, request, *args, **kwargs):
+        handler = getattr(self, request.method.lower())
+        return handler(request, *args, **kwargs)
+
+    def get(self, request, *args, **kwargs):
+        data = self.get_series_data()
+        return self.render_to_response(data)
+
+    def render_to_response(self, context, **response_kwargs):
+        return JsonResponse(context)
+
+    def get_series_data(self, **kwargs):
+        self.load()
+        kwargs['series'] = self.chart_options['series']
+        return kwargs
+
+    def load(self):
+        """
+        Load datasets into the chart via AJAX.
+        """
+        pass
+
+
+class ApexChartBase(WidgetInitKwargsMixin):
     template_name = 'wildewidgets/apex_chart.html'
     css_id = None
     chart_type = None
 
     def __init__(self, *args, **kwargs):
-        self.options = {}
-        self.options['series'] = []
+        super().__init__(*args, **kwargs)
+        self.chart_options = {}
+        self.chart_options['series'] = []
         self.css_id = kwargs.get('css_id', self.css_id)
-        self.options['chart'] = {}
+        self.chart_options['chart'] = {}
         if self.chart_type:
-            self.options['chart']['type'] = self.chart_type
+            self.chart_options['chart']['type'] = self.chart_type
 
     def add_dataset(self, dataset):
-        self.options['series'].append(dataset.get_options())
+        self.chart_options['series'].append(dataset.get_options())
 
     def add_categories(self, categories):
-        if not 'xaxis' in self.options:
-            self.options['xaxis'] = {}
-        self.options['xaxis']['categories'] = categories
+        if not 'xaxis' in self.chart_options:
+            self.chart_options['xaxis'] = {}
+        self.chart_options['xaxis']['categories'] = categories
 
     def get_context_data(self, **kwargs):
-        kwargs = super().get_context_data(**kwargs)
-        kwargs['options'] = json.dumps(self.options)
+        # kwargs = super().get_context_data(**kwargs)
+        kwargs['options'] = json.dumps(self.chart_options)
         if not self.css_id:
             self.css_id = random.randint(1, 100000)
         kwargs['css_id'] = self.css_id
+        kwargs["wildewidgetclass"] = self.__class__.__name__
+        kwargs["extra_data"] = self.get_encoded_extra_data()
         return kwargs
 
     def add_suboption(self, option, name, value):
-        if option not in self.options:
-            self.options[option] = {}
-        self.options[option][name] = value
+        if option not in self.chart_options:
+            self.chart_options[option] = {}
+        self.chart_options[option][name] = value
+
+    def __str__(self):
+        return self.get_content()
+
+    def get_content(self, **kwargs):
+        context = self.get_context_data()
+        html_template = template.loader.get_template(self.template_name)
+        content = html_template.render(context)
+        return content
 
 
 class ApexSparkline(ApexChartBase):

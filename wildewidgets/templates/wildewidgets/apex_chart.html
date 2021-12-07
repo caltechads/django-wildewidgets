@@ -5,5 +5,8 @@
     var options_{{css_id}} = {{options|safe}};
     var chart_{{css_id}} = new ApexCharts(document.querySelector("#chart_{{css_id}}"), options_{{css_id}});
     chart_{{css_id}}.render();
+
+    {% block js_extra %}
+    {% endblock %}
   });
 </script>

@@ -1,0 +1,8 @@
+{% extends "wildewidgets/apex_chart.html" %}
+
+{% block js_extra %}
+  var url = '{% url "wildewidgets_json" %}?wildewidgetclass={{wildewidgetclass}}{% if extra_data %}&extra_data={{extra_data}}{% endif %}&csrf_token={{csrf_token}}';
+  $.getJSON(url, function(data) {
+    chart_{{css_id}}.updateSeries(data['series']);
+  });
+{% endblock %}
