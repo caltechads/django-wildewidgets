@@ -31,10 +31,6 @@ class ApexJSONMixin():
     """
     A mixin class adding AJAX support to Apex Charts
 
-    Methods
-    -------
-    set_series(series)
-        Set the series attribute.
     """
     template_name = 'wildewidgets/apex_json.html'
 
