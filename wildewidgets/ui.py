@@ -56,7 +56,7 @@ class BasicHeader(TemplateWidget):
     header_level = 1
     header_type = 'h'
     header_text = None
-    css_class = None
+    css_class = "my-4"
     css_id = None
     badge_text = None
     badge_class = "warning"
@@ -69,6 +69,7 @@ class BasicHeader(TemplateWidget):
 
         kwargs['header_level'] = self.header_level
         kwargs['header_text'] = self.header_text
+        kwargs['header_type'] = self.header_type
         kwargs['css_class'] = self.css_class
         kwargs['css_id'] = self.css_id
         kwargs['badge_text'] = self.badge_text

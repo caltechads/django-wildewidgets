@@ -1,15 +1,25 @@
 table {
     color: #666 !important;
-  }
-  table.wildewidgets-table {
+}
+table.wildewidgets-table {
     margin-top: 5px;
-  }
-  td, th, tbody {
+}
+td, th, tbody {
     border-bottom-color: #eee !important;
-  }
-  table.dataTable.no-footer {
+}
+table.dataTable.no-footer {
     border-bottom: 1px solid #eee;
-  }
-  tbody {
+}
+tbody {
     border-top: 1px solid #eee !important;
-  }
+}
+
+.dataTables_info {
+    padding-left: 15px !important;
+}
+
+button.toggle-vis.btn-outline-secondary:not(.active) {
+    color: #fff;
+    background-color: #6c757d;
+    border-color: #6c757d;
+}

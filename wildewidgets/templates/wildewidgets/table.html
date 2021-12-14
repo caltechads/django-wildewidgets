@@ -1,19 +1,19 @@
 {% load i18n %}
-<div class="dashboard-table-container" style="width: {{options.width}};">
+<div class="dashboard-table-container pt-4 pb-2 bg-white shadow-sm" style="width: {{options.width}};">
   {% if form.is_visible %}
   <form class='form' action='{{form.url}}' method='post'>
   {% endif %}
-  <div class="{{name}}-controls">
+  <div class="{{name}}-controls px-3 border-bottom pb-3">
     {% csrf_token %}
     <div class="d-flex justify-content-between align-items-center">
       {% if not options.hide_controls %}
       <div class='table-control-container'>
           <div class="btn-group controls" role="group" aria-label="Show/Hide Table Controls">
             <a href="#" role="button" class="btn btn-secondary label-btn"  aria-disabled="true">Table Controls</a>
-            <button class="btn btn-outline-secondary" type="button" data-toggle="collapse"
-                    data-target="#{{name}}__columns" aria-expanded="false" aria-controls="#{{name}}__columns">Columns</button>
+            <button class="btn btn-outline-secondary" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#{{name}}__columns" aria-expanded="false" aria-controls="#{{name}}__columns">Columns</button>
             {% if has_filters %}
-              <button class="btn btn-outline-secondary" type="button" data-toggle="collapse" data-target="#{{name}}__filters"
+              <button class="btn btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#{{name}}__filters"
                     aria-expanded="false" aria-controls="#{{name}}__filters">Filter by</button>
             {% endif %}
           </div> <!-- end show/hide table controls -->
@@ -23,8 +23,8 @@
       {% if form.is_visible %}
       <div class='action-form-container'>
           <div class="d-flex align-items-center justify-content-between"> <!-- action select and button -->
-              <label class='mr-2' for='action'>Actions:</label>
-              <select class='form-control mr-2' name='action'>
+              <label class='me-2' for='action'>Actions:</label>
+              <select class='form-control me-2' name='action'>
                   <option value='none'>---</option>
                   {% for action in form.actions %}
                       <option value='{{action.0}}'>{{action.1}}</option>
@@ -36,22 +36,22 @@
       {% endif %}
       
     </div>
-    <div class="d-flex flex-column align-items-start border-left border-secondary mb-5">
-      <div id="{{name}}__columns" class="btn-group ml-3 mt-3 mw-auto toolbar__columns {{name}}__columns collapse" role="group" aria-label="Show/Hide Columns">
+    <div class="d-flex flex-column align-items-start border-left border-secondary">
+      <div id="{{name}}__columns" class="btn-group ms-3 mt-3 mw-auto toolbar__columns {{name}}__columns collapse" role="group" aria-label="Show/Hide Columns">
         <a href="#" role="button" class="btn btn-info label-btn"  aria-disabled="true">Columns</a>
         {% for key,item in header.items %}
-          {% if not forloop.firstx %}
-            <button type="button" data-toggle="button" aria-pressed="true" autocomplete="off" class="toggle-vis btn btn-outline-secondary {{item.visible|yesno:'active,'}}" data-column="{{forloop.counter0}}">{{item.verbose_name}}</button>
+          {% if item.verbose_name.strip %}
+            <button type="button" data-bs-toggle="button" aria-pressed="true" autocomplete="off" class="toggle-vis btn btn-outline-secondary {{item.visible|yesno:'active,'}}" data-column="{{forloop.counter0}}">{{item.verbose_name}}</button>
           {% endif %}
         {% endfor %}
       </div>
-      <div id="{{name}}__filters" class="btn-group ml-3 mt-3 {{name}}__filters collapse" role="group" aria-label="Search Filters">
+      <div id="{{name}}__filters" class="btn-group ms-3 mt-3 {{name}}__filters collapse" role="group" aria-label="Search Filters">
         <a href="#" role="button" class="btn btn-info label-btn"  aria-disabled="true">Filter by</a>
         {% for batch in filters %}
           {% with field_counter=forloop.counter0 filter=batch.1 item=batch.0 %}
             {% if filter %}              
               <div class="btn-group" role="group">
-                <button id="{{item.field}}-group" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" class="btn btn-outline-secondary dropdown-toggle">{{item.verbose_name}}?: <span class="filter-target">Any</span></button>
+                <button id="{{item.field}}-group" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" class="btn btn-outline-secondary dropdown-toggle">{{item.verbose_name}}?: <span class="filter-target">Any</span></button>
                 <div class="dropdown-menu" aria-labelledby="{{item.field}}-group">
                   <h6 class="dropdown-header">Filter by {{item.verbose_name}}?</h6>
                   {% for choice in filter.choices %}
@@ -115,10 +115,10 @@
   }
   $(document).ready(function() {
     var {{name}} = $('.{{name}}').DataTable({
-        dom: '<"d-flex justify-content-between"<"d-flex flex-row"l{{options.buttons|yesno:"B,'',''"}}>f>rtip',
+        dom: '<"d-flex justify-content-between px-3 my-3"<"d-flex flex-row"l{{options.buttons|yesno:"B,'',''"}}>f>rtip',
         {% if options.buttons %}
         buttons: [
-            { extend: 'copy', className: 'btn btn-info btn-sm ml-5' },
+            { extend: 'copy', className: 'btn btn-info btn-sm ms-5' },
             { extend: 'csv', className: 'btn btn-info btn-sm' },
             { extend: 'pdf', className: 'btn btn-info btn-sm' },
             { extend: 'print', className: 'btn btn-info btn-sm' }

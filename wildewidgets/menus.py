@@ -5,16 +5,26 @@ from .wildewidgets import WidgetInitKwargsMixin
 
 
 class BasicMenu(WidgetInitKwargsMixin):
-
     template_file = "wildewidgets/menu.html"
     navbar_classes = "navbar-expand-lg navbar-light"
     container = "container-lg"
+    brand_image = None
+    brand_image_width = "100%"
+    brand_text = None
+    brand_url = "#"
     items = []
 
     def __init__(self, *args, **kwargs):
         self.menu= {}
         self.active = None
         if args:
+            self.active_hierarchy = args[0].split('/') 
+        else:
+            self.active_hierarchy
+
+    def build_menu(self):
+        print("ACTIVE HIERARCHY:",self.active_hierarchy)
+        if len(self.active_hierarchy) > 0:
             for item in self.items:
                 data = {}
                 if type(item[1]) == str:
@@ -31,16 +41,20 @@ class BasicMenu(WidgetInitKwargsMixin):
                             extra = f"?{'&'.join(extra_list)}"
                             data['extra'] = extra
                 elif type(item[1]) == list:
-                    data = self.parse_submemu(item[1])
-
-                self.add_menu_item(item[0], data, item[0] == args[0])
+                    if len(self.active_hierarchy) > 1:
+                        submenu_active = self.active_hierarchy[1]
+                    else:
+                        submenu_active = None
+                    data = self.parse_submemu(item[1], submenu_active)
+                  
+                self.add_menu_item(item[0], data, item[0] == self.active_hierarchy[0])
 
     def add_menu_item(self, title, data, active=False):
         self.menu[title] = data
         if active:
             self.active = title
 
-    def parse_submemu(self, items):
+    def parse_submemu(self, items, submenu_active):
         data = {
             'kind':'submenu'            
         }
@@ -57,7 +71,8 @@ class BasicMenu(WidgetInitKwargsMixin):
                     'title':item[0],
                     'url':reverse_lazy(item[1]),
                     'extra':'',
-                    'divider':False
+                    'divider':False,
+                    'active':item[0] == submenu_active,
                 }
 
             if len(item) > 2:
@@ -68,11 +83,17 @@ class BasicMenu(WidgetInitKwargsMixin):
         return data
 
     def get_content(self, **kwargs):
+        self.build_menu()
         context = {
             'menu':self.menu, 
             'active':self.active,
             'navbar_classes':self.navbar_classes,
             'navbar_container':self.container,
+            'brand_image':self.brand_image,
+            'brand_image_width':self.brand_image_width,
+            'brand_text':self.brand_text,
+            'brand_url':self.brand_url,
+            'vertical':"navbar-vertical" in self.navbar_classes,
         }
         html_template = template.loader.get_template(self.template_file)
         content = html_template.render(context)
@@ -84,6 +105,10 @@ class BasicMenu(WidgetInitKwargsMixin):
 
 class DarkMenu(BasicMenu):
     navbar_classes = "navbar-expand-lg navbar-dark bg-secondary"
+
+
+class VerticalDarkMenu(BasicMenu):
+    navbar_classes = "navbar-vertical navbar-expand-lg navbar-dark"
 
 
 class LightMenu(BasicMenu):

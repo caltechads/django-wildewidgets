@@ -1,12 +1,20 @@
   
-  <nav class="navbar {{navbar_classes}}">
-    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon"></span>
-    </button>
+  <nav class="navbar {{navbar_classes}}" {% if vertical %} style="max-width: fit-content;min-width: 250px;width:auto;"{%endif %}>
+    <div class="{{navbar_container}}" {% if vertical %}style="margin-left:0;"{%endif%}>
+      {% if brand_image %}
+        <a class="navbar-brand" href="{{brand_url}}">
+          <img src="{{brand_image}}" alt="{{brand_text}}" {% if brand_image_width %} width="{{brand_image_width}}"{% endif %}>
+        </a>
+      {% elif brand_text %}
+        <a class="navbar-brand" href="{{brand_url}}">{{brand_text}}</a>
+      {% endif %}
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
 
-    <div class="collapse navbar-collapse" id="navbarSupportedContent">
-      <div class="{{navbar_container}}">
-        <ul class="navbar-nav mr-auto">
+      <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        
+        <ul class="navbar-nav me-auto">
           {% for item,data in menu.items %}
             {% if data.kind == 'item' %}
               <li class="nav-item">
@@ -16,16 +24,17 @@
                   </a>
               </li>
             {% elif data.kind == 'submenu' %}
-              <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle {% if item == active %}active{% endif %}" href="#" id="wildewidget_submenu_{{item|cut:' '}}" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                  {{item}}
-                </a>
-                <div class="dropdown-menu" aria-labelledby="wildewidget_submenu_{{item|cut:' '}}">
+              <li class="nav-item dropdown"> 
+                <a class="nav-link dropdown-toggle {% if item == active %}active{% endif %}" href="#" id="wildewidget_submenu_{{item|cut:' '}}" role="button" data-bs-toggle="dropdown" data-bs-auto-close="false" aria-haspopup="true" aria-expanded="{% if item == active and vertical %}true{% else %}false{% endif %}">
+                  {{item}}&nbsp;&nbsp;&nbsp;
+                </a>                  
+                <!-- <span class="bi-chevron-down ms-2"></span> -->
+                <div class="dropdown-menu {% if item == active and vertical %}show{% endif %}" aria-labelledby="wildewidget_submenu_{{item|cut:' '}}">
                   {% for subitem in data.items %}
                     {% if subitem.divider %}
                       <div class="dropdown-divider"></div>
                     {% else %}
-                      <a class="dropdown-item" href="{{subitem.url}}{{subitem.extra}}">{{subitem.title}}</a>
+                      <a class="dropdown-item {% if subitem.active %}active{% endif %}" href="{{subitem.url}}{{subitem.extra}}">{{subitem.title}}</a>
                     {% endif %}
                   {% endfor %}
                 </div>
@@ -39,5 +48,4 @@
         </ul>
       </div>
     </div>
-
   </nav>

@@ -827,10 +827,10 @@ class DataTable(WidgetInitKwargsMixin, DatatableAJAXView):
                 link_extra = f"onclick='{js_function_name}({row.id});'"
             else:
                 link_extra = ""
-            return f"<a href='{url}' class='btn btn-{color_class} btn-smx mr-3' {link_extra}>{label}</a>"
+            return f"<a href='{url}' class='btn btn-{color_class} btn-smx me-2' {link_extra}>{label}</a>"
         token_input = f'<input type="hidden" name="csrfmiddlewaretoken" value="{self.csrf_token}">'
         id_input = f'<input type="hidden" name="{attr}" value="{row.id}">'
-        button = f'<input type=submit value="{label}" class="btn btn-{color_class} btn-smx mr-3">'
+        button = f'<input type=submit value="{label}" class="btn btn-{color_class} btn-smx me-2">'
         form = f"<form class='form form-inline' action={url} method='post'>{token_input}{id_input}{button}</form>"
         return form
         

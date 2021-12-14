@@ -1,7 +1,7 @@
-<div class="d-flex align-items-center justify-content-between my-5">
-  <div class="{{header_class}}">
+<div class="d-flex align-items-center justify-content-between {{css_class}}">
+  <div class="{{header_class}} d-flex align-items-center">
     {{header_text}} 
-    {% if badge_text %}<span class='badge badge-pill badge-{{badge_class}}'>{{badge_text}}</span>{% endif %}
+    {% if badge_text %}<span class='text-white rounded-pill bg-{{badge_class}} ms-2 px-3'>{{badge_text}}</span>{% endif %}
   </div>
   {% block controls %}
   {% endblock %}  
