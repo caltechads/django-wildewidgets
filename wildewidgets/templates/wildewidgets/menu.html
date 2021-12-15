@@ -25,7 +25,7 @@
               </li>
             {% elif data.kind == 'submenu' %}
               <li class="nav-item dropdown"> 
-                <a class="nav-link dropdown-toggle {% if item == active %}active{% endif %} pe-0" href="#" id="wildewidget_submenu_{{item|cut:' '}}" role="button" data-bs-toggle="dropdown" data-bs-auto-close="false" aria-haspopup="true" aria-expanded="{% if item == active and vertical %}true{% else %}false{% endif %}">
+                <a class="nav-link dropdown-toggle {% if item == active %}active{% endif %} pe-0" href="#" id="wildewidget_submenu_{{item|cut:' '}}" role="button" data-bs-toggle="dropdown" data-bs-auto-close="true" aria-haspopup="true" aria-expanded="{% if item == active and vertical %}true{% else %}false{% endif %}">
                   {{item}}
                 </a>                  
                 <div class="dropdown-menu {% if item == active and vertical %}show{% endif %}" aria-labelledby="wildewidget_submenu_{{item|cut:' '}}">
