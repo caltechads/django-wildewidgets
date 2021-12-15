@@ -1,6 +1,6 @@
   
-  <nav class="navbar {{navbar_classes}}" {% if vertical %} style="max-width: fit-content;min-width: 250px;width:auto;"{%endif %}>
-    <div class="{{navbar_container}}" {% if vertical %}style="margin-left:0;"{%endif%}>
+  <nav class="navbar {{navbar_classes}} mw-100 w-auto">
+    <div class="{{navbar_container}} {% if vertical %}ms-0{%endif%}">
       {% if brand_image %}
         <a class="navbar-brand" href="{{brand_url}}">
           <img src="{{brand_image}}" alt="{{brand_text}}" {% if brand_image_width %} width="{{brand_image_width}}"{% endif %}>
@@ -25,10 +25,9 @@
               </li>
             {% elif data.kind == 'submenu' %}
               <li class="nav-item dropdown"> 
-                <a class="nav-link dropdown-toggle {% if item == active %}active{% endif %}" href="#" id="wildewidget_submenu_{{item|cut:' '}}" role="button" data-bs-toggle="dropdown" data-bs-auto-close="false" aria-haspopup="true" aria-expanded="{% if item == active and vertical %}true{% else %}false{% endif %}">
+                <a class="nav-link dropdown-toggle {% if item == active %}active{% endif %} pe-0" href="#" id="wildewidget_submenu_{{item|cut:' '}}" role="button" data-bs-toggle="dropdown" data-bs-auto-close="false" aria-haspopup="true" aria-expanded="{% if item == active and vertical %}true{% else %}false{% endif %}">
                   {{item}}
                 </a>                  
-                <!-- <span class="bi-chevron-down ms-2"></span> -->
                 <div class="dropdown-menu {% if item == active and vertical %}show{% endif %}" aria-labelledby="wildewidget_submenu_{{item|cut:' '}}">
                   {% for subitem in data.items %}
                     {% if subitem.divider %}
@@ -44,6 +43,11 @@
                 <a class='nav-link' href='#'>{{data.kind}}</a>
               </li>
             {% endif %}
+            <!-- 
+            This is an example of how to do vertical dividers for when i later implement them. 
+            {% if forloop.last %}
+              <li class="nav-item"><a href='#' class="nav-link pe-0"><div class="w-100 border-bottom borderx-light"></div></a></li>
+            {% endif %} -->
           {% endfor %}
         </ul>
       </div>
