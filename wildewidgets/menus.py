@@ -23,7 +23,6 @@ class BasicMenu(WidgetInitKwargsMixin):
             self.active_hierarchy
 
     def build_menu(self):
-        print("ACTIVE HIERARCHY:",self.active_hierarchy)
         if len(self.active_hierarchy) > 0:
             for item in self.items:
                 data = {}

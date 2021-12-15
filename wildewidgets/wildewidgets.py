@@ -78,9 +78,11 @@ class WildewidgetDispatch(WidgetInitKwargsMixin, View):
             configs = apps.get_app_configs()
             for config in configs:
                 check_file = os.path.join(config.path, "wildewidgets.py")
-                if os.path.isfile(check_file):
+                check_dir = os.path.join(config.path, "wildewidgets")
+                if os.path.isfile(check_file) or os.path.isdir(check_dir):
                     module = importlib.import_module(f"{config.name}.wildewidgets")
                     if hasattr(module, wildewidgetclass):
+                        print("Found:", wildewidgetclass)
                         class_ = getattr(module, wildewidgetclass)
                         extra_data = self.get_decoded_extra_data(request)
                         initargs = extra_data.get('args', [])

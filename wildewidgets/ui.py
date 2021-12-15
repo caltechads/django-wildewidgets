@@ -266,6 +266,7 @@ class CardWidget(TemplateWidget):
     def set_header(self, header):
         self.header = header
 
+
 class CodeWidget(TemplateWidget):
     template_name = 'wildewidgets/code_widget.html'
     language = None
