@@ -14,7 +14,7 @@
 
       <div class="collapse navbar-collapse" id="navbarSupportedContent">
         
-        <ul class="navbar-nav me-auto">
+        <ul class="navbar-nav me-1">
           {% for item,data in menu.items %}
             {% if data.kind == 'item' %}
               <li class="nav-item">
@@ -26,7 +26,7 @@
             {% elif data.kind == 'submenu' %}
               <li class="nav-item dropdown"> 
                 <a class="nav-link dropdown-toggle {% if item == active %}active{% endif %}" href="#" id="wildewidget_submenu_{{item|cut:' '}}" role="button" data-bs-toggle="dropdown" data-bs-auto-close="false" aria-haspopup="true" aria-expanded="{% if item == active and vertical %}true{% else %}false{% endif %}">
-                  {{item}}&nbsp;&nbsp;&nbsp;
+                  {{item}}
                 </a>                  
                 <!-- <span class="bi-chevron-down ms-2"></span> -->
                 <div class="dropdown-menu {% if item == active and vertical %}show{% endif %}" aria-labelledby="wildewidget_submenu_{{item|cut:' '}}">
