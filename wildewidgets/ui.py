@@ -51,12 +51,61 @@ class TabbedWidget(TemplateWidget):
         return kwargs
  
 
+class LinkButton(TemplateWidget):
+    template_name = 'wildewidgets/link_button.html'
+    url = None
+    text = None
+    icon = None
+    css_class = None
+    button_class = 'btn btn-default'
+
+    def __init__(self, **kwargs):
+        self.url = kwargs.get('url', self.url)
+        self.text = kwargs.get('text', self.text)
+        self.icon = kwargs.get('icon', self.icon)
+
+    def get_context_data(self, **kwargs):
+        kwargs['url'] = self.url
+        kwargs['text'] = self.text
+        kwargs['icon'] = self.icon
+        kwargs['css_class'] = self.css_class
+        kwargs['button_class'] = self.button_class
+        return kwargs
+
+
+class FormButton(TemplateWidget):
+    template_name = 'wildewidgets/form_button.html'
+    action = None
+    text = None
+    icon = None
+    css_class = None
+    button_class = 'btn btn-default'
+    confirm_text = None
+
+    def __init__(self, **kwargs):
+        self.action = kwargs.get('action', self.action)
+        self.text = kwargs.get('text', self.text)
+        self.icon = kwargs.get('icon', self.icon)
+        self.confirm_text = kwargs.get('confirm_text', self.confirm_text)
+        self.data = kwargs.get('data', {})
+
+    def get_context_data(self, **kwargs):
+        kwargs['action'] = self.action
+        kwargs['text'] = self.text
+        kwargs['icon'] = self.icon
+        kwargs['css_class'] = self.css_class
+        kwargs['button_class'] = self.button_class
+        kwargs['confirm_text'] = self.confirm_text
+        kwargs['data'] = self.data
+        return kwargs
+
+
 class BasicHeader(TemplateWidget):
     template_name = 'wildewidgets/header_with_controls.html'
     header_level = 1
     header_type = 'h'
     header_text = None
-    css_class = "my-4"
+    css_class = "my-3 w-100"
     css_id = None
     badge_text = None
     badge_class = "warning"
@@ -117,6 +166,23 @@ class HeaderWithModalButton(BasicHeader):
         return kwargs
 
 
+class HeaderWithWidget(BasicHeader):
+    template_name = 'wildewidgets/header_with_widget.html'
+
+    def __init__(self, **kwargs):
+        super().__init__()
+        self.widget = kwargs.get('widget', None)
+
+    def set_widget(self, widget):
+        self.widget = widget
+        print(type(widget))
+
+    def get_context_data(self, **kwargs):
+        kwargs = super().get_context_data(**kwargs)
+        kwargs['widget'] = self.widget
+        return kwargs
+
+
 class ModalWidget(TemplateWidget):
     template_name = 'wildewidgets/modal.html'
     modal_id = None
@@ -147,8 +213,10 @@ class CrispyFormModalWidget(ModalWidget):
 
 class WidgetStream(TemplateWidget):
     template_name = 'wildewidgets/widget_stream.html'
+    css_class = None
 
-    def __init__(self):
+    def __init__(self, **kwargs):
+        self.css_class = kwargs.get('css_class', self.css_class)
         self.widgets = []
 
     def add_widget(self, widget, css_class=None):
@@ -157,6 +225,7 @@ class WidgetStream(TemplateWidget):
     def get_context_data(self, **kwargs):
         kwargs = super().get_context_data(**kwargs)
         kwargs['widgets'] = self.widgets
+        kwargs['css_class'] = self.css_class
         return kwargs
 
 
@@ -168,6 +237,14 @@ class CardWidget(TemplateWidget):
     subtitle = None
     widget = None
     widget_css = None
+
+    def __init__(self, **kwargs):
+        self.header = kwargs.get('header', self.header)
+        self.header_text = kwargs.get('header_text', self.header_text)
+        self.title = kwargs.get('title', self.title)
+        self.subtitle = kwargs.get('subtitle', self.subtitle)
+        self.widget = kwargs.get('widget', self.widget)
+        self.widget_css = kwargs.get('widget_css', self.widget_css)
 
     def get_context_data(self, **kwargs):
         kwargs = super().get_context_data(**kwargs)
@@ -186,6 +263,8 @@ class CardWidget(TemplateWidget):
         self.widget = widget
         self.widget_css = css_class
 
+    def add_header(self, header):
+        self.header = header
 
 class CodeWidget(TemplateWidget):
     template_name = 'wildewidgets/code_widget.html'
@@ -223,6 +302,21 @@ class MarkdownWidget(TemplateWidget):
     def get_context_data(self, **kwargs):
         kwargs = super().get_context_data(**kwargs)
         kwargs['text'] = self.text
+        kwargs['css_class'] = self.css_class
+        return kwargs
+
+
+class HTMLWidget(TemplateWidget):
+    template_name = 'wildewidgets/html_widget.html'
+    html = ""
+    css_class = None
+
+    def __init__(self, *args, **kwargs):
+        self.html = kwargs.get('html', self.html)
+
+    def get_context_data(self, **kwargs):
+        kwargs = super().get_context_data(**kwargs)
+        kwargs['html'] = self.html
         kwargs['css_class'] = self.css_class
         return kwargs
 

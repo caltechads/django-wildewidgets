@@ -1,7 +1,9 @@
 {% load wildewidgets %}
 
-{% for widget,css_class in widgets %}
-<div class="wildewidgets_widget {{ css_class }}">
-  {% wildewidgets widget %}
+<div class="wildewidgets_stream_widget {{css_class}}">
+  {% for widget,widget_css_class in widgets %}
+  <div class="wildewidgets_widget {{ widget_css_class }}">
+    {% wildewidgets widget %}
+  </div>
+  {% endfor %}
 </div>
-{% endfor %}
