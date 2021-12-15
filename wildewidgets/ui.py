@@ -259,11 +259,11 @@ class CardWidget(TemplateWidget):
             raise ImproperlyConfigured("You must define a widget.")
         return kwargs
 
-    def add_widget(self, widget, css_class=None):
+    def set_widget(self, widget, css_class=None):
         self.widget = widget
         self.widget_css = css_class
 
-    def add_header(self, header):
+    def set_header(self, header):
         self.header = header
 
 class CodeWidget(TemplateWidget):
