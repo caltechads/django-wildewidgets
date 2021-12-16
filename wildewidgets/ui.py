@@ -105,7 +105,7 @@ class BasicHeader(TemplateWidget):
     header_level = 1
     header_type = 'h'
     header_text = None
-    css_class = "my-3 w-100"
+    css_class = "my-3"
     css_id = None
     badge_text = None
     badge_class = "warning"
