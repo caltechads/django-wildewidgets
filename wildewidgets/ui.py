@@ -110,6 +110,15 @@ class BasicHeader(TemplateWidget):
     badge_text = None
     badge_class = "warning"
 
+    def __init__(self, **kwargs):
+        self.header_level = kwargs.get('header_level', self.header_level)
+        self.header_type = kwargs.get('header_type', self.header_type)
+        self.header_text = kwargs.get('header_text', self.header_text)
+        self.css_class = kwargs.get('css_class', self.css_class)
+        self.css_id = kwargs.get('css_id', self.css_id)
+        self.badge_text = kwargs.get('badge_text', self.badge_text)
+        self.badge_class = kwargs.get('badge_class', self.badge_class)
+
     def get_context_data(self, **kwargs):
         if self.header_type == 'h':
             kwargs['header_class'] = f"h{self.header_level}"
@@ -152,11 +161,37 @@ class HeaderWithFormButton(BasicHeader):
         return kwargs
 
 
+class HeaderWithCollapseButton(BasicHeader):
+    template_name = 'wildewidgets/header_with_collapse_button.html'
+    collapse_id = None
+    button_text = None
+    button_class = "primary"
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.collapse_id = kwargs.get('collapse_id', self.collapse_id)
+        self.button_text = kwargs.get('button_text', self.button_text)
+        self.button_class = kwargs.get('button_class', self.button_class)
+
+    def get_context_data(self, **kwargs):
+        kwargs = super().get_context_data(**kwargs)
+        kwargs['collapse_id'] = self.collapse_id
+        kwargs['button_text'] = self.button_text
+        kwargs['button_class'] = self.button_class
+        return kwargs
+
+
 class HeaderWithModalButton(BasicHeader):
     template_name = 'wildewidgets/header_with_modal_button.html'
     modal_id = None
     button_text = None
     button_class = "primary"
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.modal_id = kwargs.get('modal_id', self.modal_id)
+        self.button_text = kwargs.get('button_text', self.button_text)
+        self.button_class = kwargs.get('button_class', self.button_class)
 
     def get_context_data(self, **kwargs):
         kwargs = super().get_context_data(**kwargs)
@@ -237,6 +272,7 @@ class CardWidget(TemplateWidget):
     subtitle = None
     widget = None
     widget_css = None
+    css_class = None
 
     def __init__(self, **kwargs):
         self.header = kwargs.get('header', self.header)
@@ -254,6 +290,7 @@ class CardWidget(TemplateWidget):
         kwargs['subtitle'] = self.subtitle
         kwargs['widget'] = self.widget
         kwargs['widget_css'] = self.widget_css
+        kwargs['css_class'] = self.css_class
 
         if not self.widget:
             raise ImproperlyConfigured("You must define a widget.")

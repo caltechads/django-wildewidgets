@@ -1,0 +1,7 @@
+{% extends 'wildewidgets/header_with_controls.html' %}
+
+{% block controls %}
+<div class="controls">
+  <button type="button" class="btn btn-{{button_class}}" data-bs-toggle="collapse" data-bs-target="#{{collapse_id}}">{{button_text}}</button>
+</div>  
+{% endblock %}  
