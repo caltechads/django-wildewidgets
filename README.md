@@ -42,6 +42,10 @@ Include the wildewidgets URLconf in your project urls.py like this:
 
 Add the appropriate resources to your template files.
 
+First, add this to your `<head>`:
+
+    <link rel="stylesheet" href="{% static 'wildewidgets/css/wildewidgets.css' %}"> 
+
 For [ChartJS](https://www.chartjs.org/) (regular business type charts), add the corresponding javascript file:
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4/dist/Chart.min.js"></script> 

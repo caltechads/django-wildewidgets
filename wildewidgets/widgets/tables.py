@@ -1,103 +1,39 @@
-from datetime import datetime, date
 from functools import lru_cache
-import json
 import random
 import re
 
 from django import template
 from django.conf import settings
-from django.core.exceptions import ImproperlyConfigured
-from django.core.serializers.json import DjangoJSONEncoder
+from django.core.exceptions import FieldDoesNotExist
 from django.db import models
-from django.http import HttpResponse
-try:
-    from django.utils.encoding import force_unicode as force_text  # Django < 1.5
-except ImportError as e:
-    from django.utils.encoding import force_text  # Django 1.5 / python3
-from django.utils.functional import Promise
-from django.utils.cache import add_never_cache_headers
-from django.urls import reverse, reverse_lazy
-from django.views.generic.base import TemplateView
+from django.urls import reverse_lazy
 from django.db.models import Q
-from django.utils.html import escape, format_html
+from django.utils.html import escape
 
-from .wildewidgets import (
-    JSONDataView,
-    WidgetInitKwargsMixin
-)
+from wildewidgets.views import (JSONResponseView, WidgetInitKwargsMixin)
+
+from .base import Widget
 
 import logging
 logger = logging.getLogger(__name__)
 
 
-class LazyEncoder(DjangoJSONEncoder):
-    """Encodes django's lazy i18n strings
-    """
-    def default(self, obj):
-        if isinstance(obj, Promise):
-            return force_text(obj)
-        return super(LazyEncoder, self).default(obj)
-
-
-class JSONResponseMixin(object):
-    is_clean = False
-
-    def render_to_response(self, context):
-        """ Returns a JSON response containing 'context' as payload
-        """
-        return self.get_json_response(context)
-
-    def get_json_response(self, content, **httpresponse_kwargs):
-        """ Construct an `HttpResponse` object.
-        """
-        response = HttpResponse(content,
-                                content_type='application/json',
-                                **httpresponse_kwargs)
-        add_never_cache_headers(response)
-        return response
-
-    def post(self, *args, **kwargs):
-        return self.get(*args, **kwargs)
-
-    def get(self, request, *args, **kwargs):
-        self.request = request
-        self.csrf_token = self.request.GET.get('csrf_token', None)
-        response = None
-
-        func_val = self.get_context_data(**kwargs)
-        if not self.is_clean:
-            assert isinstance(func_val, dict)
-            response = dict(func_val)
-            if 'error' not in response and 'sError' not in response:
-                response['result'] = 'ok'
-            else:
-                response['result'] = 'error'
-        else:
-            response = func_val
-
-        dump = json.dumps(response, cls=LazyEncoder)
-        return self.render_to_response(dump)
-
-
-class JSONResponseView(JSONResponseMixin, TemplateView):
-    pass
-
-
-class DatatableMixin(object):
-    """ JSON data for datatables
-    """
+class DatatableMixin:
     model = None
+
     columns = []
-    _columns = []  # internal cache for columns definition
+    _columns = []               # internal cache for columns definition
     order_columns = []
-    max_display_length = 100  # max limit of records returned, do not allow to kill our server by huge sets of data
+
+    max_display_length = 100    # max limit of records returned, do not allow to kill our server by huge sets  of data
     pre_camel_case_notation = False  # datatables 1.10 changed query string parameter names
     none_string = ''
-    escape_values = True  # if set to true then values returned by render_column will be escaped
+    escape_values = True        # if set to true then values returned by render_column will be escaped
     columns_data = []
-    is_data_list = True  # determines the type of results. If JavaScript passes data attribute that is not an integer
-                         # then it expects dictionary with specific fields in
-                         # the response, see: https://datatables.net/reference/option/columns.data
+    # is_data_list determines the type of results. If JavaScript passes data attribute that is not an integer, it
+    # expects a dictionary with specific fields in the response, see:
+    # https://datatables.net/reference/option/columns.data
+    is_data_list = True
 
     FILTER_ISTARTSWITH = 'istartswith'
     FILTER_ICONTAINS = 'icontains'
@@ -110,33 +46,38 @@ class DatatableMixin(object):
             return self.request.GET
 
     def get_filter_method(self):
-        """ Returns preferred filter method """
+        """
+        Returns preferred filter method.
+        """
         return self.FILTER_ISTARTSWITH
 
     def initialize(self, *args, **kwargs):
-        """ Determine which version of DataTables is being used - there are differences in parameters sent by
-            DataTables < 1.10.x
+        """
+        Determine which version of DataTables is being used - there are differences in parameters sent by
+        DataTables < 1.10.x
         """
         if 'iSortingCols' in self._querydict:
             self.pre_camel_case_notation = True
 
     def get_order_columns(self):
-        """ Return list of columns used for ordering.
-            By default returns self.order_columns but if these are not defined it tries to get columns
-            from the request using the columns[i][name] attribute. This requires proper client side definition of
-            columns, eg:
-                columns: [
-                    {
-                        name: 'username',
-                        data: 'username',
-                        orderable: true,
-                    },
-                    {
-                        name: 'email',
-                        data: 'email',
-                        orderable: false
-                    }
-                ]
+        """
+        Return list of columns used for ordering.
+
+        By default returns self.order_columns but if these are not defined it tries to get columns from the request
+        using the ``columns[i][name]`` attribute. This requires proper client side definition of columns, eg::
+
+            columns: [
+                {
+                    name: 'username',
+                    data: 'username',
+                    orderable: true,
+                },
+                {
+                    name: 'email',
+                    data: 'email',
+                    orderable: false
+                }
+            ]
         """
         if self.order_columns or self.pre_camel_case_notation:
             return self.order_columns
@@ -163,20 +104,21 @@ class DatatableMixin(object):
         return order_columns
 
     def get_columns(self):
-        """ Returns the list of columns to be returned in the result set.
-            By default returns self.columns but if these are not defined it tries to get columns
-            from the request using the columns[i][data] or columns[i][name] attribute.
-            This requires proper client side definition of
-            columns, eg:
+        """
+        Returns the list of columns to be returned in the result set.
 
-                columns: [
-                    {
-                        data: 'username'
-                    },
-                    {
-                        data: 'email'
-                    }
-                ]
+        By default returns self.columns but if these are not defined it tries to get columns from the request using the
+        ``columns[i][data]`` or columns[i][name] attribute.  This requires proper client side definition of columns,
+        e.g.::
+
+            columns: [
+                {
+                    data: 'username'
+                },
+                {
+                    data: 'email'
+                }
+            ]
         """
         if self.columns or self.pre_camel_case_notation:
             return self.columns
@@ -184,7 +126,7 @@ class DatatableMixin(object):
         columns = []
         for column_def in self.columns_data:
             if self.is_data_list:
-                # if self.is_data_list is true then 'data' atribute is an integer - column index, so we
+                # if self.is_data_list is True then 'data' atribute is an integer - column index, so we
                 # cannot use it as a column name, let's try 'name' attribute instead
                 col_name = column_def['name']
             else:
@@ -199,7 +141,8 @@ class DatatableMixin(object):
 
     @staticmethod
     def _column_value(obj, key):
-        """ Returns the value from a queryset item
+        """
+        Returns the value from a queryset item.
         """
         if isinstance(obj, dict):
             return obj.get(key, None)
@@ -207,7 +150,8 @@ class DatatableMixin(object):
         return getattr(obj, key, None)
 
     def _render_column(self, row, column):
-        """ Renders a column on a row. column can be given in a module notation eg. document.invoice.type
+        """
+        Renders a column on a row. column can be given in a module notation eg. ``document.invoice.type``
         """
         # try to find rightmost object
         obj = row
@@ -232,7 +176,8 @@ class DatatableMixin(object):
         return value
 
     def render_column(self, row, column):
-        """ Renders a column on a row. column can be given in a module notation eg. document.invoice.type
+        """
+        Renders a column on a row. column can be given in a module notation eg. ``document.invoice.type``
         """
         value = self._render_column(row, column)
         # if value and hasattr(row, 'get_absolute_url'):
@@ -240,7 +185,8 @@ class DatatableMixin(object):
         return value
 
     def ordering(self, qs):
-        """ Get parameters from the request and prepare order by clause
+        """
+        Get parameters from the request and prepare order by clause.
         """
 
         # Number of columns that are used in sorting
@@ -290,8 +236,6 @@ class DatatableMixin(object):
         return qs
 
     def paging(self, qs):
-        """ Paging
-        """
         if self.pre_camel_case_notation:
             limit = min(int(self._querydict.get('iDisplayLength', 10)), self.max_display_length)
             start = int(self._querydict.get('iDisplayStart', 0))
@@ -313,7 +257,8 @@ class DatatableMixin(object):
         return self.model.objects.all()
 
     def extract_datatables_column_data(self):
-        """ Helper method to extract columns data from request as passed by Datatables 1.10+
+        """
+        Helper method to extract columns data from request as passed by Datatables 1.10+.
         """
         request_dict = self._querydict
         col_data = []
@@ -321,16 +266,19 @@ class DatatableMixin(object):
             counter = 0
             data_name_key = 'columns[{0}][name]'.format(counter)
             while data_name_key in request_dict:
-                searchable = True if request_dict.get('columns[{0}][searchable]'.format(counter)) == 'true' else False
-                orderable = True if request_dict.get('columns[{0}][orderable]'.format(counter)) == 'true' else False
+                searchable = request_dict.get('columns[{0}][searchable]'.format(counter)) == 'true'
+                orderable = request_dict.get('columns[{0}][orderable]'.format(counter)) == 'true'
 
-                col_data.append({'name': request_dict.get(data_name_key),
-                                 'data': request_dict.get('columns[{0}][data]'.format(counter)),
-                                 'searchable': searchable,
-                                 'orderable': orderable,
-                                 'search.value': request_dict.get('columns[{0}][search][value]'.format(counter)),
-                                 'search.regex': request_dict.get('columns[{0}][search][regex]'.format(counter)),
-                                 })
+                col_data.append(
+                    {
+                        'name': request_dict.get(data_name_key),
+                        'data': request_dict.get('columns[{0}][data]'.format(counter)),
+                        'searchable': searchable,
+                        'orderable': orderable,
+                        'search.value': request_dict.get('columns[{0}][search][value]'.format(counter)),
+                        'search.regex': request_dict.get('columns[{0}][search][regex]'.format(counter))
+                    }
+                )
                 counter += 1
                 data_name_key = 'columns[{0}][name]'.format(counter)
         return col_data
@@ -428,7 +376,7 @@ class DatatableAJAXView(BaseDatatableView):
         Parse the request we got from the DataTables AJAX request (``querydict``) from a list of strings to a more
         useful nested dict.  We'll use this to more readily figure out what we need to be doing.
 
-        A single column's data in the querystring we got from datatables looks like:
+        A single column's data in the querystring we got from datatables looks like::
 
             {
                 'columns[4][data]': 'employee_number',
@@ -439,7 +387,7 @@ class DatatableAJAXView(BaseDatatableView):
                 'columns[4][searchable]': 'true'
             }
 
-        Turn all such data into a dict that looks like:
+        Turn all such data into a dict that looks like::
 
             {
                 'employee_number': {
@@ -644,9 +592,10 @@ class DatatableAJAXView(BaseDatatableView):
             return super().render_column(row, column)
 
 
-class DataTableColumn():
+class DataTableColumn:
 
-    def __init__(self, field, verbose_name=None, searchable=False, sortable=False, align='left', head_align='left', visible=True, wrap=True):
+    def __init__(self, field, verbose_name=None, searchable=False, sortable=False, align='left',
+                 head_align='left', visible=True, wrap=True):
         self.field = field
         if verbose_name:
             self.verbose_name = verbose_name
@@ -660,7 +609,7 @@ class DataTableColumn():
         self.wrap = wrap
 
 
-class DataTableFilter():
+class DataTableFilter:
 
     def __init__(self, header=None):
         self.header = header
@@ -670,8 +619,8 @@ class DataTableFilter():
         self.choices.append((label, value))
 
 
-class DataTableStyler():
-    
+class DataTableStyler:
+
     def __init__(self, is_row, test_cell, cell_value, css_class, target_cell=None):
         self.is_row = is_row
         self.test_cell = test_cell
@@ -682,8 +631,8 @@ class DataTableStyler():
         self.target_index = 0
 
 
-class DataTableForm():
-    
+class DataTableForm:
+
     def __init__(self, table):
         if table.form_actions:
             self.is_visible = True
@@ -691,9 +640,9 @@ class DataTableForm():
             self.is_visible = False
         self.actions = table.form_actions
         self.url = table.form_url
-        
 
-class DataTable(WidgetInitKwargsMixin, DatatableAJAXView):
+
+class DataTable(Widget, WidgetInitKwargsMixin, DatatableAJAXView):
     template_file = 'wildewidgets/table.html'
     actions = False
     form_actions = None
@@ -706,14 +655,14 @@ class DataTable(WidgetInitKwargsMixin, DatatableAJAXView):
         self.options = {
             'width': kwargs.get('width', '100%'),
             'height': kwargs.get('height', None),
-            "title":kwargs.get('title', None),
-            "searchable":kwargs.get('searchable', True),
-            "paging":kwargs.get('paging', True),
-            "page_length":kwargs.get('page_length', None),
-            "small":kwargs.get('small', False),
-            "buttons":kwargs.get('buttons', False),
-            "striped":kwargs.get('striped', False),
-            "hide_controls":self.hide_controls
+            "title": kwargs.get('title', None),
+            "searchable": kwargs.get('searchable', True),
+            "paging": kwargs.get('paging', True),
+            "page_length": kwargs.get('page_length', None),
+            "small": kwargs.get('small', False),
+            "buttons": kwargs.get('buttons', False),
+            "striped": kwargs.get('striped', False),
+            "hide_controls": self.hide_controls
         }
         self.table_id = kwargs.get('table_id', self.table_id)
         self.async_if_empty = kwargs.get('async', True)
@@ -722,8 +671,13 @@ class DataTable(WidgetInitKwargsMixin, DatatableAJAXView):
         self.column_styles = []
         self.data = []
         if self.form_actions:
-            self.column_fields['checkbox'] = DataTableColumn(field='checkbox', verbose_name=' ', searchable=False, sortable=False)
-        
+            self.column_fields['checkbox'] = DataTableColumn(
+                field='checkbox',
+                verbose_name=' ',
+                searchable=False,
+                sortable=False
+            )
+
     def get_order_columnsx(self):
         cols = []
         for field, col in self.column_fields.items():
@@ -731,8 +685,18 @@ class DataTable(WidgetInitKwargsMixin, DatatableAJAXView):
                 cols.append(field)
         return cols
 
-    def add_column(self, field, verbose_name=None, searchable=True, sortable=True, align='left', head_align='left', visible=True, wrap=True):
-        self.column_fields[field] = DataTableColumn(field=field, verbose_name=verbose_name, searchable=searchable, sortable=sortable, align=align, head_align=head_align, visible=visible, wrap=wrap)
+    def add_column(self, field, verbose_name=None, searchable=True, sortable=True, align='left',
+                   head_align='left', visible=True, wrap=True):
+        self.column_fields[field] = DataTableColumn(
+            field=field,
+            verbose_name=verbose_name,
+            searchable=searchable,
+            sortable=sortable,
+            align=align,
+            head_align=head_align,
+            visible=visible,
+            wrap=wrap
+        )
 
     def add_filter(self, field, filter):
         self.column_filters[field] = filter
@@ -741,13 +705,10 @@ class DataTable(WidgetInitKwargsMixin, DatatableAJAXView):
         styler.test_index = list(self.column_fields.keys()).index(styler.test_cell)
         if styler.target_cell:
             styler.target_index = list(self.column_fields.keys()).index(styler.target_cell)
-        self.column_styles.append(styler)        
+        self.column_styles.append(styler)
 
     def build_context(self):
-        context = {
-            'rows':self.data            
-        }
-        return context
+        return {'rows': self.data}
 
     def get_content(self, **kwargs):
         if self.actions:
@@ -763,12 +724,12 @@ class DataTable(WidgetInitKwargsMixin, DatatableAJAXView):
         if self.table_id:
             table_id = self.table_id
         else:
-            table_id = random.randrange(0,1000)
+            table_id = random.randrange(0, 1000)
         template_file = self.template_file
         if self.data or not self.async_if_empty:
             context = self.build_context()
         else:
-            context = {"async":True}
+            context = {"async": True}
         html_template = template.loader.get_template(template_file)
         context['header'] = self.column_fields
         context['filters'] = filters
@@ -796,14 +757,8 @@ class DataTable(WidgetInitKwargsMixin, DatatableAJAXView):
                 row.append('')
         self.data.append(row)
 
-    def get_action_button(self, 
-            row, 
-            label, 
-            url_name, 
-            method='get', 
-            color_class='secondary', 
-            attr='id', 
-            js_function_name=None):
+    def get_action_button(self, row, label, url_name, method='get', color_class='secondary', attr='id',
+                          js_function_name=None):
         if url_name:
             base = reverse_lazy(url_name)
             if method == 'get':
@@ -814,14 +769,8 @@ class DataTable(WidgetInitKwargsMixin, DatatableAJAXView):
             url = "javascript:void(0)"
         return self.get_action_button_with_url(row, label, url, method, color_class, attr, js_function_name)
 
-    def get_action_button_with_url(self, 
-            row, 
-            label, 
-            url, 
-            method='get', 
-            color_class='secondary', 
-            attr='id', 
-            js_function_name=None):
+    def get_action_button_with_url(self, row, label, url, method='get', color_class='secondary', attr='id',
+                                   js_function_name=None):
         if method == 'get':
             if js_function_name:
                 link_extra = f"onclick='{js_function_name}({row.id});'"
@@ -833,11 +782,11 @@ class DataTable(WidgetInitKwargsMixin, DatatableAJAXView):
         button = f'<input type=submit value="{label}" class="btn btn-{color_class} btn-smx me-2">'
         form = f"<form class='form form-inline' action={url} method='post'>{token_input}{id_input}{button}</form>"
         return form
-        
-    def get_conditional_action_buttons(self, row):
-        return ''        
 
-    def render_actions_column(self, row, column):        
+    def get_conditional_action_buttons(self, row):
+        return ''
+
+    def render_actions_column(self, row, column):
         response = "<div class='d-flex flex-row'>"
         if hasattr(row, 'get_absolute_url'):
             url = row.get_absolute_url()
@@ -869,7 +818,7 @@ class DataTable(WidgetInitKwargsMixin, DatatableAJAXView):
         response += self.get_conditional_action_buttons(row)
         response += "</div>"
         return response
-        
+
     def render_checkbox_column(self, row, column):
         return f"<input type='checkbox' name='checkbox' value='{row.id}'>"
 
@@ -894,7 +843,7 @@ class BasicModelTable(DataTable):
             if value:
                 kwargs[field] = value
         super().__init__(*args, **kwargs)
-        
+
         self.model_fields = {}
         self.related_fields = {}
         self.field_names = []
@@ -911,7 +860,7 @@ class BasicModelTable(DataTable):
                 self.load_field(field_name)
 
         for field_name in self.fields:
-            if not field_name in self.model_fields:
+            if field_name not in self.model_fields:
                 field = self.get_related_field(self.model, field_name)
                 if field:
                     self.related_fields[field_name] = field
@@ -929,7 +878,7 @@ class BasicModelTable(DataTable):
         if current_model:
             try:
                 final_field = current_model._meta.get_field(name_fields[-1])
-            except:
+            except FieldDoesNotExist:
                 final_field = None
         else:
             final_field = None
@@ -958,12 +907,12 @@ class BasicModelTable(DataTable):
             if isinstance(field, (models.TextField, models.CharField)):
                 kwargs['align'] = 'left'
             else:
-                kwargs['align'] = 'right'            
+                kwargs['align'] = 'right'
 
     def load_field(self, field_name):
         if field_name in self.model_fields:
             field = self.model_fields[field_name]
-            verbose_name = field.name.replace('_',' ')
+            verbose_name = field.name.replace('_', ' ')
             kwargs = {}
             if field_name in self.verbose_names:
                 kwargs['verbose_name'] = self.verbose_names[field_name]
@@ -978,7 +927,7 @@ class BasicModelTable(DataTable):
             if field_name in self.verbose_names:
                 verbose_name = self.verbose_names[field_name]
             else:
-                verbose_name = field_name.replace('_',' ').replace('__', ' ').capitalize()
+                verbose_name = field_name.replace('_', ' ').replace('__', ' ').capitalize()
             kwargs['verbose_name'] = verbose_name
             self.set_standard_column_attributes(field_name, kwargs)
             self.add_column(field_name, **kwargs)
@@ -991,14 +940,14 @@ class BasicModelTable(DataTable):
         return f"${value}"
 
     def render_bool_type_column(self, value):
-        if value=="True":
+        if value == "True":
             return "<i class='bi-check-lg text-success'><span style='display:none'>True</span></i>"
         return ""
 
     def render_bool_icon_column(self, value, icon_data):
         if len(icon_data) == 0:
             return value
-        if value=="True":
+        if value == "True":
             return f"<i class='bi-{icon_data[0][0]} {icon_data[0][1]}'><span style='display:none'>True</span></i>"
         if len(icon_data) > 1:
             return f"<i class='bi-{icon_data[1][0]} {icon_data[1][1]}'><span style='display:none'>False</span></i>"
@@ -1032,21 +981,9 @@ class BasicModelTable(DataTable):
                     value = getattr(row, column)
                 return getattr(self, attr_name)(value)
         elif isinstance(field, models.DateTimeField):
-            return self.render_datetime_type_column(getattr(row,column))
+            return self.render_datetime_type_column(getattr(row, column))
         elif isinstance(field, models.DateField):
-            return self.render_date_type_column(getattr(row,column))
+            return self.render_date_type_column(getattr(row, column))
         elif column in self.bool_icons:
             return self.render_bool_icon_column(value, self.bool_icons[column])
         return value
-        
-
-class TableView(TemplateView):
-    table_class = None
-
-    def get_context_data(self, **kwargs):
-        if not self.table_class:
-            raise ImproperlyConfigured(
-                "You must set a table_class attribute on {}".format(self.__class__.__name__)
-            )
-        kwargs['table'] = self.table_class()
-        return super().get_context_data(**kwargs)

@@ -1,13 +1,5 @@
 __version__ = "0.12.4"
 
-from .wildewidgets import *
-
-from .tables import *
-
-from .menus import *
-
-from .ui import *
-
-from .apexcharts import *
-
-from .views import *
+from .widgets import *  # noqa: F403,F401
+from .menus import *  # noqa: F403,F401
+from .views import *  # noqa: F403,F401

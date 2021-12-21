@@ -1,0 +1,15 @@
+{% extends 'wildewidgets/block.html' %}
+{% load wildewidgets %}
+
+{% block block_content %}
+<h3 class="{{block_name}}__title font-weight-bold mb-5">{{ title }}</h3>
+<div class="{{block_name}}__list sticky-top">
+{% if actions %}
+    {% wildewidgets actions %}
+{% endif %}
+{% if widget_index %}
+    {% wildewidgets widget_index %}
+{% endif %}
+</div>
+{% endblock %}
+

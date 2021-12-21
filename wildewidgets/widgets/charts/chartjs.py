@@ -1,141 +1,58 @@
-import base64
-from functools import lru_cache
-import importlib
-import json
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 import math
-import os
 import random
-import re
 
 from django import template
-from django.apps import apps
 from django.conf import settings
-from django.core.exceptions import ImproperlyConfigured
-from django.db.models import Q
-from django.http import JsonResponse
-from django.views.generic import View
+
+from wildewidgets.views import WidgetInitKwargsMixin, JSONDataView
+
+from ..base import Widget
 
 
-class JSONDataView(View):
-
-    def get(self, request, *args, **kwargs):
-        context = self.get_context_data()
-        return self.render_to_response(context)
-
-    def get_context_data(self, **kwargs):
-        return {}
-
-    def render_to_response(self, context, **response_kwargs):
-        return JsonResponse(context)
-
-
-class WidgetInitKwargsMixin():
-
-    def __init__(self, *args, **kwargs):
-        super().__init__()
-        self.extra_data = {
-            "args": args,
-            "kwargs": kwargs
-        }
-
-    def get_encoded_extra_data(self):
-        data_json = json.dumps(self.extra_data)
-        payload_bytes = base64.b64encode(data_json.encode())
-        payload = payload_bytes.decode()
-        return payload
-
-    def get_decoded_extra_data(self, request):
-        encoded_extra_data = request.GET.get("extra_data", None)
-        if not encoded_extra_data:
-            return {}
-        extra_bytes = encoded_extra_data.encode()
-        payload_bytes = base64.b64decode(extra_bytes)
-        payload = json.loads(payload_bytes.decode())
-        return payload
-
-    def convert_extra(self, extra_item, first=True):
-        if first:
-            start = '?'
-        else:
-            start = '&'
-        if type(extra_item) == dict:
-            extra_list = []
-            for k,v in extra_item.items():
-                extra_list.append(f"{k}={v}")
-            extra = f"{start}{'&'.join(extra_list)}"
-            return extra
-        return ''
-
-
-class WildewidgetDispatch(WidgetInitKwargsMixin, View):
-
-    def dispatch(self, request, *args, **kwargs):
-        # initkwargs = {}
-
-        wildewidgetclass = request.GET.get('wildewidgetclass', None)
-        csrf_token = request.GET.get('csrf_token', '')
-        if wildewidgetclass:
-            configs = apps.get_app_configs()
-            for config in configs:
-                check_file = os.path.join(config.path, "wildewidgets.py")
-                check_dir = os.path.join(config.path, "wildewidgets")
-                if os.path.isfile(check_file) or os.path.isdir(check_dir):
-                    module = importlib.import_module(f"{config.name}.wildewidgets")
-                    if hasattr(module, wildewidgetclass):
-                        class_ = getattr(module, wildewidgetclass)
-                        extra_data = self.get_decoded_extra_data(request)
-                        initargs = extra_data.get('args', [])
-                        initkwargs = extra_data.get('kwargs', {})
-                        instance = class_(*initargs, **initkwargs)
-                        instance.request = request
-                        instance.csrf_token = csrf_token
-                        instance.args = initargs
-                        instance.kwargs = initkwargs
-                        return instance.dispatch(request, *args, **kwargs)
-
-
-class CategoryChart(WidgetInitKwargsMixin, JSONDataView):
+class CategoryChart(Widget, WidgetInitKwargsMixin, JSONDataView):
 
     COLORS = [
-        (0,59,76),
-        (0,88,80),
-        (100,75,120),
-        (123,48,62),
-        (133,152,148),
-        (157,174,136),
-        (159,146,94),
-        (242,211,131),
-        (30,152,138),
-        (115,169,80)
+        (0, 59, 76),
+        (0, 88, 80),
+        (100, 75, 120),
+        (123, 48, 62),
+        (133, 152, 148),
+        (157, 174, 136),
+        (159, 146, 94),
+        (242, 211, 131),
+        (30, 152, 138),
+        (115, 169, 80)
     ]
 
     GRAYS = [
-        (200,200,200),
-        (229,229,229),
-        (170,169,159),
-        (118,119,123),
-        (97,98,101),
-        (175,175,175),
-        (105,107,115),
+        (200, 200, 200),
+        (229, 229, 229),
+        (170, 169, 159),
+        (118, 119, 123),
+        (97, 98, 101),
+        (175, 175, 175),
+        (105, 107, 115),
     ]
     template_file = 'wildewidgets/categorychart.html'
     legend = False
     legend_position = "top"
     color = True
 
-    def __init__(self, *args, **kwargs):        
+    def __init__(self, *args, **kwargs):
         self.options = {
-            'width': kwargs.get('width', '400px'),
-            'height': kwargs.get('height', '400px'),
-            "title":kwargs.get('title', None),
-            "legend":kwargs.get('legend', self.legend),
-            "legend_position":kwargs.get('legend_position', self.legend_position),
-            "chart_type":kwargs.get('chart_type',None),
-            "histogram":kwargs.get('histogram',False),
-            "max":kwargs.get('max',None),
-            "thousands":kwargs.get('thousands',False),
-            "histogram_max":kwargs.get('histogram_max',None),
-            "url":kwargs.get('url',None)
+            'width':  kwargs.get('width', '400px'),
+            'height':  kwargs.get('height', '400px'),
+            "title": kwargs.get('title', None),
+            "legend": kwargs.get('legend', self.legend),
+            "legend_position": kwargs.get('legend_position', self.legend_position),
+            "chart_type": kwargs.get('chart_type', None),
+            "histogram": kwargs.get('histogram', False),
+            "max": kwargs.get('max', None),
+            "thousands": kwargs.get('thousands', False),
+            "histogram_max": kwargs.get('histogram_max', None),
+            "url": kwargs.get('url', None)
         }
         self.chart_id = kwargs.get('chart_id', None)
         self.categories = None
@@ -173,12 +90,12 @@ class CategoryChart(WidgetInitKwargsMixin, JSONDataView):
         if self.chart_id:
             chart_id = self.chart_id
         else:
-            chart_id = random.randrange(0,1000)                
-        template_file = self.template_file            
+            chart_id = random.randrange(0, 1000)
+        template_file = self.template_file
         if self.datasets:
             context = self.get_context_data()
         else:
-            context = {"async":True}
+            context = {"async": True}
         html_template = template.loader.get_template(template_file)
         context['options'] = self.options
         context['name'] = f"chart_{chart_id}"
@@ -241,7 +158,7 @@ class CategoryChart(WidgetInitKwargsMixin, JSONDataView):
 class DoughnutChart(CategoryChart):
 
     def __init__(self, *args, **kwargs):
-        if not 'chart_type' in kwargs:
+        if 'chart_type' not in kwargs:
             kwargs['chart_type'] = "doughnut"
         super().__init__(*args, **kwargs)
 
@@ -249,8 +166,6 @@ class DoughnutChart(CategoryChart):
         datasets = []
         color_generator = self.get_color_iterator()
         data = self.get_dataset()
-        labels = self.get_categories()
-        num = len(labels)
         dataset = {"data": data}
         dataset["backgroundColor"] = []
         for j in range(len(data)):
@@ -271,9 +186,9 @@ class PieChart(DoughnutChart):
 
 
 class BarChart(CategoryChart):
-    
+
     def __init__(self, *args, **kwargs):
-        if not "chart_type" in kwargs:
+        if "chart_type" not in kwargs:
             kwargs["chart_type"] = "bar"
         super().__init__(*args, **kwargs)
         self.set_option("money", kwargs.get('money', False))
@@ -323,7 +238,7 @@ class BarChart(CategoryChart):
 
 
 class StackedBarChart(BarChart):
-    
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.set_stacked(True)
@@ -347,7 +262,7 @@ class HorizontalStackedBarChart(BarChart):
 class Histogram(BarChart):
 
     def __init__(self, *args, **kwargs):
-        if not "histogram" in kwargs:
+        if "histogram" not in kwargs:
             kwargs["histogram"] = True
         super().__init__(*args, **kwargs)
 
@@ -356,24 +271,24 @@ class Histogram(BarChart):
         num_max = max(data)
 
         num_range = num_max - num_min
-        bin_chunk = num_range/bin_count
+        bin_chunk = num_range / bin_count
         bin_power = math.floor(math.log10(bin_chunk))
-        bin_chunk = math.ceil(bin_chunk/10**bin_power) * 10**bin_power
+        bin_chunk = math.ceil(bin_chunk / 10**bin_power) * 10**bin_power
         if num_min < 0:
-            bin_min = math.ceil(math.fabs(num_min/bin_chunk)) * bin_chunk * -1
+            bin_min = math.ceil(math.fabs(num_min / bin_chunk)) * bin_chunk * -1
         else:
-            bin_min = math.floor(num_min/bin_chunk) * bin_chunk
+            bin_min = math.floor(num_min / bin_chunk) * bin_chunk
         if num_max < 0:
-            bin_max = math.floor(math.fabs(num_max/bin_chunk)) * bin_chunk * -1
+            bin_max = math.floor(math.fabs(num_max / bin_chunk)) * bin_chunk * -1
         else:
-            bin_max = math.ceil(num_max/bin_chunk) * bin_chunk
+            bin_max = math.ceil(num_max / bin_chunk) * bin_chunk
         categories = list(range(bin_min, bin_max + bin_chunk, bin_chunk))
         self.set_option('max', categories[-2])
         self.set_option('histogram_max', categories[-1])
         bins = [0] * bin_count
         for num in data:
-            for i in range(len(categories)-1):
-                if num >= categories[i] and num < categories[i+1]:
+            for i in range(len(categories) - 1):
+                if num >= categories[i] and num < categories[i + 1]:
                     if i < len(bins):
                         bins[i] += 1
         self.set_categories(categories)
@@ -382,58 +297,6 @@ class Histogram(BarChart):
 
 class HorizontalHistogram(Histogram):
 
-    def __init__(self, *args, **kwargs):        
+    def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.set_horizontal(True)
-
-
-class AltairChart(JSONDataView):
-    template_file = 'wildewidgets/altairchart.html'
-    title = None
-    width = "100%"
-    height = "300px"
-
-    def __init__(self, *args, **kwargs):
-        self.data = None
-        self.options = {
-            'width': kwargs.get('width', self.width),
-            'height': kwargs.get('height', self.height),
-            "title":kwargs.get('title', self.title)
-        }
-
-    def get_content(self, **kwargs):
-        chart_id = random.randrange(0,1000)
-        template_file = self.template_file
-        if self.data:
-            context = self.get_context_data()
-        else:
-            context = {"async":True}
-        html_template = template.loader.get_template(template_file)
-        context['options'] = self.options
-        context['name'] = f"altair_chart_{chart_id}"
-        context["wildewidgetclass"] = self.__class__.__name__
-        content = html_template.render(context)
-        return content
-
-    def __str__(self):
-        return self.get_content()
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        self.load()
-        context.update({"data": self.data})
-        return context
-
-    def set_data(self, spec, set_size=True):
-        if set_size:
-            self.data = spec.properties(
-                width="container",
-                height="container"
-            ).to_dict()
-        else:
-            self.data = spec.to_dict()
-
-    def load(self):
-        pass
-
-

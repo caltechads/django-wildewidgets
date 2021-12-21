@@ -1,0 +1,7 @@
+.widget-index {
+  &__item {
+    font-size: 1.8rem;
+    a, a:visited {color: black !important;}
+    a:hover {text-decoration: underline;}
+  }
+}

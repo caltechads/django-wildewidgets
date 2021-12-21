@@ -5,3 +5,4 @@ __pycache__
 .vscode
 *.code-workspace
 docs/_build
+config.codekit3

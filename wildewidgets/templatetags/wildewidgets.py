@@ -1,5 +1,8 @@
 from django import template
 
+from ..widgets import Widget
+
+
 register = template.Library()
 
 
@@ -26,3 +29,8 @@ def do_wildewidget_render(parser, token):
     token = token.split_contents()
     widget = token.pop(1)
     return WildewidgetsNode(widget)
+
+
+@register.filter
+def is_wildewidget(obj):
+    return isinstance(obj, Widget)

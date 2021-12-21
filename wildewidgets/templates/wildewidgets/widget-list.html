@@ -1,0 +1,13 @@
+{% extends 'wildewidgets/block.html' %}
+{% load wildewidgets %}
+
+{% block block_content %}
+<h2 class="mb-5">{{ title }}</h2>
+<div class="row">
+    {% wildewidgets sidebar %}
+    {% wildewidgets main %}
+</div>
+{% for modal in modals %}
+    {% wildewidgets modal %}
+{% endfor %}
+{% endblock %}

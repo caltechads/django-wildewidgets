@@ -1,0 +1,10 @@
+{% extends 'wildewidgets/block.html' %}
+{% load wildewidgets %}
+
+{% block block_content %}
+  {% csrf_token %}
+  {% for name, value in data.items %}
+    <input type="hidden" name="{{name}}" value="{{value}}">
+  {% endfor %}
+  {% wildewidgets button %}
+{% endblock %}

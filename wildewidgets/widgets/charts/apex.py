@@ -1,18 +1,23 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+
 import json
 import random
+from typing import Optional
 
 from django import template
 from django.http import JsonResponse
-from django.views.generic import View
 
-from .wildewidgets import WidgetInitKwargsMixin, JSONDataView
-from .ui import TemplateWidget
+from wildewidgets.views import WidgetInitKwargsMixin
+
+from ..base import Widget
 
 
-class ApexDatasetBase():
-    name = ""
-    type = None
-    
+class ApexDatasetBase(Widget):
+    name: Optional[str] = None
+    chart_type: Optional[str] = None
+
     def __init__(self, **kwargs):
         self.data = []
 
@@ -21,18 +26,17 @@ class ApexDatasetBase():
             'data': self.data
         }
         if self.name:
-            options['name'] = self.name
+            options['name'] = self.name if self.name is not None else ""
         if self.type:
-            options['type'] = self.type
+            options['type'] = self.chart_type
         return options
 
 
-class ApexJSONMixin():
+class ApexJSONMixin:
     """
     A mixin class adding AJAX support to Apex Charts
-
     """
-    template_name = 'wildewidgets/apex_json.html'
+    template_name: str = 'wildewidgets/apex_json.html'
 
     def dispatch(self, request, *args, **kwargs):
         handler = getattr(self, request.method.lower())
@@ -75,7 +79,7 @@ class ApexChartBase(WidgetInitKwargsMixin):
         self.chart_options['series'].append(dataset.get_options())
 
     def add_categories(self, categories):
-        if not 'xaxis' in self.chart_options:
+        if 'xaxis' not in self.chart_options:
             self.chart_options['xaxis'] = {}
         self.chart_options['xaxis']['categories'] = categories
 
@@ -107,11 +111,9 @@ class ApexChartBase(WidgetInitKwargsMixin):
 class ApexSparkline(ApexChartBase):
     width = 65
     stroke_width = 2
-    
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.add_suboption('chart', 'sparkline', {'enabled': True})
         self.add_suboption('chart', 'width', self.width)
         self.add_suboption('stroke', 'width', self.stroke_width)
-
-

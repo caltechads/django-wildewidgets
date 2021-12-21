@@ -1,0 +1,10 @@
+{% extends 'wildewidgets/block.html' %}
+
+{% block block_content %}
+{% for item in entries %}
+<div class="{{block_name}}__item">
+  <i class='bi-{{item.icon}}'></i><a class='pl-3' href="#{{ item.title|slugify }}">{{item.title}}</a>
+</div>
+{% endfor %}
+{% endblock %}
+

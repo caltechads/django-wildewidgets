@@ -1,9 +1,0 @@
-<div class="wildewidgets_button_widget {{css_class}}"
-  <form class="" action="{{action}}" method="post">
-    {% csrf_token %}
-    {% for name, value in data.items %}
-      <input type="hidden" name="{{name}}" value="{{value}}">
-    {% endfor %}
-    <input type="submit" class="{{button_class}}" value={{text}} {% if confirm_text %}onclick="return confirm('{{confirm_text}}'"{% endif %}>
-  </form>
-</div>
