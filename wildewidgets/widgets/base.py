@@ -75,7 +75,7 @@ class Block(TemplateWidget):
     :param data_attributes: Set ``data-`` attributes for the element, defaults to no data attributes
     :type modifier: dict(str, str)
     """
-    template_name: str = "core/widgets/block.html"
+    template_name: str = "wildewidgets/block.html"
 
     # block is the official wildewidgets name of the block; it can't be changed by constructor
     # kwargs

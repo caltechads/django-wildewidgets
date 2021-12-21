@@ -1,19 +1,13 @@
 .widget-index__item {
-  font-size: 1.8rem;
-}
-.widget-index__item a, .widget-index__item a:visited {
-  color: black !important;
-}
-.widget-index__item a:hover {
-  text-decoration: underline;
-}
+  font-size: 1.8rem; }
+  .widget-index__item a, .widget-index__item a:visited {
+    color: black !important; }
+  .widget-index__item a:hover {
+    text-decoration: underline; }
 
 .widget-list__sidebar {
-  font-size: 1.2rem;
-}
-.widget-list__sidebar a, .widget-list__sidebar a:visited {
-  color: #6c757d;
-}
-.widget-list__sidebar a:hover {
-  color: #ffffff;
-}
+  font-size: 1.2rem; }
+  .widget-list__sidebar a, .widget-list__sidebar a:visited {
+    color: #6c757d; }
+  .widget-list__sidebar a:hover {
+    color: #ffffff; }
