@@ -272,8 +272,8 @@ class FormButton(Block):
             'text': kwargs.pop('text', self.text),
             'color': kwargs.pop('color', self.color),
             'css_class': kwargs.pop('button_css_class', self.button_css_class),
-            'attributes': kwargs.pop('button_attributes', self.button_attributes),
-            'data_attributes': kwargs.pop('button_data_attributes', self.button_data_attributes)
+            'attributes': kwargs.pop('button_attributes', copy(self.button_attributes)),
+            'data_attributes': kwargs.pop('button_data_attributes', copy(self.button_data_attributes))
         }
         confirm_text = kwargs.pop('confirm_text', self.confirm_text)
         if confirm_text is not None:
