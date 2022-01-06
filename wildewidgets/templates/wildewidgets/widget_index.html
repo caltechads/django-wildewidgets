@@ -2,8 +2,8 @@
 
 {% block block_content %}
 {% for item in entries %}
-<div class="{{block_name}}__item">
-  <i class='bi-{{item.icon}}'></i><a class='pl-3' href="#{{ item.title|slugify }}">{{item.title}}</a>
+<div class="{{block_name}}__item {% if not forloop.first %}mt-2{% endif %}">
+  <i class='bi-{{item.icon}}'></i><a class='ps-3' href="#{{ item.title|slugify }}">{{item.title}}</a>
 </div>
 {% endfor %}
 {% endblock %}

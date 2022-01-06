@@ -114,7 +114,6 @@ class HeaderWithWidget(BasicHeader):
 
     def set_widget(self, widget):
         self.widget = widget
-        print(type(widget))
 
     def get_context_data(self, **kwargs):
         kwargs = super().get_context_data(**kwargs)
