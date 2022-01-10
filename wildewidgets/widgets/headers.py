@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from .base import TemplateWidget
-
+from .buttons import ModalButton, LinkButton, FormButton
 
 class BasicHeader(TemplateWidget):
     template_name = 'wildewidgets/header_with_controls.html'
@@ -108,9 +108,21 @@ class HeaderWithModalButton(BasicHeader):
 class HeaderWithWidget(BasicHeader):
     template_name = 'wildewidgets/header_with_widget.html'
 
-    def __init__(self, **kwargs):
-        super().__init__()
-        self.widget = kwargs.get('widget', None)
+    def __init__(self, widget=None, **kwargs):
+        super().__init__(**kwargs)
+        self.widget = widget
+
+    def add_form_button(self, **kwargs):
+        widget = FormButton(**kwargs)
+        self.widget = widget
+
+    def add_link_button(self, **kwargs):
+        widget = LinkButton(**kwargs)
+        self.widget = widget
+
+    def add_modal_button(self, **kwargs):
+        widget = ModalButton(**kwargs)
+        self.widget = widget
 
     def set_widget(self, widget):
         self.widget = widget
@@ -119,3 +131,8 @@ class HeaderWithWidget(BasicHeader):
         kwargs = super().get_context_data(**kwargs)
         kwargs['widget'] = self.widget
         return kwargs
+
+
+class PageHeader(HeaderWithWidget):
+    css_class = "my-4"
+

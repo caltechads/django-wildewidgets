@@ -2,5 +2,7 @@
 {% load wildewidgets %}
 
 {% block controls %}
-{% wildewidgets widget %} 
+  {% if widget %}
+    {% wildewidgets widget %} 
+  {% endif %} 
 {% endblock %}  
