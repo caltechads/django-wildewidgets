@@ -46,7 +46,7 @@ class Block(TemplateWidget):
     """
     Render a single HTML element.   Example::
 
-        Block(tag='a', name='foo', modifier='bar', css_class='blah dah', content='Hello World',
+        Block('Hello World', tag='a', name='foo', modifier='bar', css_class='blah dah',
             attributes={'href': 'https://example.com'})
 
     When rendered in the template with the ``wildewdigets`` template tag, this will produce::
@@ -56,6 +56,8 @@ class Block(TemplateWidget):
     All the constructor parameters can be set in a subclass of this class as class attributes.  Parameters
     to the constructor override any defined class attributes.
 
+    :param *args: any content to be rendered in the block, including other blocks.
+    :type *args: list of strings or other blocks
     :param tag: the name of the element to use, defaults to 'div'
     :type tag: str
     :param name: This CSS class will be added to the classes to identify this element, defaults to 'block'
@@ -91,17 +93,17 @@ class Block(TemplateWidget):
     data_attributes: Dict[str, str] = {}
     aria_attributes: Dict[str, str] = {}
 
-    def __init__(self, tag=None, name=None, modifier=None, css_class=None, css_id=None,
-                 content=None, attributes=None, data_attributes=None, aria_attributes=None):
+    def __init__(self, *args, tag=None, name=None, modifier=None, css_class=None, css_id=None,
+                 attributes=None, data_attributes=None, aria_attributes=None):
         self._name = name if name is not None else copy(self.name)
         self._modifier = modifier if modifier is not None else self.modifier
         self._css_class = css_class if css_class is not None else self.css_class
         self._css_id = css_id if css_id is not None else self.css_id
         self._tag = tag if tag is not None else self.tag
-        self._content = content if content is not None else self.content
         self._attributes = attributes if attributes is not None else copy(self.attributes)
         self._data_attributes = data_attributes if data_attributes is not None else copy(self.data_attributes)
         self._aria_attributes = aria_attributes if aria_attributes is not None else copy(self.aria_attributes)
+        self.args = args
 
     def get_context_data(self, **kwargs) -> Dict[str, Any]:
         context = super().get_context_data(**kwargs)
@@ -117,7 +119,7 @@ class Block(TemplateWidget):
         context['name'] = name
         context['css_classes'] = ' '.join([name, modifier, block, css_class]).strip()
         context['css_id'] = self._css_id
-        context['content'] = self._content if self._content is not None else ''
+        context['blocks'] = self.args
         context['attributes'] = self._attributes
         context['data_attributes'] = self._data_attributes
         context['aria_attributes'] = self._aria_attributes
@@ -138,8 +140,7 @@ class WidgetStream(Block):
         return len(self._widgets) == 0
 
     def add_widget(self, widget, **kwargs):
-        kwargs['content'] = widget
-        wrapper = Block(**kwargs)
+        wrapper = Block(widget, **kwargs)
         wrapper.block = f"{self.block}__widget"
         self._widgets.append(wrapper)
 

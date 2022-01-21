@@ -181,6 +181,11 @@ class WidgetListMainWidget(Block):
 
 class WidgetListLayout(Block):
     """
+    Extend `Block`. This class provides a two column layout. The first column
+    is the sidebar containing links to the various widgets in the right column, 
+    and the second column is the main content, consisting of the contained 
+    widgets vertically stacked.
+
     Example 1:
 
         layout = WidgetListLayout('My Page')
@@ -194,6 +199,14 @@ class WidgetListLayout(Block):
     sidebar_title: str = 'Actions'
 
     def __init__(self, title: str, **kwargs):
+        """
+        Extend `Block.__init()`.
+
+        Parameters
+        ----------
+        title : str
+            The title of the widget.
+        """
         sidebar_title = kwargs.pop('sidebar_title', self.sidebar_title)
         super().__init__(**kwargs)
         self.title = title
