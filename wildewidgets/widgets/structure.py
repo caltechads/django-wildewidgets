@@ -80,7 +80,7 @@ class PagedModelWidget(Block):
     paginate_by = None
     queryset = None
     max_page_controls = 5
-    css_class = "wildewidgets-paged-model-widget p-3 bg-white shadow-sm"
+    css_class = "wildewidgets-paged-model-widget bg-white"
 
     def __init__(self, *args, **kwargs): #model=None, model_widget=None, ordering=None, page_kwarg=None, paginate_by=None, queryset=None, extra_url={}, **kwargs):
         self.model = kwargs.pop('model', self.model)
@@ -167,3 +167,17 @@ class PagedModelWidget(Block):
                 ordering = (ordering,)
             queryset = queryset.order_by(*ordering)
         return queryset
+
+
+class CrispyFormWidget(Block):
+    template_name = 'wildewidgets/crispy_form_widget.html'
+    css_class = "wildewidgets-crispy-form-widget"
+
+    def __init__(self, *args, form=None, **kwargs): 
+        super().__init__(*args, **kwargs)    
+        self.form = form
+
+    def get_context_data(self, **kwargs):
+        kwargs = super().get_context_data(**kwargs)
+        kwargs['form'] = self.form
+        return kwargs
