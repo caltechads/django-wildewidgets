@@ -56,8 +56,8 @@ class Block(TemplateWidget):
     All the constructor parameters can be set in a subclass of this class as class attributes.  Parameters
     to the constructor override any defined class attributes.
 
-    :param *args: any content to be rendered in the block, including other blocks.
-    :type *args: list of strings or other blocks
+    :param *blocks: any content to be rendered in the block, including other blocks.
+    :type *blocks: list of strings or other blocks
     :param tag: the name of the element to use, defaults to 'div'
     :type tag: str
     :param name: This CSS class will be added to the classes to identify this element, defaults to 'block'
@@ -93,7 +93,7 @@ class Block(TemplateWidget):
     data_attributes: Dict[str, str] = {}
     aria_attributes: Dict[str, str] = {}
 
-    def __init__(self, *args, tag=None, name=None, modifier=None, css_class=None, css_id=None,
+    def __init__(self, *blocks, tag=None, name=None, modifier=None, css_class=None, css_id=None,
                  attributes=None, data_attributes=None, aria_attributes=None):
         self._name = name if name is not None else copy(self.name)
         self._modifier = modifier if modifier is not None else self.modifier
@@ -103,7 +103,7 @@ class Block(TemplateWidget):
         self._attributes = attributes if attributes is not None else copy(self.attributes)
         self._data_attributes = data_attributes if data_attributes is not None else copy(self.data_attributes)
         self._aria_attributes = aria_attributes if aria_attributes is not None else copy(self.aria_attributes)
-        self.args = args
+        self.blocks = blocks
 
     def get_context_data(self, **kwargs) -> Dict[str, Any]:
         context = super().get_context_data(**kwargs)
@@ -119,7 +119,7 @@ class Block(TemplateWidget):
         context['name'] = name
         context['css_classes'] = ' '.join([name, modifier, block, css_class]).strip()
         context['css_id'] = self._css_id
-        context['blocks'] = self.args
+        context['blocks'] = self.blocks
         context['attributes'] = self._attributes
         context['data_attributes'] = self._data_attributes
         context['aria_attributes'] = self._aria_attributes
