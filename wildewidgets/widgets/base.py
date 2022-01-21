@@ -89,9 +89,10 @@ class Block(TemplateWidget):
     content: Optional[Union[str, Widget]] = None
     attributes: Dict[str, str] = {}
     data_attributes: Dict[str, str] = {}
+    aria_attributes: Dict[str, str] = {}
 
     def __init__(self, tag=None, name=None, modifier=None, css_class=None, css_id=None,
-                 content=None, attributes=None, data_attributes=None):
+                 content=None, attributes=None, data_attributes=None, aria_attributes=None):
         self._name = name if name is not None else copy(self.name)
         self._modifier = modifier if modifier is not None else self.modifier
         self._css_class = css_class if css_class is not None else self.css_class
@@ -100,6 +101,7 @@ class Block(TemplateWidget):
         self._content = content if content is not None else self.content
         self._attributes = attributes if attributes is not None else copy(self.attributes)
         self._data_attributes = data_attributes if data_attributes is not None else copy(self.data_attributes)
+        self._aria_attributes = aria_attributes if aria_attributes is not None else copy(self.aria_attributes)
 
     def get_context_data(self, **kwargs) -> Dict[str, Any]:
         context = super().get_context_data(**kwargs)
@@ -118,6 +120,7 @@ class Block(TemplateWidget):
         context['content'] = self._content if self._content is not None else ''
         context['attributes'] = self._attributes
         context['data_attributes'] = self._data_attributes
+        context['aria_attributes'] = self._aria_attributes
         return context
 
 

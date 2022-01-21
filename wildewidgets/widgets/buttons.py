@@ -105,6 +105,55 @@ class ModalButton(Button):
         self._data_attributes['target'] = target if target is not None else self.target
 
 
+class CollapseButton(Button):
+    """
+    Render a ``<button>`` with Bootstrap styling which toggles a Bootstrap modal.  Example::
+
+        from wildwidgets import ModalButton
+
+        ModalButton(text="My Button", target='#mymodal')
+
+    When rendered in the template with the ``wildewdigets`` template tag, this will produce::
+
+        <button type="button" class="button button--modal btn btn-secondary" data-toggle="modal"
+          data-target="#mymodal">My Button</button>
+
+    All the constructor parameters can be set in a subclass of this class as class attributes.  Parameters
+    to the constructor override any defined class attributes.
+
+    :param text: The text to use for the button, defaults to 'Button'
+    :type text: str
+    :param color: The Boostrap color class to use for the button, defaults to 'secondary'
+    :type color: str
+    :param target: The CSS target for the Bootstrap modal, defaults to no target.
+    :type target: str
+    :param name: This CSS class will be added to the classes to identify this button, defaults to 'block'
+    :type tag: str
+    :param modifier: If specified, also add a class named ``{name}--{modifier}`` to the CSS classes, defaults
+        to no modifier
+    :type modifier: str
+    :param css_class: a string of classes to apply to the button, defaults to no classes.
+    :type css_class: str
+    :param css_id: Use this as the ``id`` attribute for the button, defaults to no ``id``
+    :type css_id: str
+    :param attributes: Set any additional attributes for the button as key, value pairs, defaults to no additional
+        attributes.
+    :type attributes: dict(str, str)
+    :param data_attributes: Set ``data-`` attributes for the button, defaults to no data attributes
+    :type data_attributes: dict(str, str)
+    """
+    block: str = 'button button--collapse'
+    target: Optional[str] = None
+
+    def __init__(self, **kwargs):
+        target = kwargs.pop('target', self.target)
+        super().__init__(**kwargs)
+        self._data_attributes['toggle'] = 'collapse'
+        self._data_attributes['target'] = target
+        self._aria_attributes['expanded'] = 'false'
+        self._aria_attributes['controls'] = target.lstrip("#")
+
+
 class LinkButton(Button):
     """
     Render an ``<a>`` with Bootstrap button styling which toggles a Bootstrap modal.  Example::

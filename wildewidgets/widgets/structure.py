@@ -1,8 +1,14 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import random
+from urllib.parse import urlencode
 
-from .base import TemplateWidget
+from django.core.exceptions import ImproperlyConfigured
+from django.core.paginator import InvalidPage, Paginator
+from django.db.models import QuerySet
+from django.http import Http404
+
+from .base import TemplateWidget, Block
 
 from django.core.exceptions import ImproperlyConfigured
 
@@ -63,3 +69,101 @@ class CardWidget(TemplateWidget):
 
     def set_header(self, header):
         self.header = header
+
+
+class PagedModelWidget(Block):
+    template_name = 'wildewidgets/paged_model_widget.html'
+    model = None
+    model_widget = None
+    ordering = None
+    page_kwarg = 'page'
+    paginate_by = None
+    queryset = None
+    max_page_controls = 5
+    css_class = "wildewidgets-paged-model-widget p-3 bg-white shadow-sm"
+
+    def __init__(self, *args, **kwargs): #model=None, model_widget=None, ordering=None, page_kwarg=None, paginate_by=None, queryset=None, extra_url={}, **kwargs):
+        self.model = kwargs.pop('model', self.model)
+        self.model_widget = kwargs.pop('model_widget', self.model_widget)
+        self.ordering = kwargs.pop('ordering', self.ordering)
+        self.page_kwarg = kwargs.pop('page_kwarg', self.page_kwarg)
+        self.paginate_by = kwargs.pop('paginate_by', self.paginate_by)
+        self.queryset = kwargs.pop('queryset', self.queryset)
+        self.extra_url = kwargs.pop('extra_url', {})
+        super().__init__(*args, **kwargs)
+
+    def get_model_widgets(self, object_list):
+        widgets = []
+        for object in object_list:
+            widgets.append(self.model_widget(object=object))
+        return widgets
+
+
+    def get_context_data(self, **kwargs):
+        kwargs = super().get_context_data(**kwargs)
+        self.request = kwargs.get('request')
+        if self.paginate_by:
+            paginator = Paginator(self.get_queryset(), self.paginate_by)
+            page_number = self.request.GET.get(self.page_kwarg)
+            try:
+                page_number = int(page_number)
+            except (TypeError, ValueError):
+                page_number = 1
+            try:
+                page = paginator.page(page_number)
+                kwargs['widget_list'] = self.get_model_widgets(page.object_list)
+                kwargs['page_obj'] = page
+                kwargs['is_paginated'] = page.has_other_pages()
+                kwargs['paginator'] = paginator
+                pages = kwargs['page_obj'].paginator.num_pages
+                if pages > self.max_page_controls:
+                    pages = self.max_page_controls
+                page_number = page.number
+                max_controls_half = int(self.max_page_controls / 2)
+                range_start = 1 if page_number - max_controls_half < 1 else page_number - max_controls_half
+                kwargs['page_range'] = range(range_start, range_start+pages)                
+            except InvalidPage as e:
+                raise Http404(
+                    'Invalid page (%(page_number)s): %(message)s' % {
+                        'page_number': page_number,
+                        'message': str(e)
+                    }
+                )
+        else:
+            kwargs['widget_list'] = self.get_model_widgets(self.get_queryset().all())
+        if self.extra_url:
+            anchor = self.extra_url.pop("#", None)
+            extra_url = f"&{urlencode(self.extra_url)}"
+            if anchor:
+                extra_url = f"{extra_url}#{anchor}"
+            kwargs['extra_url'] = extra_url
+        else:
+            kwargs['extra_url'] = ''
+        return kwargs
+
+    def get_queryset(self):
+        """
+        Return the list of items for this widget.
+        The return value must be an iterable and may be an instance of
+        `QuerySet` in which case `QuerySet` specific behavior will be enabled.
+        """
+        if self.queryset is not None:
+            queryset = self.queryset
+            if isinstance(queryset, QuerySet):
+                queryset = queryset.all()
+        elif self.model is not None:
+            queryset = self.model._default_manager.all()
+        else:
+            raise ImproperlyConfigured(
+                "%(cls)s is missing a QuerySet. Define "
+                "%(cls)s.model, %(cls)s.queryset, or override "
+                "%(cls)s.get_queryset()." % {
+                    'cls': self.__class__.__name__
+                }
+            )
+        ordering = self.ordering
+        if ordering:
+            if isinstance(ordering, str):
+                ordering = (ordering,)
+            queryset = queryset.order_by(*ordering)
+        return queryset

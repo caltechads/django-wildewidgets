@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from .base import TemplateWidget
-from .buttons import ModalButton, LinkButton, FormButton
+from .buttons import ModalButton, CollapseButton, LinkButton, FormButton
 
 class BasicHeader(TemplateWidget):
     template_name = 'wildewidgets/header_with_controls.html'
@@ -124,6 +124,10 @@ class HeaderWithWidget(BasicHeader):
         widget = ModalButton(**kwargs)
         self.widget = widget
 
+    def add_collapse_button(self, **kwargs):
+        widget = CollapseButton(**kwargs)
+        self.widget = widget
+
     def set_widget(self, widget):
         self.widget = widget
 
@@ -136,3 +140,7 @@ class HeaderWithWidget(BasicHeader):
 class PageHeader(HeaderWithWidget):
     css_class = "my-4"
 
+
+class CardHeader(HeaderWithWidget):
+    css_class = "my-3"
+    header_level = 2

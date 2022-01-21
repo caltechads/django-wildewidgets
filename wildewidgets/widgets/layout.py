@@ -151,7 +151,7 @@ class WidgetListMainWidget(Block):
     template_name: str = 'wildewidgets/widget-list--main.html'
     block: str = "widget-list__main"
     css_class: Optional[str] = 'col-9'
-    entry_css_class: Optional[str] = 'shadow'
+    entry_css_class: Optional[str] = 'shadow bg-white'
     entry_title_css_class: Optional[str] = 'font-weight-bold'
     entries: List[WidgetIndexItem] = []
 
