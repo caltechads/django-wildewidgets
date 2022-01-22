@@ -42,11 +42,11 @@ class CodeWidget(TemplateWidget):
 class MarkdownWidget(TemplateWidget):
     template_name = 'wildewidgets/markdown_widget.html'
     text = ""
-    css_class = None
+    css_class = ""
 
     def __init__(self, *args, **kwargs):
-        if 'text' in kwargs:
-            self.text = kwargs['text']
+        self.text = kwargs.get("text", self.text)
+        self.css_class = kwargs.get("css_class", self.css_class)
 
     def get_context_data(self, **kwargs):
         kwargs = super().get_context_data(**kwargs)

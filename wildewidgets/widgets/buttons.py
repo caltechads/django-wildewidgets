@@ -49,7 +49,7 @@ class Button(Block):
     def __init__(self, **kwargs):
         color = kwargs.pop('color', self.color)
         text = kwargs.pop('text', self.text)
-        super().__init__(**kwargs)
+        super().__init__(text, **kwargs)
         self._content = text
         self._attributes['type'] = 'button'
         if self._css_class:

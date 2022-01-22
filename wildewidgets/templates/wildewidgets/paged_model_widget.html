@@ -10,11 +10,11 @@
 {% if is_paginated %}
   <ul class="pagination justify-content-center">
     <li class="page-item {% if not page_obj.has_previous %}disabled{% endif %}">
-      <a class="page-link" href="?page=1{{extra_url}}">First</a>
+      <a class="page-link" href="?{{page_kwarg}}=1{{extra_url}}">First</a>
     </li>
     {% if page_obj.has_previous %}
     <li class="page-item ">
-      <a class="page-link" href="?page={{ page_obj.previous_page_number }}{{extra_url}}">Previous</a>
+      <a class="page-link" href="?{{page_kwarg}}={{ page_obj.previous_page_number }}{{extra_url}}">Previous</a>
     </li>
     {% else %}
     <li class="page-item disabled">
@@ -23,7 +23,7 @@
     {% endif %}
     {% for i in page_range %}
       <li class="page-item {% if page_obj.number == i %}active{% endif %}">
-        <a class="page-link" href="?page={{ i }}{{extra_url}}">
+        <a class="page-link" href="?{{page_kwarg}}={{ i }}{{extra_url}}">
           <span {% if page_obj.number == i %}class='font-weight-bold'{% endif %}>{{i}}</span>
         </a>
       </li>        
@@ -31,7 +31,7 @@
 
     {% if page_obj.has_next %}
     <li class="page-item ">
-      <a class="page-link" href="?page={{ page_obj.next_page_number }}{{extra_url}}">Next</a>
+      <a class="page-link" href="?{{page_kwarg}}={{ page_obj.next_page_number }}{{extra_url}}">Next</a>
     </li>
     {% else %}
     <li class="page-item disabled">
@@ -39,7 +39,7 @@
     </li>
     {% endif %}
     <li class="page-item {% if not page_obj.has_next %}disabled{% endif %}">
-      <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{{extra_url}}">Last</a>
+      <a class="page-link" href="?{{page_kwarg}}={{ page_obj.paginator.num_pages }}{{extra_url}}">Last</a>
     </li>    
   </ul>
 {% endif %}

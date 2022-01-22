@@ -115,6 +115,7 @@ class PagedModelWidget(Block):
                 kwargs['page_obj'] = page
                 kwargs['is_paginated'] = page.has_other_pages()
                 kwargs['paginator'] = paginator
+                kwargs['page_kwarg'] = self.page_kwarg
                 pages = kwargs['page_obj'].paginator.num_pages
                 if pages > self.max_page_controls:
                     pages = self.max_page_controls
