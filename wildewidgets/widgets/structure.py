@@ -182,3 +182,16 @@ class CrispyFormWidget(Block):
         kwargs = super().get_context_data(**kwargs)
         kwargs['form'] = self.form
         return kwargs
+
+
+class HorizontalLayoutBlock(Block):
+    align="center"
+    justify="between"
+
+    def __init__(self, *blocks, **kwargs):
+        align = kwargs.pop("align", self.align)
+        justify = kwargs.pop("justify", self.justify)
+        css_class = kwargs.get("css_class", "")
+        css_class += f" d-flex align-items-{align} justify-content-{justify}"
+        kwargs["css_class"] = css_class
+        super().__init__(*blocks, **kwargs)

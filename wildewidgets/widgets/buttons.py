@@ -334,3 +334,12 @@ class FormButton(Block):
         context['button'] = self.button
         context['data'] = self.data
         return context
+
+
+class ButtonRow(Block):
+
+    def __init__(self, *blocks, **kwargs):
+        css_class = kwargs.get("css_class", "")
+        css_class += " d-flex justify-content-end"
+        kwargs["css_class"] = css_class
+        super().__init__(*blocks, **kwargs)

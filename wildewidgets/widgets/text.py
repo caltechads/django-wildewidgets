@@ -12,7 +12,7 @@ except ModuleNotFoundError:
 
 from django.core.exceptions import ImproperlyConfigured
 
-from .base import TemplateWidget
+from .base import TemplateWidget, Block
 
 
 class CodeWidget(TemplateWidget):
@@ -68,3 +68,28 @@ class HTMLWidget(TemplateWidget):
         kwargs['html'] = self.html
         kwargs['css_class'] = self.css_class
         return kwargs
+
+
+class StringBlock(Block):
+
+    def __init__(self, text: str, **kwargs):
+        super().__init__(*[text], **kwargs)
+
+
+class TimeStamp(StringBlock):
+    tag="small"
+    css_class="text-muted"
+
+
+class LabelBlock(StringBlock):
+    css_class="font-weight-bold"
+
+
+class TagBlock(StringBlock):
+
+    def __init__(self, text: str, color="secondary", **kwargs):
+        css_class = kwargs.get("css_class", "")
+        css_class = f"{css_class} badge bg-{color}"
+        kwargs["css_class"] = css_class
+        super().__init__(text, **kwargs)
+
