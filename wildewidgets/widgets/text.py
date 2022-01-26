@@ -87,9 +87,9 @@ class LabelBlock(StringBlock):
 
 class TagBlock(StringBlock):
 
-    def __init__(self, text: str, color="secondary", **kwargs):
+    def __init__(self, text: str, color: str = "secondary", **kwargs):
         css_class = kwargs.get("css_class", "")
-        css_class = f"{css_class} badge bg-{color}"
-        kwargs["css_class"] = css_class
+        css_class += f" badge bg-{color}"
+        kwargs["css_class"] = css_class.strip()
         super().__init__(text, **kwargs)
 
