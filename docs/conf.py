@@ -23,7 +23,7 @@ copyright = '2021, Glenn Bach'
 author = 'Glenn Bach'
 
 # The full version, including alpha/beta/rc tags
-release = '0.13.1'
+release = '0.13.2'
 
 
 # -- General configuration ---------------------------------------------------
