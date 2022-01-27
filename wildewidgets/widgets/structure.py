@@ -80,7 +80,7 @@ class PagedModelWidget(Block):
     paginate_by = None
     queryset = None
     max_page_controls = 5
-    css_class = "wildewidgets-paged-model-widget bg-white shadow-sm"
+    css_class = "wildewidgets-paged-model-widget "
 
     def __init__(self, *args, **kwargs): #model=None, model_widget=None, ordering=None, page_kwarg=None, paginate_by=None, queryset=None, extra_url={}, **kwargs):
         self.model = kwargs.pop('model', self.model)
