@@ -9,6 +9,8 @@ from django.db.models import QuerySet
 from django.http import Http404
 
 from .base import TemplateWidget, Block
+from .text import HTMLWidget, StringBlock
+from .buttons import FormButton
 
 from django.core.exceptions import ImproperlyConfigured
 
@@ -71,33 +73,75 @@ class CardWidget(TemplateWidget):
         self.header = header
 
 
-class PagedModelWidget(Block):
-    template_name = 'wildewidgets/paged_model_widget.html'
+class MultipleModelWidget(Block):
     model = None
     model_widget = None
     ordering = None
-    page_kwarg = 'page'
-    paginate_by = None
     queryset = None
-    max_page_controls = 5
-    css_class = "wildewidgets-paged-model-widget "
 
-    def __init__(self, *args, **kwargs): #model=None, model_widget=None, ordering=None, page_kwarg=None, paginate_by=None, queryset=None, extra_url={}, **kwargs):
-        self.model = kwargs.pop('model', self.model)
+    def __init__(self, *args, **kwargs):
+        self.model = kwargs.pop('model', self.model)        
         self.model_widget = kwargs.pop('model_widget', self.model_widget)
         self.ordering = kwargs.pop('ordering', self.ordering)
-        self.page_kwarg = kwargs.pop('page_kwarg', self.page_kwarg)
-        self.paginate_by = kwargs.pop('paginate_by', self.paginate_by)
         self.queryset = kwargs.pop('queryset', self.queryset)
-        self.extra_url = kwargs.pop('extra_url', {})
         super().__init__(*args, **kwargs)
+
+    def get_model_widget(self, object=object):
+        if self.model_widget:
+            return self.model_widget(object=object)
+        else:
+            raise ImproperlyConfigured(
+                "%(cls)s is missing a model widget. Define "
+                "%(cls)s.model_widget or override "
+                "%(cls)s.get_model_widget()." % {'cls': self.__class__.__name__}
+            )
 
     def get_model_widgets(self, object_list):
         widgets = []
         for object in object_list:
-            widgets.append(self.model_widget(object=object))
+            widgets.append(self.get_model_widget(object=object))
         return widgets
 
+    def get_queryset(self):
+        """
+        Return the list of items for this widget.
+        The return value must be an iterable and may be an instance of
+        `QuerySet` in which case `QuerySet` specific behavior will be enabled.
+        """
+        if self.queryset is not None:
+            queryset = self.queryset
+            if isinstance(queryset, QuerySet):
+                queryset = queryset.all()
+        elif self.model is not None:
+            queryset = self.model._default_manager.all()
+        else:
+            raise ImproperlyConfigured(
+                "%(cls)s is missing a QuerySet. Define "
+                "%(cls)s.model, %(cls)s.queryset, or override "
+                "%(cls)s.get_queryset()." % {
+                    'cls': self.__class__.__name__
+                }
+            )
+        ordering = self.ordering
+        if ordering:
+            if isinstance(ordering, str):
+                ordering = (ordering,)
+            queryset = queryset.order_by(*ordering)
+        return queryset
+
+
+class PagedModelWidget(MultipleModelWidget):
+    template_name = 'wildewidgets/paged_model_widget.html'    
+    page_kwarg = 'page'
+    paginate_by = None
+    max_page_controls = 5
+    css_class = "wildewidgets-paged-model-widget "
+
+    def __init__(self, *args, **kwargs):
+        self.page_kwarg = kwargs.pop('page_kwarg', self.page_kwarg)
+        self.paginate_by = kwargs.pop('paginate_by', self.paginate_by)
+        self.extra_url = kwargs.pop('extra_url', {})
+        super().__init__(*args, **kwargs)
 
     def get_context_data(self, **kwargs):
         kwargs = super().get_context_data(**kwargs)
@@ -142,33 +186,6 @@ class PagedModelWidget(Block):
             kwargs['extra_url'] = ''
         return kwargs
 
-    def get_queryset(self):
-        """
-        Return the list of items for this widget.
-        The return value must be an iterable and may be an instance of
-        `QuerySet` in which case `QuerySet` specific behavior will be enabled.
-        """
-        if self.queryset is not None:
-            queryset = self.queryset
-            if isinstance(queryset, QuerySet):
-                queryset = queryset.all()
-        elif self.model is not None:
-            queryset = self.model._default_manager.all()
-        else:
-            raise ImproperlyConfigured(
-                "%(cls)s is missing a QuerySet. Define "
-                "%(cls)s.model, %(cls)s.queryset, or override "
-                "%(cls)s.get_queryset()." % {
-                    'cls': self.__class__.__name__
-                }
-            )
-        ordering = self.ordering
-        if ordering:
-            if isinstance(ordering, str):
-                ordering = (ordering,)
-            queryset = queryset.order_by(*ordering)
-        return queryset
-
 
 class CrispyFormWidget(Block):
     template_name = 'wildewidgets/crispy_form_widget.html'
@@ -195,3 +212,56 @@ class HorizontalLayoutBlock(Block):
         css_class += f" d-flex align-items-{align} justify-content-{justify}"
         kwargs["css_class"] = css_class
         super().__init__(*blocks, **kwargs)
+
+
+class ListModelWidget(MultipleModelWidget):
+    css_class = "wildewidgets-list-model-widget list-group"
+    tag='ul'
+    item="item"
+    remove_url=None
+
+    def __init__(self, *args, remove_url=None, item_label="", **kwargs):
+        self.item_label = item_label if item_label else self.item
+        self.remove_url = remove_url if remove_url else self.remove_url
+        super().__init__(*args, **kwargs)
+        self.remove_url = remove_url
+        super().__init__(*args, **kwargs)
+        widgets = self.get_model_widgets(self.get_queryset().all())
+        for widget in widgets:
+            self.add_block(widget)
+
+    def get_remove_url(self, object):
+        if self.remove_url:
+            return self.remove_url.format(object)
+        return ""
+
+    def get_item_label(self, object):
+        return self.item_label
+
+    def get_confirm_text(self, object):
+        item_label = self.get_item_label(object)
+        return f"Are you sure you want to remove this {item_label}?"
+
+    def get_model_widget(self, object=object):
+        if self.model_widget:
+            return super().get_model_widget(object=object)
+        widget = HorizontalLayoutBlock(
+            tag='li', 
+            css_class='list-group-item'
+        )
+        if hasattr(object, 'get_absolute_url'):
+            url = object.get_absolute_url()
+            widget.add_block(HTMLWidget(html=f'<a href="{url}">{str(object)}</a>'))
+        else:
+            widget.add_block(StringBlock(str(object)))
+        remove_url = self.get_remove_url(object)
+        if remove_url:
+            widget.add_block(
+                FormButton(
+                    close=True,
+                    action=remove_url,
+                    confirm_text=self.get_confirm_text(object),
+                ),
+            )    
+        return widget    
+

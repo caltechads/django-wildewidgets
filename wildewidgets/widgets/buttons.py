@@ -26,6 +26,8 @@ class Button(Block):
     :type text: str
     :param color: The Boostrap color class to use for the button, defaults to 'secondary'
     :type color: str
+    :param close: The Boostrap close icon will be used for the button, defaults to False.
+    :type close: bool
     :param name: This CSS class will be added to the classes to identify this button, defaults to 'block'
     :type tag: str
     :param modifier: If specified, also add a class named ``{name}--{modifier}`` to the CSS classes, defaults
@@ -49,13 +51,19 @@ class Button(Block):
     def __init__(self, **kwargs):
         color = kwargs.pop('color', self.color)
         text = kwargs.pop('text', self.text)
+        close = kwargs.pop('close', False)
+        if close:
+            text = ""
+            kwargs["css_class"]="btn-close"
+            kwargs["aria_attributes"]={"label":"Close"}
         super().__init__(text, **kwargs)
         self._content = text
         self._attributes['type'] = 'button'
-        if self._css_class:
-            self._css_class = f'{self._css_class} btn btn-{color}'
-        else:
-            self._css_class = f'btn btn-{color}'
+        if not close:
+            if self._css_class:
+                self._css_class = f'{self._css_class} btn btn-{color}'
+            else:
+                self._css_class = f'btn btn-{color}'
 
 
 class ModalButton(Button):

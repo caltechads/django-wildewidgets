@@ -103,7 +103,12 @@ class Block(TemplateWidget):
         self._attributes = attributes if attributes is not None else copy(self.attributes)
         self._data_attributes = data_attributes if data_attributes is not None else copy(self.data_attributes)
         self._aria_attributes = aria_attributes if aria_attributes is not None else copy(self.aria_attributes)
-        self.blocks = blocks
+        self.blocks = []
+        for block in blocks:
+            self.add_block(block)        
+
+    def add_block(self, block):
+        self.blocks.append(block)
 
     def get_context_data(self, **kwargs) -> Dict[str, Any]:
         context = super().get_context_data(**kwargs)
