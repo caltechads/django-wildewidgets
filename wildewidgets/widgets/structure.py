@@ -215,13 +215,29 @@ class HorizontalLayoutBlock(Block):
 
 
 class ListModelWidget(MultipleModelWidget):
+    """
+    Extend `MultipleModelWidget`. This class provides a list of objects
+    defined by a QuerySet, displayed in a list-group `ul` block. By default, 
+    a widget will be provided that simply displays whatever returns from 
+    the conversion of the object to a `str`. If a `remove_url` is provided, 
+    an `X` icon to the right of each object will act as a button to remove 
+    the item. 
+
+    Example 1:
+
+        widget = ListModelWidget(
+            queryset=myparent.children,
+            item_label='child',
+            remove_url=reverse('remove_url') + "?id={}",
+        )
+    """
     css_class = "wildewidgets-list-model-widget list-group"
     tag='ul'
-    item="item"
+    item_label="item"
     remove_url=None
 
     def __init__(self, *args, remove_url=None, item_label="", **kwargs):
-        self.item_label = item_label if item_label else self.item
+        self.item_label = item_label if item_label else self.item_label
         self.remove_url = remove_url if remove_url else self.remove_url
         super().__init__(*args, **kwargs)
         self.remove_url = remove_url
@@ -232,7 +248,7 @@ class ListModelWidget(MultipleModelWidget):
 
     def get_remove_url(self, object):
         if self.remove_url:
-            return self.remove_url.format(object)
+            return self.remove_url.format(object.id)
         return ""
 
     def get_item_label(self, object):

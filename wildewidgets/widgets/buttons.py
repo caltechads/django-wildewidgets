@@ -318,6 +318,7 @@ class FormButton(Block):
     def __init__(self, **kwargs):
         action = kwargs.pop('action', self.action)
         method = kwargs.pop('method', self.method)
+        self.close = kwargs.pop('close', False)
         self.data = kwargs.pop('data', copy(self.data))
         self.button = self.__build_button(kwargs)
         super().__init__(**kwargs)
@@ -332,6 +333,9 @@ class FormButton(Block):
             'attributes': kwargs.pop('button_attributes', copy(self.button_attributes)),
             'data_attributes': kwargs.pop('button_data_attributes', copy(self.button_data_attributes))
         }
+        if self.close:
+            button_kwargs['close'] = True
+            button_kwargs['aria_attributes'] = {"label":"Close"}
         confirm_text = kwargs.pop('confirm_text', self.confirm_text)
         if confirm_text is not None:
             button_kwargs['attributes']['onclick'] = f"return confirm('{confirm_text}');"
