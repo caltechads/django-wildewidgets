@@ -231,7 +231,7 @@ class ListModelWidget(MultipleModelWidget):
             remove_url=reverse('remove_url') + "?id={}",
         )
     """
-    css_class = "wildewidgets-list-model-widget list-group"
+    base_css_class = "wildewidgets-list-model-widget list-group"
     tag='ul'
     item_label="item"
     remove_url=None
@@ -239,6 +239,9 @@ class ListModelWidget(MultipleModelWidget):
     def __init__(self, *args, remove_url=None, item_label="", **kwargs):
         self.item_label = item_label if item_label else self.item_label
         self.remove_url = remove_url if remove_url else self.remove_url
+        css_class = kwargs.get("css_class", "")
+        css_class += f" {self.base_css_class}"
+        kwargs["css_class"] = css_class.strip()
         super().__init__(*args, **kwargs)
         self.remove_url = remove_url
         super().__init__(*args, **kwargs)
