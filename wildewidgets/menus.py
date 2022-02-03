@@ -1,3 +1,5 @@
+import random
+
 from django import template
 from django.urls import reverse_lazy
 
@@ -93,6 +95,7 @@ class BasicMenu(WidgetInitKwargsMixin):
             'brand_text': self.brand_text,
             'brand_url': self.brand_url,
             'vertical': "navbar-vertical" in self.navbar_classes,
+            'target': random.randrange(0, 10000),
         }
         html_template = template.loader.get_template(self.template_file)
         content = html_template.render(context)

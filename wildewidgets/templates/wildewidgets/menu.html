@@ -1,6 +1,9 @@
   
-  <nav class="navbar {{navbar_classes}} mw-100 w-auto">
+  <nav class="navbar {{navbar_classes}}">
     <div class="{{navbar_container}} {% if vertical %}ms-0{%endif%}">
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent{% if vertical %}V{%endif%}_{{target}}" aria-controls="navbarSupportedContent{% if vertical %}V{%endif%}_{{target}}" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
       {% if brand_image %}
         <a class="navbar-brand" href="{{brand_url}}">
           <img src="{{brand_image}}" alt="{{brand_text}}" {% if brand_image_width %} width="{{brand_image_width}}"{% endif %}>
@@ -8,18 +11,15 @@
       {% elif brand_text %}
         <a class="navbar-brand" href="{{brand_url}}">{{brand_text}}</a>
       {% endif %}
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
 
-      <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <div class="collapse navbar-collapse" id="navbarSupportedContent{% if vertical %}V{%endif%}_{{target}}">
         
         <ul class="navbar-nav me-1">
           {% for item,data in menu.items %}
             {% if data.kind == 'item' %}
               <li class="nav-item">
                 <a class="nav-link {% if item == active %}active{% endif %}" href="{{data.url}}{{data.extra}}">
-                  {{item}}
+                  {% if vertical %}{{item|truncatechars:28}}{% else %}{{item}}{% endif %}
                   {% if item == active %}<span class="sr-only visually-hidden visually-hidden-focusable">(current)</span>{% endif %}
                   </a>
               </li>
@@ -33,7 +33,7 @@
                     {% if subitem.divider %}
                       <div class="dropdown-divider"></div>
                     {% else %}
-                      <a class="dropdown-item {% if subitem.active %}active{% endif %}" href="{{subitem.url}}{{subitem.extra}}">{{subitem.title}}</a>
+                      <a class="dropdown-item {% if subitem.active %}active{% endif %}" href="{{subitem.url}}{{subitem.extra}}">{% if vertical %}{{subitem.title|truncatechars:21}}{% else %}{{subitem.title}}{% endif %}</a>
                     {% endif %}
                   {% endfor %}
                 </div>
