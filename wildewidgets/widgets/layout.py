@@ -6,6 +6,7 @@ from typing import List, Optional, Dict, Any
 
 from .base import Widget, Block, WidgetStream
 from .buttons import LinkButton, FormButton
+from .headers import PageHeader
 
 
 @dataclass
@@ -65,7 +66,7 @@ class WidgetListSidebarWidget(Block):
     actions: List[Widget] = []
 
     class Actions(WidgetStream):
-        css_class: str = 'px-3 py-5 d-flex flex-column align-items-stretch border'
+        css_class: str = 'px-3 py-4 d-flex flex-column align-items-stretch border bg-white shadow-sm'
 
     def __init__(self, *args, **kwargs):
         if 'title' in kwargs:
@@ -210,6 +211,7 @@ class WidgetListLayout(Block):
         sidebar_title = kwargs.pop('sidebar_title', self.sidebar_title)
         super().__init__(**kwargs)
         self.title = title
+        self.header = PageHeader(header_text=title)
         self.sidebar = WidgetListSidebarWidget(title=sidebar_title)
         self.main = WidgetListMainWidget()
         self.modals: List[Widget] = []
@@ -236,4 +238,5 @@ class WidgetListLayout(Block):
         context['sidebar'] = self.sidebar
         context['main'] = self.main
         context['modals'] = self.modals
+        context['header'] = self.header
         return context

@@ -1,0 +1,17 @@
+{% extends 'wildewidgets/block.html' %}
+{% load wildewidgets %}
+
+{% block block_content %}
+  
+  <ol class="breadcrumb">
+  {% for item in items %}
+    <li class="breadcrumb-item {% if forloop.last %}active{% endif %}">
+      {% if item.url %}
+        <a href="{{ item.url }}"><span class="{{title_class}}">{{item.title}}</span></a>
+      {% else %}
+      <span class="{{title_class}}">{{item.title}}</span>
+      {% endif %}
+    </li>
+  {% endfor %}
+  </ol>
+{% endblock %}

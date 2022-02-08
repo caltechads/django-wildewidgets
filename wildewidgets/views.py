@@ -179,3 +179,20 @@ class TableView(TemplateView):
             )
         kwargs['table'] = self.table_class()
         return super().get_context_data(**kwargs)
+
+
+class StandardWidgetView(TemplateView):
+
+    def get_context_data(self, **kwargs):
+        kwargs['content'] = self.get_content()
+        kwargs['breadcrumbs'] = self.get_breadcrumbs()
+        return super().get_context_data(**kwargs)
+
+    def get_content(self):
+        raise ImproperlyConfigured(
+                "You must override get_content in {}".format(self.__class__.__name__)
+            )
+        return None
+
+    def get_breadcrumbs(self):
+        return None
