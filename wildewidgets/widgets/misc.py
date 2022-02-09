@@ -29,5 +29,8 @@ class BreadrumbBlock(Block):
     def get_context_data(self, **kwargs) -> Dict[str, Any]:
         kwargs = super().get_context_data(**kwargs)
         kwargs['items'] = self.items
-        kwargs['title_class'] = self.title_class
+        kwargs['title_class'] = self.title_class        
         return kwargs
+
+    def flatten(self):
+        return ' - '.join([item.title for item in self.items])
