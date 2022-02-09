@@ -23,3 +23,11 @@ button.toggle-vis.btn-outline-secondary:not(.active) {
     background-color: #6c757d;
     border-color: #6c757d;
 }
+td {
+    vertical-align: middle !important;
+}
+
+table.dataTable.table-sm tbody th, 
+table.dataTable.table-sm tbody td {
+    padding: .25rem 0.25rem;
+}
