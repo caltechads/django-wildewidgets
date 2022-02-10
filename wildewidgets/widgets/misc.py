@@ -3,8 +3,14 @@
 from dataclasses import dataclass
 from typing import List, Optional, Dict, Any
 
-from .base import Block
+from wildewidgets.widgets.text import StringBlock
 
+from .base import Block
+from .structure import HorizontalLayoutBlock
+from .text import (
+    CodeWidget,
+    StringBlock,
+)
 
 @dataclass
 class BreadcrumbItem:
@@ -34,3 +40,32 @@ class BreadrumbBlock(Block):
 
     def flatten(self):
         return ' - '.join([item.title for item in self.items])
+
+
+class KeyValueListBlock(Block):
+    tag = 'ul'
+    css_class = "list-group"
+
+    def add_simple_key_value(self, key, value):
+        self.add_block(
+            HorizontalLayoutBlock(
+                StringBlock(key),
+                StringBlock(value),
+                tag = "li",
+                css_class = "list-group-item",
+            )
+        )
+
+    def add_code_key_value(self, key, value, language=None):
+        self.add_block(
+            Block(
+                StringBlock(key),
+                CodeWidget(
+                    code=value, 
+                    language=language,
+                    css_class="m-3",
+                ),
+                tag = "li",
+                css_class = "list-group-item",
+            )
+        )

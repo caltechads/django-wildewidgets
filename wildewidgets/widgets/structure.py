@@ -11,6 +11,7 @@ from django.http import Http404
 from .base import TemplateWidget, Block
 from .text import HTMLWidget, StringBlock
 from .buttons import FormButton
+from .headers import CardHeader
 
 from django.core.exceptions import ImproperlyConfigured
 
@@ -46,10 +47,13 @@ class CardWidget(TemplateWidget):
     def __init__(self, **kwargs):
         self.header = kwargs.get('header', self.header)
         self.header_text = kwargs.get('header_text', self.header_text)
+        if not self.header:
+            self.header = CardHeader(header_text=self.header_text)
         self.title = kwargs.get('title', self.title)
         self.subtitle = kwargs.get('subtitle', self.subtitle)
         self.widget = kwargs.get('widget', self.widget)
         self.widget_css = kwargs.get('widget_css', self.widget_css)
+        self.css_class = kwargs.get("css_class", self.css_class)
 
     def get_context_data(self, **kwargs):
         kwargs = super().get_context_data(**kwargs)

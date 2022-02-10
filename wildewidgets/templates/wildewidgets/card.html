@@ -3,10 +3,10 @@
 <div class="card {{css_class}}">
   {% if header or header_text %}
     <div class="card-header">
-      {% if header_text %}
-        {{ header_text}}
-      {% elif header %}
+      {% if header %}
         {% wildewidgets header %}
+      {% elif header_text %}
+        {{ header_text}}
       {% endif %}
     </div>
   {% endif %}

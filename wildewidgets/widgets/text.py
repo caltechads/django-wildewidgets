@@ -27,6 +27,7 @@ class CodeWidget(TemplateWidget):
             self.code = kwargs['code']
         if 'language' in kwargs:
             self.language = kwargs['language']
+        self.css_class = kwargs.get("css_class", self.css_class)
 
     def get_context_data(self, **kwargs):
         kwargs = super().get_context_data(**kwargs)
