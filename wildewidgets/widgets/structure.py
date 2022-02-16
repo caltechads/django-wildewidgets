@@ -38,8 +38,8 @@ class CardWidget(TemplateWidget):
     template_name = 'wildewidgets/card.html'
     header = None
     header_text = None
-    title = None
-    subtitle = None
+    card_title = None
+    card_subtitle = None
     widget = None
     widget_css = None
     css_class = None
@@ -47,10 +47,10 @@ class CardWidget(TemplateWidget):
     def __init__(self, **kwargs):
         self.header = kwargs.get('header', self.header)
         self.header_text = kwargs.get('header_text', self.header_text)
-        if not self.header:
+        if self.header_text and not self.header:
             self.header = CardHeader(header_text=self.header_text)
-        self.title = kwargs.get('title', self.title)
-        self.subtitle = kwargs.get('subtitle', self.subtitle)
+        self.card_title = kwargs.get('card_title', self.card_title)
+        self.card_subtitle = kwargs.get('card_subtitle', self.card_subtitle)
         self.widget = kwargs.get('widget', self.widget)
         self.widget_css = kwargs.get('widget_css', self.widget_css)
         self.css_class = kwargs.get("css_class", self.css_class)
@@ -59,8 +59,8 @@ class CardWidget(TemplateWidget):
         kwargs = super().get_context_data(**kwargs)
         kwargs['header'] = self.header
         kwargs['header_text'] = self.header_text
-        kwargs['title'] = self.title
-        kwargs['subtitle'] = self.subtitle
+        kwargs['title'] = self.card_title
+        kwargs['subtitle'] = self.card_subtitle
         kwargs['widget'] = self.widget
         kwargs['widget_css'] = self.widget_css
         kwargs['css_class'] = self.css_class
