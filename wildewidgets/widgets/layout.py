@@ -2,11 +2,11 @@
 # -*- coding: utf-8 -*-
 from copy import copy
 from dataclasses import dataclass
-from typing import List, Optional, Dict, Any
+from typing import List, Optional, Dict, Any, Union
 
 from .base import Widget, Block, WidgetStream
 from .buttons import LinkButton, FormButton
-from .headers import PageHeader
+from .headers import PageHeader, CardHeader
 
 
 @dataclass
@@ -163,14 +163,14 @@ class WidgetListMainWidget(Block):
         super().__init__(*args, **kwargs)
         self._entries: List[WidgetIndexItem] = entries
 
-    def add_widget(self, widget: Widget, title: Optional[str] = None):
-        item = WidgetIndexItem(
-            widget=widget,
-            title=getattr(widget, 'title', widget.__class__.__name__),
-        )
+    def add_widget(self, widget: Widget, title: Optional[Union[str, Widget]] = None):
         if title is not None:
-            item.title = title
-        self._entries.append(item)
+            widget.title = title
+        widget_title = widget.get_title()
+        if not isinstance(widget_title, Widget):
+            header = CardHeader(header_text=widget.title)
+            widget.title = header
+        self._entries.append(widget)
 
     def get_context_data(self, **kwargs) -> Dict[str, Any]:
         context = super().get_context_data(**kwargs)

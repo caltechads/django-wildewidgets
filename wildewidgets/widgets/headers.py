@@ -15,13 +15,14 @@ class BasicHeader(TemplateWidget):
     badge_class = "warning"
 
     def __init__(self, **kwargs):
-        self.header_level = kwargs.get('header_level', self.header_level)
-        self.header_type = kwargs.get('header_type', self.header_type)
-        self.header_text = kwargs.get('header_text', self.header_text)
-        self.css_class = kwargs.get('css_class', self.css_class)
-        self.css_id = kwargs.get('css_id', self.css_id)
-        self.badge_text = kwargs.get('badge_text', self.badge_text)
-        self.badge_class = kwargs.get('badge_class', self.badge_class)
+        self.header_level = kwargs.pop('header_level', self.header_level)
+        self.header_type = kwargs.pop('header_type', self.header_type)
+        self.header_text = kwargs.pop('header_text', self.header_text)
+        self.css_class = kwargs.pop('css_class', self.css_class)
+        self.css_id = kwargs.pop('css_id', self.css_id)
+        self.badge_text = kwargs.pop('badge_text', self.badge_text)
+        self.badge_class = kwargs.pop('badge_class', self.badge_class)
+        super().__init__(title=self.header_text)
 
     def get_context_data(self, **kwargs):
         if self.header_type == 'h':
@@ -144,3 +145,4 @@ class PageHeader(HeaderWithWidget):
 class CardHeader(HeaderWithWidget):
     css_class = "my-3"
     header_level = 2
+

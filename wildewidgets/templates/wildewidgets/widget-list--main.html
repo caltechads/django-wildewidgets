@@ -3,10 +3,15 @@
 
 
 {% block block_content %}
-{% for item in entries %}
-  <a id="{{ item.title|slugify }}"><div class="{{block_name}}__entry__title {{entry_title_css_class}} mb-4 h2 {% if not forloop.first %}mt-5{% endif %}">{{item.title}}</div></a>
+{% for widget in entries %}
+  
+  <div class="{% if not forloop.first %}mt-5{% endif %}">
+  <a id="{{ widget.get_title.get_title|slugify }}"></a>
+      {% wildewidgets widget.get_title %}
+  </div>
+
   <div class="{{block_name}}__entry {{entry_css_class}}">
-    {% wildewidgets item.widget %}
+    {% wildewidgets widget %}
   </div>
 {% endfor %}
 {% endblock %}

@@ -11,13 +11,16 @@ class Widget:
     """
     The base class form which all widgets should inherit.
     """
-    title: Optional[str] = None
+    title: Optional[Union[str, "Widget"]] = None
     icon: str = 'gear'
 
-    def __init__(self, **kwargs):
-        self.title = kwargs.pop('title', self.title)
-        self.icon = kwargs.pop('icon', self.icon)
+    def __init__(self, title: Union[str, "Widget"] = None, icon=None, **kwargs):
+        self.title = title if title else self.title
+        self.icon = icon if icon else self.icon
         super().__init__(**kwargs)
+
+    def get_title(self) -> Union[str, "Widget"]:
+        return self.title
 
     def is_visible(self) -> bool:
         return True
