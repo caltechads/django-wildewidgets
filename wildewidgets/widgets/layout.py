@@ -6,7 +6,7 @@ from typing import List, Optional, Dict, Any, Union
 
 from .base import Widget, Block, WidgetStream
 from .buttons import LinkButton, FormButton
-from .headers import PageHeader, CardHeader
+from .headers import PageHeader, WidgetListLayoutHeader
 
 
 @dataclass
@@ -168,7 +168,7 @@ class WidgetListMainWidget(Block):
             widget.title = title
         widget_title = widget.get_title()
         if not isinstance(widget_title, Widget):
-            header = CardHeader(header_text=widget.title)
+            header = WidgetListLayoutHeader(header_text=widget.title)
             widget.title = header
         self._entries.append(widget)
 

@@ -146,3 +146,8 @@ class CardHeader(HeaderWithWidget):
     css_class = "my-3"
     header_level = 2
 
+
+class WidgetListLayoutHeader(HeaderWithWidget):
+    css_class = "mb-4"
+    header_level = 2
+
