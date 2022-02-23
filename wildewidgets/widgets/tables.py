@@ -853,17 +853,17 @@ class BasicModelTable(DataTable):
             self.model_fields[field.name] = field
             self.field_names.append(field.name)
 
-        if not self.fields or self.fields == '__all__':
-            self.load_all_fields()
-        else:
-            for field_name in self.fields:
-                self.load_field(field_name)
-
         for field_name in self.fields:
             if field_name not in self.model_fields:
                 field = self.get_related_field(self.model, field_name)
                 if field:
                     self.related_fields[field_name] = field
+
+        if not self.fields or self.fields == '__all__':
+            self.load_all_fields()
+        else:
+            for field_name in self.fields:
+                self.load_field(field_name)
 
     def get_related_model(self, current_model, field_name):
         field = current_model._meta.get_field(field_name)
@@ -890,6 +890,7 @@ class BasicModelTable(DataTable):
         elif field_name in self.related_fields:
             field = self.related_fields[field_name]
         else:
+            print(self.related_fields)
             field = None
         return field
 
@@ -907,6 +908,7 @@ class BasicModelTable(DataTable):
             if isinstance(field, (models.TextField, models.CharField)):
                 kwargs['align'] = 'left'
             else:
+                print(type(field))
                 kwargs['align'] = 'right'
 
     def load_field(self, field_name):
