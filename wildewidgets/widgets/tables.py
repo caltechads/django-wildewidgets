@@ -905,7 +905,7 @@ class BasicModelTable(DataTable):
             kwargs['align'] = self.alignment[field_name]
         else:
             field = self.get_field(field_name)
-            if isinstance(field, (models.TextField, models.CharField)):
+            if isinstance(field, (models.TextField, models.CharField, models.DateField, models.DateTimeField)):
                 kwargs['align'] = 'left'
             else:
                 print(type(field))
