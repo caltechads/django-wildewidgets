@@ -84,7 +84,7 @@ class MultipleModelWidget(Block):
     queryset = None
 
     def __init__(self, *args, **kwargs):
-        self.model = kwargs.pop('model', self.model)        
+        self.model = kwargs.pop('model', self.model)
         self.model_widget = kwargs.pop('model_widget', self.model_widget)
         self.ordering = kwargs.pop('ordering', self.ordering)
         self.queryset = kwargs.pop('queryset', self.queryset)
@@ -135,7 +135,7 @@ class MultipleModelWidget(Block):
 
 
 class PagedModelWidget(MultipleModelWidget):
-    template_name = 'wildewidgets/paged_model_widget.html'    
+    template_name = 'wildewidgets/paged_model_widget.html'
     page_kwarg = 'page'
     paginate_by = None
     max_page_controls = 5
@@ -170,7 +170,7 @@ class PagedModelWidget(MultipleModelWidget):
                 page_number = page.number
                 max_controls_half = int(self.max_page_controls / 2)
                 range_start = 1 if page_number - max_controls_half < 1 else page_number - max_controls_half
-                kwargs['page_range'] = range(range_start, range_start+pages)                
+                kwargs['page_range'] = range(range_start, range_start+pages)
             except InvalidPage as e:
                 raise Http404(
                     'Invalid page (%(page_number)s): %(message)s' % {
@@ -195,8 +195,8 @@ class CrispyFormWidget(Block):
     template_name = 'wildewidgets/crispy_form_widget.html'
     css_class = "wildewidgets-crispy-form-widget"
 
-    def __init__(self, *args, form=None, **kwargs): 
-        super().__init__(*args, **kwargs)    
+    def __init__(self, *args, form=None, **kwargs):
+        super().__init__(*args, **kwargs)
         self.form = form
 
     def get_context_data(self, **kwargs):
@@ -221,11 +221,11 @@ class HorizontalLayoutBlock(Block):
 class ListModelWidget(MultipleModelWidget):
     """
     Extend `MultipleModelWidget`. This class provides a list of objects
-    defined by a QuerySet, displayed in a list-group `ul` block. By default, 
-    a widget will be provided that simply displays whatever returns from 
-    the conversion of the object to a `str`. If a `remove_url` is provided, 
-    an `X` icon to the right of each object will act as a button to remove 
-    the item. 
+    defined by a QuerySet, displayed in a list-group `ul` block. By default,
+    a widget will be provided that simply displays whatever returns from
+    the conversion of the object to a `str`. If a `remove_url` is provided,
+    an `X` icon to the right of each object will act as a button to remove
+    the item.
 
     Example 1:
 
@@ -269,7 +269,7 @@ class ListModelWidget(MultipleModelWidget):
         if self.model_widget:
             return super().get_model_widget(object=object)
         widget = HorizontalLayoutBlock(
-            tag='li', 
+            tag='li',
             css_class='list-group-item'
         )
         if hasattr(object, 'get_absolute_url'):
@@ -285,6 +285,6 @@ class ListModelWidget(MultipleModelWidget):
                     action=remove_url,
                     confirm_text=self.get_confirm_text(object),
                 ),
-            )    
-        return widget    
+            )
+        return widget
 
