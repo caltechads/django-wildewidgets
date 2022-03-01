@@ -670,7 +670,7 @@ class DataTable(Widget, WidgetInitKwargsMixin, DatatableAJAXView):
         self.column_fields = {}
         self.column_filters = {}
         self.column_styles = []
-        self.data = []
+        self.data = kwargs.get('data', [])
         if self.form_actions:
             self.column_fields['checkbox'] = DataTableColumn(
                 field='checkbox',
@@ -709,7 +709,7 @@ class DataTable(Widget, WidgetInitKwargsMixin, DatatableAJAXView):
         self.column_styles.append(styler)
 
     def build_context(self):
-        return {'rows': self.data}
+        return {'rows': self.prepare_results(self.data)}
 
     def get_content(self, **kwargs):
         if self.actions:
@@ -729,6 +729,7 @@ class DataTable(Widget, WidgetInitKwargsMixin, DatatableAJAXView):
         template_file = self.template_file
         if self.data or not self.async_if_empty:
             context = self.build_context()
+            context['async'] = False
         else:
             context = {"async": True}
         html_template = template.loader.get_template(template_file)
@@ -739,7 +740,8 @@ class DataTable(Widget, WidgetInitKwargsMixin, DatatableAJAXView):
         context['options'] = self.options
         context['name'] = f"datatable_table_{table_id}"
         context["tableclass"] = self.__class__.__name__
-        context["extra_data"] = self.get_encoded_extra_data()
+        if not self.data:
+            context["extra_data"] = self.get_encoded_extra_data()
         context["form"] = DataTableForm(self)
         if 'csrf_token' in kwargs:
             context["csrf_token"] = kwargs['csrf_token']
@@ -891,7 +893,6 @@ class BasicModelTable(DataTable):
         elif field_name in self.related_fields:
             field = self.related_fields[field_name]
         else:
-            print(self.related_fields)
             field = None
         return field
 
@@ -909,7 +910,6 @@ class BasicModelTable(DataTable):
             if isinstance(field, (models.TextField, models.CharField, models.DateField, models.DateTimeField)):
                 kwargs['align'] = 'left'
             else:
-                print(type(field))
                 kwargs['align'] = 'right'
 
     def load_field(self, field_name):
