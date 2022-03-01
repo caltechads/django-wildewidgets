@@ -201,7 +201,8 @@ class CrispyFormWidget(Block):
 
     def get_context_data(self, **kwargs):
         kwargs = super().get_context_data(**kwargs)
-        kwargs['form'] = self.form
+        if self.form:
+            kwargs['form'] = self.form
         return kwargs
 
 
