@@ -649,7 +649,8 @@ class DataTable(Widget, WidgetInitKwargsMixin, DatatableAJAXView):
     form_url = ''
     hide_controls = False
     table_id = None
-    defaul_action_button_label = 'View'
+    default_action_button_label = 'View'
+    default_action_button_color_class = 'secondary'
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -791,7 +792,7 @@ class DataTable(Widget, WidgetInitKwargsMixin, DatatableAJAXView):
         response = "<div class='d-flex flex-row'>"
         if hasattr(row, 'get_absolute_url'):
             url = row.get_absolute_url()
-            view_button = self.get_action_button_with_url(row, self.defaul_action_button_label, url)
+            view_button = self.get_action_button_with_url(row, self.default_action_button_label, url, color_class=self.default_action_button_color_class)
             response += view_button
         if not type(self.actions) == bool:
             for action in self.actions:
