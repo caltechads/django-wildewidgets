@@ -25,7 +25,7 @@ class Widget:
     def is_visible(self) -> bool:
         return True
 
-    def get_content(self, **kwargs) -> Dict[str, Any]:
+    def get_content(self) -> "Widget":
         raise NotImplementedError
 
 

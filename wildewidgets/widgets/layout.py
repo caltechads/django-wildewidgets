@@ -216,17 +216,17 @@ class WidgetListLayout(Block):
         self.main = WidgetListMainWidget()
         self.modals: List[Widget] = []
 
-    def add_widget(self, widget: Widget, title: Optional[str] = None, icon: Optional[str] = None):
+    def add_widget(self, widget: Widget, title: Optional[str] = None, icon: Optional[str] = None) -> None:
         self.sidebar.add_widget_to_index(widget, title=title, icon=icon)
         self.main.add_widget(widget, title=title)
 
-    def add_modal(self, modal: Widget):
+    def add_modal(self, modal: Widget) -> None:
         self.modals.append(modal)
 
-    def add_sidebar_link_button(self, text: str, url: str, **kwargs):
+    def add_sidebar_link_button(self, text: str, url: str, **kwargs) -> None:
         self.sidebar.add_link_button(text, url, **kwargs)
 
-    def add_sidebar_form_button(self, text: str, action: str, **kwargs):
+    def add_sidebar_form_button(self, text: str, action: str, **kwargs) -> None:
         self.sidebar.add_form_button(text, action, **kwargs)
 
     def add_sidebar_widget(self, widget: Widget):
