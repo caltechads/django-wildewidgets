@@ -64,6 +64,10 @@ class WidgetListSidebarWidget(Block):
     block: str = "widget-list__sidebar"
     css_class: Optional[str] = None
     actions: List[Widget] = []
+    bare_widgets: List[Widget] = []
+
+    class Widgets(WidgetStream):
+        block: str = 'widget-list__sidebar__widgets'
 
     class Actions(WidgetStream):
         css_class: str = 'px-3 py-4 d-flex flex-column align-items-stretch border bg-white shadow-sm'
@@ -73,6 +77,7 @@ class WidgetListSidebarWidget(Block):
         *args,
         title: str = None,
         width: int = 3,
+        bare_widgets: List[Widget] = None,
         actions: List[Widget] = None,
         **kwargs
     ):
@@ -83,7 +88,9 @@ class WidgetListSidebarWidget(Block):
         self.css_class += f"col-{width}"
         super().__init__(*args, **kwargs)
         actions = actions if actions is not None else self.actions
+        bare_widgets = bare_widgets if bare_widgets is not None else self.bare_widgets
         self.widget_index = WidgetIndex()
+        self._widgets = WidgetListSidebarWidget.Widgets(widgets=bare_widgets)
         self._actions = WidgetListSidebarWidget.Actions(widgets=actions)
         self._actions.block = f"{self.block}__actions"
 
@@ -104,7 +111,7 @@ class WidgetListSidebarWidget(Block):
             kwargs['css_class'] = f'{kwargs["css_class"]} w-100'
         else:
             kwargs['css_class'] = 'w-100'
-        self.add_widget(LinkButton(**kwargs))
+        self.add_actions_widget(LinkButton(**kwargs))
 
     def add_form_button(self, text: str, action: str, **kwargs):
         """
@@ -127,11 +134,17 @@ class WidgetListSidebarWidget(Block):
             kwargs['button_css_class'] = f'{kwargs["button_css_class"]} w-100'
         else:
             kwargs['button_css_class'] = 'w-100'
-        self.add_widget(FormButton(**kwargs))
+        self.add_actions_widget(FormButton(**kwargs))
 
     def add_widget(self, widget: Widget):
         """
-        Add a widget to the sidebar.
+        Add a widget to the sidebar outside the Actions box.
+        """
+        self._widgets.add_widget(widget)
+
+    def add_actions_widget(self, widget: Widget):
+        """
+        Add a widget to the sidebar inside the Actions box.
         """
         self._actions.add_widget(widget)
 
@@ -150,6 +163,9 @@ class WidgetListSidebarWidget(Block):
     def get_context_data(self, **kwargs) -> Dict[str, Any]:
         context = super().get_context_data(**kwargs)
         context['title'] = self.title
+        if not self._widgets.is_empty:
+            context['widgets'] = self._widgets
+            self.widget_index._css_class = 'mt-5'
         if not self._actions.is_empty:
             context['actions'] = self._actions
             self.widget_index._css_class = 'mt-5'
