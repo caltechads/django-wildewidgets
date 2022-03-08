@@ -119,34 +119,33 @@ class LightMenu(BasicMenu):
 
 class MenuMixin:
     menu_class = None
+    menu_item = None
     submenu_class = None
+    submenu_item = None
 
     def get_menu_class(self):
-        if self.menu_class:
-            return self.menu_class
-        return None
+        return self.menu_class
+
+    def get_menu_item(self):
+        return self.menu_item
 
     def get_menu(self):
         menu_class = self.get_menu_class()
         if menu_class:
-            menu_item = None
-            if self.menu_item:
-                # FIXME: menu_item is not used
-                menu_item = self.menu_item
-            return menu_class(self.menu_item)
+            menu_item = self.get_menu_item()
+            return menu_class(menu_item)
         return None
 
     def get_submenu_class(self):
-        if self.submenu_class:
-            return self.submenu_class
-        return None
+        return self.submenu_class
+
+    def get_submenu_item(self):
+        return self.submenu_item
 
     def get_submenu(self):
         submenu_class = self.get_submenu_class()
         if submenu_class:
-            submenu_item = None
-            if self.submenu_item:
-                submenu_item = self.submenu_item
+            submenu_item = self.get_submenu_item()
             return submenu_class(submenu_item)
         return None
 

@@ -79,11 +79,11 @@ class StringBlock(Block):
 
 class TimeStamp(StringBlock):
     tag="small"
-    css_class="text-muted"
+    css_class="fw-light"
 
 
 class LabelBlock(StringBlock):
-    css_class="font-weight-bold"
+    css_class="fw-bold"
 
 
 class TagBlock(StringBlock):
