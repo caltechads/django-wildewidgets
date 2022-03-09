@@ -18,8 +18,8 @@
             {% endif %}
           </div> <!-- end show/hide table controls -->
       </div>
-      {% endif %}      
-      
+      {% endif %}
+
       {% if form.is_visible %}
       <div class='action-form-container'>
           <div class="d-flex align-items-center justify-content-between"> <!-- action select and button -->
@@ -34,7 +34,7 @@
           </div> <!-- end action select and button -->
       </div>
       {% endif %}
-      
+
     </div>
     <div class="d-flex flex-column align-items-start border-left border-secondary">
       <div id="{{name}}__columns" class="btn-group ms-3 mt-3 mw-auto toolbar__columns {{name}}__columns collapse" role="group" aria-label="Show/Hide Columns">
@@ -49,7 +49,7 @@
         <a href="#" role="button" class="btn btn-info label-btn"  aria-disabled="true">Filter by</a>
         {% for batch in filters %}
           {% with field_counter=forloop.counter0 filter=batch.1 item=batch.0 %}
-            {% if filter %}              
+            {% if filter %}
               <div class="btn-group" role="group">
                 <button id="{{item.field}}-group" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" class="btn btn-outline-secondary dropdown-toggle">{{item.verbose_name}}?: <span class="filter-target">Any</span></button>
                 <div class="dropdown-menu" aria-labelledby="{{item.field}}-group">
@@ -160,7 +160,7 @@
           $(row).addClass("{{item.css_class}}");
           {% else %}
           cells[{{item.target_index}}].classList.add('{{item.css_class}}');
-          {% endif %}        
+          {% endif %}
         }
         {% endfor %}
       },

@@ -25,7 +25,7 @@ class Widget:
     def is_visible(self) -> bool:
         return True
 
-    def get_content(self, **kwargs) -> str:
+    def get_content(self) -> "Widget":
         raise NotImplementedError
 
 
@@ -108,7 +108,7 @@ class Block(TemplateWidget):
         self._aria_attributes = aria_attributes if aria_attributes is not None else copy(self.aria_attributes)
         self.blocks = []
         for block in blocks:
-            self.add_block(block)        
+            self.add_block(block)
 
     def add_block(self, block):
         self.blocks.append(block)

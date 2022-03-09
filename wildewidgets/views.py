@@ -8,11 +8,13 @@ from django.core.exceptions import ImproperlyConfigured
 from django.core.serializers.json import DjangoJSONEncoder
 from django.http import HttpResponseRedirect, HttpResponse, JsonResponse
 from django.utils.cache import add_never_cache_headers
-from django.utils.encoding import force_text
+try:
+    from django.utils.encoding import force_text
+except ImportError:
+    from django.utils.encoding import force_str as force_text  # type: ignore
 from django.utils.functional import Promise
 from django.views.generic import View
 from django.views.generic.base import TemplateView
-
 
 
 class LazyEncoder(DjangoJSONEncoder):

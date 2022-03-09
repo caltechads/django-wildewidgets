@@ -19,7 +19,7 @@ import sphinx_rtd_theme
 # -- Project information -----------------------------------------------------
 
 project = 'django-wildewidgets'
-copyright = '2021, Glenn Bach'
+copyright = '2021, California Institute of Technology'
 author = 'Glenn Bach'
 
 # The full version, including alpha/beta/rc tags

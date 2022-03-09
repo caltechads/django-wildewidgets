@@ -4,6 +4,9 @@
 {% block block_content %}
 <div class="{{block_name}}__title font-weight-bold mb-4 h2">{{ title }}</div>
 <div class="{{block_name}}__list sticky-top">
+{% if widgets %}
+    {% wildewidgets widgets %}
+{% endif %}
 {% if actions %}
     {% wildewidgets actions %}
 {% endif %}
