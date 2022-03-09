@@ -206,6 +206,17 @@ class CrispyFormWidget(Block):
         return kwargs
 
 
+class CollapseWidget(Block):
+    css_class="collapse"
+
+    def __init__(self, *args, **kwargs):
+        if "css_class" in kwargs:
+            kwargs['css_class'] = f"{kwargs['css_class']} collapse"
+        else:
+            kwargs['css_class'] = self.css_class
+        super().__init__(*args, **kwargs)
+
+
 class HorizontalLayoutBlock(Block):
     align="center"
     justify="between"
