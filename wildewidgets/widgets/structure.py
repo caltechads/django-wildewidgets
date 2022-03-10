@@ -277,6 +277,9 @@ class ListModelWidget(MultipleModelWidget):
         item_label = self.get_item_label(object)
         return f"Are you sure you want to remove this {item_label}?"
 
+    def get_object_text(self, object):
+        return str(object)
+
     def get_model_widget(self, object=object):
         if self.model_widget:
             return super().get_model_widget(object=object)
@@ -288,7 +291,7 @@ class ListModelWidget(MultipleModelWidget):
             url = object.get_absolute_url()
             widget.add_block(HTMLWidget(html=f'<a href="{url}">{str(object)}</a>'))
         else:
-            widget.add_block(StringBlock(str(object)))
+            widget.add_block(StringBlock(self.get_object_text(object)))
         remove_url = self.get_remove_url(object)
         if remove_url:
             widget.add_block(

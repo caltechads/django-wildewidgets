@@ -63,6 +63,7 @@ class HTMLWidget(TemplateWidget):
 
     def __init__(self, *args, **kwargs):
         self.html = kwargs.get('html', self.html)
+        self.css_class = kwargs.get("css_class", self.css_class)
 
     def get_context_data(self, **kwargs):
         kwargs = super().get_context_data(**kwargs)
@@ -83,7 +84,12 @@ class TimeStamp(StringBlock):
 
 
 class LabelBlock(StringBlock):
-    css_class="fw-bold"
+
+    def __init__(self, text: str, color: str = "secondary", **kwargs):
+        css_class = kwargs.get("css_class", "")
+        css_class += f" fw-bold"
+        kwargs["css_class"] = css_class.strip()
+        super().__init__(text, **kwargs)
 
 
 class TagBlock(StringBlock):
