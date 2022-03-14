@@ -1,3 +1,4 @@
+{% load wildewidgets %}
 <div class="modal fade" id="{{modal_id}}" tabindex="-1" role="dialog" aria-labelledby="{{modal_id}}Label" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content pb-2">
@@ -7,6 +8,9 @@
       </div>
       <div class="modal-body">
         {% block modal_body %}
+          {% if modal_body %}
+            {% wildewidgets modal_body %}
+          {% endif %}
         {% endblock %}
       </div>
     </div>
