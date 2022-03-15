@@ -12,11 +12,13 @@ class ModalWidget(TemplateWidget):
     modal_id = None
     modal_title = None
     modal_body = None
+    modal_size = None
 
-    def __init__(self, modal_id=None, modal_title=None, modal_body=None, **kwargs):
+    def __init__(self, modal_id=None, modal_title=None, modal_body=None, modal_size=None, **kwargs):
         self.modal_id = modal_id if modal_id else self.modal_id
         self.modal_title = modal_title if modal_title else self.modal_title
         self.modal_body = modal_body if modal_body else self.modal_body
+        self.modal_size = modal_size if modal_size else self.modal_size
         super().__init__(**kwargs)
 
     def get_context_data(self, **kwargs):
@@ -24,6 +26,7 @@ class ModalWidget(TemplateWidget):
         kwargs['modal_id'] = self.modal_id
         kwargs['modal_title'] = self.modal_title
         kwargs['modal_body'] = self.modal_body
+        kwargs['modal_size'] = self.modal_size
         return kwargs
 
 

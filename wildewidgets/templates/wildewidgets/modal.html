@@ -1,6 +1,6 @@
 {% load wildewidgets %}
 <div class="modal fade" id="{{modal_id}}" tabindex="-1" role="dialog" aria-labelledby="{{modal_id}}Label" aria-hidden="true">
-  <div class="modal-dialog">
+  <div class="modal-dialog {% if modal_size %}model-{{modal_size}}{% endif %}">
     <div class="modal-content pb-2">
       <div class="modal-header">
         <div class='h4' class="modal-title" id="{{modal_id}}Label">{{modal_title}}</div>
