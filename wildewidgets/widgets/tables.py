@@ -651,6 +651,7 @@ class DataTable(Widget, WidgetInitKwargsMixin, DatatableAJAXView):
     table_id = None
     default_action_button_label = 'View'
     default_action_button_color_class = 'secondary'
+    sort_ascending = True
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -679,6 +680,7 @@ class DataTable(Widget, WidgetInitKwargsMixin, DatatableAJAXView):
                 searchable=False,
                 sortable=False
             )
+        self.sort_ascending = kwargs.get('sort_ascending', self.sort_ascending)
 
     def get_order_columnsx(self):
         cols = []
@@ -740,6 +742,7 @@ class DataTable(Widget, WidgetInitKwargsMixin, DatatableAJAXView):
         context['has_filters'] = has_filters
         context['options'] = self.options
         context['name'] = f"datatable_table_{table_id}"
+        context['sort_ascending'] = self.sort_ascending
         context["tableclass"] = self.__class__.__name__
         if not self.data:
             context["extra_data"] = self.get_encoded_extra_data()

@@ -139,9 +139,9 @@
               // $("#" + oSettings.sTableId + "_length").show();
           }
       },
-      {% if form.is_visible %}
-          order: [[1, 'asc']],
-      {% endif %}
+      
+      order: [[{{form.is_visible|yesno:'1,0,0'}}, "{{sort_ascending|yesno:'asc,desc,asc'}}"]],
+      
       columns: [
         {% for key,item in header.items %}
           {
