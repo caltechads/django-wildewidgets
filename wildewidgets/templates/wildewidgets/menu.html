@@ -1,15 +1,17 @@
   <nav class="navbar {{navbar_classes}}">
     <div class="{{navbar_container}} {% if vertical %}ms-0{%endif%}">
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent{% if vertical %}V{%endif%}_{{target}}" aria-controls="navbarSupportedContent{% if vertical %}V{%endif%}_{{target}}" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
       {% if brand_image %}
         <a class="navbar-brand" href="{{brand_url}}">
           <img src="{{brand_image}}" alt="{{brand_text}}" {% if brand_image_width %} width="{{brand_image_width}}"{% endif %}>
         </a>
       {% elif brand_text %}
         <a class="navbar-brand" href="{{brand_url}}">{{brand_text}}</a>
+      {% else %}
+        <div></div>
       {% endif %}
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent{% if vertical %}V{%endif%}_{{target}}" aria-controls="navbarSupportedContent{% if vertical %}V{%endif%}_{{target}}" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
 
       <div class="collapse navbar-collapse" id="navbarSupportedContent{% if vertical %}V{%endif%}_{{target}}">
 

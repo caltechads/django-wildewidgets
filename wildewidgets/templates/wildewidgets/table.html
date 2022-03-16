@@ -1,5 +1,5 @@
 {% load i18n %}
-<div class="dashboard-table-container pt-4 pb-2 bg-white" style="width: {{options.width}};">
+<div class="dashboard-table-container pt-4 pb-2 bg-white" style="width: {{options.width}};overflow-x:auto;">
   {% if form.is_visible %}
   <form class='form' action='{{form.url}}' method='post'>
   {% endif %}
