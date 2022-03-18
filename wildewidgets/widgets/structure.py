@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+from copy import copy
 import random
 from urllib.parse import urlencode
 
@@ -80,6 +81,7 @@ class CardWidget(TemplateWidget):
 class MultipleModelWidget(Block):
     model = None
     model_widget = None
+    model_kwargs = {}
     ordering = None
     queryset = None
 
@@ -88,11 +90,12 @@ class MultipleModelWidget(Block):
         self.model_widget = kwargs.pop('model_widget', self.model_widget)
         self.ordering = kwargs.pop('ordering', self.ordering)
         self.queryset = kwargs.pop('queryset', self.queryset)
+        self.model_kwargs = kwargs.pop('model_kwargs', copy(self.model_kwargs))
         super().__init__(*args, **kwargs)
 
-    def get_model_widget(self, object=object):
+    def get_model_widget(self, object=object, **kwargs):
         if self.model_widget:
-            return self.model_widget(object=object)
+            return self.model_widget(object=object, **kwargs)
         else:
             raise ImproperlyConfigured(
                 "%(cls)s is missing a model widget. Define "
@@ -103,7 +106,7 @@ class MultipleModelWidget(Block):
     def get_model_widgets(self, object_list):
         widgets = []
         for object in object_list:
-            widgets.append(self.get_model_widget(object=object))
+            widgets.append(self.get_model_widget(object=object, **self.model_kwargs))
         return widgets
 
     def get_queryset(self):

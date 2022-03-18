@@ -103,6 +103,8 @@ class JSONResponseMixin:
                 response['result'] = 'error'
         else:
             response = func_val
+        # can't have 'view' here, because the view object can't be jsonified
+        junk = response.pop('view', None)
 
         dump = json.dumps(response, cls=LazyEncoder)
         return self.render_to_response(dump)
