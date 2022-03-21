@@ -794,7 +794,7 @@ class DataTable(Widget, WidgetInitKwargsMixin, DatatableAJAXView):
         return ''
 
     def render_actions_column(self, row, column):
-        response = "<div class='d-flex flex-row'>"
+        response = "<div class='d-flex flex-row justify-content-end'>"
         if hasattr(row, 'get_absolute_url'):
             url = row.get_absolute_url()
             view_button = self.get_action_button_with_url(row, self.default_action_button_label, url, color_class=self.default_action_button_color_class)
