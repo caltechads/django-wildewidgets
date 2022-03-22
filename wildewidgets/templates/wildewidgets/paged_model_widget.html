@@ -5,6 +5,8 @@
 
 {% for widget in widget_list %}
   {% wildewidgets widget %}
+{% empty %}
+  <ul class="list-group"><li class="list-group-item fw-light fst-italic">No {{item_label}}s</li></ul>
 {% endfor %}
 
 {% if is_paginated %}

@@ -84,14 +84,19 @@ class MultipleModelWidget(Block):
     model_kwargs = {}
     ordering = None
     queryset = None
+    item_label="item"
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, item_label="", **kwargs):
         self.model = kwargs.pop('model', self.model)
         self.model_widget = kwargs.pop('model_widget', self.model_widget)
         self.ordering = kwargs.pop('ordering', self.ordering)
         self.queryset = kwargs.pop('queryset', self.queryset)
         self.model_kwargs = kwargs.pop('model_kwargs', copy(self.model_kwargs))
+        self.item_label = item_label if item_label else self.item_label
         super().__init__(*args, **kwargs)
+
+    def get_item_label(self, object):
+        return self.item_label
 
     def get_model_widget(self, object=object, **kwargs):
         if self.model_widget:
@@ -183,6 +188,7 @@ class PagedModelWidget(MultipleModelWidget):
                 )
         else:
             kwargs['widget_list'] = self.get_model_widgets(self.get_queryset().all())
+        kwargs['item_label'] = self.item_label
         if self.extra_url:
             anchor = self.extra_url.pop("#", None)
             extra_url = f"&{urlencode(self.extra_url)}"
@@ -252,11 +258,9 @@ class ListModelWidget(MultipleModelWidget):
     """
     base_css_class = "wildewidgets-list-model-widget list-group"
     tag='ul'
-    item_label="item"
     remove_url=None
 
-    def __init__(self, *args, remove_url=None, item_label="", **kwargs):
-        self.item_label = item_label if item_label else self.item_label
+    def __init__(self, *args, remove_url=None, **kwargs):
         self.remove_url = remove_url if remove_url else self.remove_url
         css_class = kwargs.get("css_class", "")
         css_class += f" {self.base_css_class}"
@@ -265,6 +269,8 @@ class ListModelWidget(MultipleModelWidget):
         self.remove_url = remove_url
         super().__init__(*args, **kwargs)
         widgets = self.get_model_widgets(self.get_queryset().all())
+        if not widgets:
+            self.add_block(StringBlock(f"No {self.item_label}s", tag='li', css_class="list-group-item fw-light fst-italic"))
         for widget in widgets:
             self.add_block(widget)
 
@@ -272,9 +278,6 @@ class ListModelWidget(MultipleModelWidget):
         if self.remove_url:
             return self.remove_url.format(object.id)
         return ""
-
-    def get_item_label(self, object):
-        return self.item_label
 
     def get_confirm_text(self, object):
         item_label = self.get_item_label(object)
