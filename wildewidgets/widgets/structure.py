@@ -286,9 +286,9 @@ class ListModelWidget(MultipleModelWidget):
     def get_object_text(self, object):
         return str(object)
 
-    def get_model_widget(self, object=object):
+    def get_model_widget(self, object=object, **kwargs):
         if self.model_widget:
-            return super().get_model_widget(object=object)
+            return super().get_model_widget(object=object, **kwargs)
         widget = HorizontalLayoutBlock(
             tag='li',
             css_class='list-group-item'
