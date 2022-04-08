@@ -46,6 +46,13 @@ class KeyValueListBlock(Block):
     tag = 'ul'
     css_class = "list-group"
 
+    def __init__(self, *args, **kwargs):
+        if "css_class" in kwargs:
+            kwargs['css_class'] = f"{kwargs['css_class']} {self.css_class}"
+        else:
+            kwargs['css_class'] = self.css_class
+        super().__init__(*args, **kwargs)
+
     def add_simple_key_value(self, key, value):
         self.add_block(
             HorizontalLayoutBlock(
