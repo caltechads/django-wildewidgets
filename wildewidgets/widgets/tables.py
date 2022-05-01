@@ -776,8 +776,14 @@ class DataTable(Widget, WidgetInitKwargsMixin, DatatableAJAXView):
             url = "javascript:void(0)"
         return self.get_action_button_with_url(row, label, url, method, color_class, attr, js_function_name)
 
+    def get_action_button_url_extra_attributes(self, row):
+        return ""
+
     def get_action_button_with_url(self, row, label, url, method='get', color_class='secondary', attr='id',
                                    js_function_name=None):
+        url_extra = self.get_action_button_url_extra_attributes(row)
+        if url_extra:
+            url = f"{url}&{url_extra}"                                   
         if method == 'get':
             if js_function_name:
                 link_extra = f"onclick='{js_function_name}({row.id});'"
