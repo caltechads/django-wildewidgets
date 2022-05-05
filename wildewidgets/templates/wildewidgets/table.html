@@ -1,5 +1,5 @@
 {% load i18n %}
-<div class="dashboard-table-container pt-4 pb-2 bg-white" style="width: {{options.width}};overflow-x:auto;">
+<div class="dashboard-table-container pt-4 pb-2 bg-white" style="width: {{options.width}};">
   {% if form.is_visible %}
   <form class='form' action='{{form.url}}' method='post'>
   {% endif %}
@@ -66,7 +66,7 @@
     </div>
   </div> <!-- end table controls -->
 
-  <table id="{{name}}" class="wildewidgets-table table {{options.small|yesno:'table-sm,,'}} {{options.striped|yesno:'stripe,,'}} {{name}}" style="width: {{options.width}};">
+  <table id="{{name}}" class="wildewidgets-table table {{options.small|yesno:'table-sm,,'}} {{options.striped|yesno:'stripe,,'}} {{name}}" style="width: {{options.width}}; overflow-x:auto;">
     <thead>
       <tr>
         {% for key,item in header.items %}

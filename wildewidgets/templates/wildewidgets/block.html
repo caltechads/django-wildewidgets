@@ -5,7 +5,7 @@
     {% if content|is_wildewidget %}
       {% wildewidgets content %}
     {% else %}
-      {{content}}
+      {{content|safe}}
     {% endif %}
   {% endfor %}
 {% endblock %}

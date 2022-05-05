@@ -1,3 +1,4 @@
+from copy import copy
 from functools import lru_cache
 import random
 import re
@@ -634,11 +635,11 @@ class DataTableStyler:
 class DataTableForm:
 
     def __init__(self, table):
-        if table.form_actions:
+        if table.has_form_actions():
             self.is_visible = True
         else:
             self.is_visible = False
-        self.actions = table.form_actions
+        self.actions = table.get_form_actions()
         self.url = table.form_url
 
 
@@ -673,6 +674,7 @@ class DataTable(Widget, WidgetInitKwargsMixin, DatatableAJAXView):
         self.column_filters = {}
         self.column_styles = []
         self.data = kwargs.get('data', [])
+        self._form_actions = copy(self.form_actions)
         if self.form_actions:
             self.column_fields['checkbox'] = DataTableColumn(
                 field='checkbox',
@@ -681,6 +683,15 @@ class DataTable(Widget, WidgetInitKwargsMixin, DatatableAJAXView):
                 sortable=False
             )
         self.sort_ascending = kwargs.get('sort_ascending', self.sort_ascending)
+
+    def has_form_actions(self):
+        return not self._form_actions == None
+
+    def get_form_actions(self):
+        return self._form_actions
+
+    def add_form_action(self, action):
+        self._form_actions.append(action)
 
     def get_order_columnsx(self):
         cols = []
@@ -704,6 +715,9 @@ class DataTable(Widget, WidgetInitKwargsMixin, DatatableAJAXView):
 
     def add_filter(self, field, filter):
         self.column_filters[field] = filter
+
+    def remove_filter(self, field):
+        del self.column_filters[field]
 
     def add_styler(self, styler):
         styler.test_index = list(self.column_fields.keys()).index(styler.test_cell)

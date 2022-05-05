@@ -5,7 +5,7 @@ from typing import List, Optional, Dict, Any
 
 from wildewidgets.widgets.text import StringBlock
 
-from .base import Block
+from .base import Block, TemplateWidget
 from .structure import HorizontalLayoutBlock
 from .text import (
     CodeWidget,
@@ -76,3 +76,49 @@ class KeyValueListBlock(Block):
                 css_class = "list-group-item",
             )
         )
+
+
+class GravatarWidget(TemplateWidget):
+    template_name = 'wildewidgets/gravatar.html'
+    css_class = "rounded-circle"
+    size = "28"
+
+    def __init__(self, *args, gravatar_url=None, size=None, fullname=None, **kwargs):
+        self.gravatar_url = gravatar_url
+        self.css_class = kwargs.pop('css_class', self.css_class)
+        self.size = size or self.size
+        self.fullname = fullname
+        super().__init__(*args, **kwargs)
+
+    def get_context_data(self, **kwargs) -> Dict[str, Any]:
+        kwargs = super().get_context_data(**kwargs)
+        kwargs['gravatar_url'] = self.gravatar_url
+        kwargs['css_class'] = self.css_class
+        kwargs['size'] = self.size
+        kwargs['fullname'] = self.fullname
+        return kwargs
+
+
+class InitialsAvatarWidget(TemplateWidget):
+    template_name = 'wildewidgets/initials_avatar.html'
+    size = 28
+    color = "white"
+    background_color = "#626976"
+
+    def __init__(self, *args, initials=None, size=None, color=None, background_color=None, fullname=None, **kwargs):
+        self.initials = initials
+        self.size = size or self.size
+        self.color = color or self.color
+        self.background_color = background_color or self.background_color
+        self.fullname = fullname
+        super().__init__(*args, **kwargs)
+
+    def get_context_data(self, **kwargs) -> Dict[str, Any]:
+        kwargs = super().get_context_data(**kwargs)
+        kwargs['initials'] = self.initials.upper()
+        kwargs['fullsize'] = str(self.size)
+        kwargs['halfsize'] = str(self.size/2)
+        kwargs['color'] = self.color
+        kwargs['background_color'] = self.background_color
+        kwargs['fullname'] = self.fullname
+        return kwargs
