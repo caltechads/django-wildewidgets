@@ -653,6 +653,7 @@ class DataTable(Widget, WidgetInitKwargsMixin, DatatableAJAXView):
     default_action_button_label = 'View'
     default_action_button_color_class = 'secondary'
     sort_ascending = True
+    action_button_size = 'normal'
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -683,6 +684,11 @@ class DataTable(Widget, WidgetInitKwargsMixin, DatatableAJAXView):
                 sortable=False
             )
         self.sort_ascending = kwargs.get('sort_ascending', self.sort_ascending)
+        self.action_button_size = kwargs.get('action_button_size', self.action_button_size)
+        if not self.action_button_size == 'normal':
+            self.action_button_size_class = f"btn-{self.action_button_size}"
+        else:
+            self.action_button_size_class = ''
 
     def has_form_actions(self):
         return not self._form_actions == None
@@ -803,10 +809,10 @@ class DataTable(Widget, WidgetInitKwargsMixin, DatatableAJAXView):
                 link_extra = f"onclick='{js_function_name}({row.id});'"
             else:
                 link_extra = ""
-            return f"<a href='{url}' class='btn btn-{color_class} btn-smx me-2' {link_extra}>{label}</a>"
+            return f"<a href='{url}' class='btn btn-{color_class} {self.action_button_size_class} me-2' {link_extra}>{label}</a>"
         token_input = f'<input type="hidden" name="csrfmiddlewaretoken" value="{self.csrf_token}">'
         id_input = f'<input type="hidden" name="{attr}" value="{row.id}">'
-        button = f'<input type=submit value="{label}" class="btn btn-{color_class} btn-smx me-2">'
+        button = f'<input type=submit value="{label}" class="btn btn-{color_class} {self.action_button_size_class} me-2">'
         form = f"<form class='form form-inline' action={url} method='post'>{token_input}{id_input}{button}</form>"
         return form
 
