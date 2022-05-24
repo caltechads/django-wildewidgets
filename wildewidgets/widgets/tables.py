@@ -949,10 +949,11 @@ class BasicModelTable(DataTable):
             kwargs = {}
             if field_name in self.verbose_names:
                 kwargs['verbose_name'] = self.verbose_names[field_name]
-            elif verbose_name == field.verbose_name:
-                kwargs['verbose_name'] = verbose_name.capitalize()
-            else:
-                kwargs['verbose_name'] = field.verbose_name
+            elif hasattr(field, 'verbose_name'):
+                if verbose_name == field.verbose_name:
+                    kwargs['verbose_name'] = verbose_name.capitalize()
+                else:
+                    kwargs['verbose_name'] = field.verbose_name
             self.set_standard_column_attributes(field_name, kwargs)
             self.add_column(field_name, **kwargs)
         else:
