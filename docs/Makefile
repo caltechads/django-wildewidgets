@@ -7,6 +7,7 @@ SPHINXOPTS    ?=
 SPHINXBUILD   ?= sphinx-build
 SOURCEDIR     = .
 BUILDDIR      = _build
+DJANGO_SETTINGS_MODULE = wildewidgets.settings
 
 # Put it first so that "make" without argument is like "make help".
 help:
