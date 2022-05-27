@@ -18,6 +18,15 @@ from django.core.exceptions import ImproperlyConfigured
 
 
 class TabbedWidget(TemplateWidget):
+    """Extends TemplateWidget.
+    Render a tabbed interace. 
+    
+    Example::
+
+        tab = TabbedWidget()
+        tab.add_tab('My First Widget', widget1)
+        tab.add_tab('My Second Widget', widget2)
+    """
     template_name = 'wildewidgets/tabbed_widget.html'
     slug_suffix = None
 
@@ -25,6 +34,13 @@ class TabbedWidget(TemplateWidget):
         self.tabs = []
 
     def add_tab(self, name, widget):
+        """
+        Add a Bootstrap 5 tab named `name` that displays `widget`.
+
+        Args:
+            name (str): Tab name/title.
+            widget (obj): Widget to display in tab.
+        """
         self.tabs.append((name, widget))
 
     def get_context_data(self, **kwargs):
@@ -36,6 +52,18 @@ class TabbedWidget(TemplateWidget):
 
 
 class CardWidget(TemplateWidget):
+    """Extends TemplateWidget.
+    Renders a Bootstrap 5 Card.
+
+    Args:
+        header (header widget, optional): A header widget to display above the card.
+        header_text (str, optional): Text used to build a header widget is one is not provided
+        card_title (str): Card title
+        card_subtitle (str): Card subtitle
+        widget (obj): Widget to display in card body
+        widget_css (str): CSS to apply to the widget displayed in the card body
+        css_class (str): CSS to apply to the card itself in addition to the defaults
+    """
     template_name = 'wildewidgets/card.html'
     header = None
     header_text = None
@@ -71,14 +99,30 @@ class CardWidget(TemplateWidget):
         return kwargs
 
     def set_widget(self, widget, css_class=None):
+        """
+        Set the widget displayed in the card body
+
+        Args:
+            widget (obj): Widget to display in card body
+            css_class (str): CSS to apply to the widget displayed in the card body
+        """
         self.widget = widget
         self.widget_css = css_class
 
     def set_header(self, header):
+        """
+        Set the header widget to display above the card
+
+        Args:
+            header (obj): Header widget to display above the card
+        """
         self.header = header
 
 
 class MultipleModelWidget(Block):
+    """Extends Block.
+    Base class for `PagedModelWidget` and `ListModelWidget`.
+    """
     model = None
     model_widget = None
     model_kwargs = {}
@@ -96,9 +140,15 @@ class MultipleModelWidget(Block):
         super().__init__(*args, **kwargs)
 
     def get_item_label(self, object):
+        """
+        Returns the type of the item displayed. This is used in the confirmation dialog when deleting.
+        """
         return self.item_label
 
     def get_model_widget(self, object=object, **kwargs):
+        """
+        Returns the individual widget to display as part of the list.
+        """
         if self.model_widget:
             return self.model_widget(object=object, **kwargs)
         else:
@@ -143,6 +193,31 @@ class MultipleModelWidget(Block):
 
 
 class PagedModelWidget(MultipleModelWidget):
+    """
+    Extends `MultipleModelWidget`. A widget that displays a pageable list of widgets 
+    defined by a queryset. A model or queryset must be provided, and either a model_widget 
+    or the funtion `get_model_widget` must be provided.
+
+    Args:
+        page_kwarg (str, optional): get argument for the page number. Defaults to `page`.
+        paginate_by (int, optional): number of widgets per page. Defaults to all widgets.
+        extra_url (dict, optional): extra paramters passed in the page links.
+
+    Example::
+
+        PagedModelWidget(
+            queryset=project.myobject_set.all(),
+            paginate_by=3,
+            page_kwarg='myobject_page',
+            model_widget=MyObjectWidget,
+            model_kwargs={'foo': bar},
+            item_label="myobject",
+            extra_url={
+                'pk': myobject.id,
+                '#':'myobjects',
+            },
+        )
+    """
     template_name = 'wildewidgets/paged_model_widget.html'
     page_kwarg = 'page'
     paginate_by = None
@@ -201,6 +276,13 @@ class PagedModelWidget(MultipleModelWidget):
 
 
 class CrispyFormWidget(Block):
+    """Extends Block.
+    A widget that displays a crispy_form widget.
+
+    Args:
+        form (obj, optional): A crispy form to display. If none is specified, 
+            it will be assumed that `form` is specified elsewhere in the context.
+    """
     template_name = 'wildewidgets/crispy_form_widget.html'
     css_class = "wildewidgets-crispy-form-widget"
 
@@ -216,6 +298,30 @@ class CrispyFormWidget(Block):
 
 
 class CollapseWidget(Block):
+    """Extends Block.
+    A widget that is initially displayed hidden. It is typically used in conjunction
+    with a `CollapseButton`. Pressing the `CollapseButton` toggles the visibility of
+    the widget.
+
+    Args:
+        css_id (str): This ID will be shared with the `CollapseButton`.
+
+    Example::
+
+        CollapseWidget(
+            CrispyFormWidget(
+                form=form,
+            ),
+            css_id=collapse_id,
+            css_class="pt-3",
+        )
+        header = CardHeader(header_text="Services")
+        header.add_collapse_button(
+            text="Manage",
+            color="primary",
+            target=f"#{collapse_id}",
+        )
+    """
     css_class="collapse"
 
     def __init__(self, *args, **kwargs):
@@ -227,6 +333,25 @@ class CollapseWidget(Block):
 
 
 class HorizontalLayoutBlock(Block):
+    """Extends Block.
+    A container widget intended to display several other widgets aligned horizontally.
+
+    Args:
+        align (str, optional): Flex alignment as defined in Bootstrap 5 (start, end, center...). 
+            Default is `center`.
+        justify (str, optional): Flex justification as defined in Bootstrap 5 (start, end, center, between...).
+            Default is `between`.
+
+    Example::
+
+        HorizontalLayoutBlock(
+            LabelBlock(label),
+            block1,
+            block2,
+            justify="end",
+            css_class="mt-3",
+        )
+    """
     align="center"
     justify="between"
 
@@ -241,14 +366,18 @@ class HorizontalLayoutBlock(Block):
 
 class ListModelWidget(MultipleModelWidget):
     """
-    Extend `MultipleModelWidget`. This class provides a list of objects
+    Extends `MultipleModelWidget`. This class provides a list of objects
     defined by a QuerySet, displayed in a list-group `ul` block. By default,
     a widget will be provided that simply displays whatever returns from
     the conversion of the object to a `str`. If a `remove_url` is provided,
     an `X` icon to the right of each object will act as a button to remove
     the item.
 
-    Example 1:
+    Args:
+        remove_url (str, optional): The url to `POST` to in order to delete or 
+            remove the object. 
+
+    Example::
 
         widget = ListModelWidget(
             queryset=myparent.children,
