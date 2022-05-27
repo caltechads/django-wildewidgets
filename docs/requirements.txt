@@ -1,5 +1,5 @@
 Django==3.2.5
 mkdocs==1.2.3
 jinja2==3.0.0
-django-wildewidgets==0.13.43
+django-wildewidgets
 
