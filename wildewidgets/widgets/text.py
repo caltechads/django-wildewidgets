@@ -16,6 +16,14 @@ from .base import TemplateWidget, Block
 
 
 class CodeWidget(TemplateWidget):
+    """Extends TemplateWidget.
+
+    A widget to display code with context-sensitive if a language is supplied.
+
+    Args:
+        code (str): the code to be displayed
+        language (str): the language of the code
+    """
     template_name = 'wildewidgets/code_widget.html'
     language = None
     code = ""
@@ -41,6 +49,14 @@ class CodeWidget(TemplateWidget):
 
 
 class MarkdownWidget(TemplateWidget):
+    """Extends TemplateWidget.
+
+    A widget to display markdown as HTML. 
+
+    Args:
+        text (str): the markdown to render as HTML.
+        css_class (str, optional): any classes to add to the widget
+    """
     template_name = 'wildewidgets/markdown_widget.html'
     text = ""
     css_class = ""
@@ -57,6 +73,14 @@ class MarkdownWidget(TemplateWidget):
 
 
 class HTMLWidget(TemplateWidget):
+    """Extends TemplateWidget.
+
+    A widget to display raw HTML. 
+
+    Args:
+        html (str): the HTML to render.
+        css_class (str, optional): any classes to add to the widget
+    """
     template_name = 'wildewidgets/html_widget.html'
     html = ""
     css_class = None
@@ -73,17 +97,38 @@ class HTMLWidget(TemplateWidget):
 
 
 class StringBlock(Block):
+    """Extends Block.
+
+    A basic widget that displays a string.
+
+    Args:
+        text: the text to display.
+    """
 
     def __init__(self, text: str, **kwargs):
         super().__init__(*[text], **kwargs)
 
 
 class TimeStamp(StringBlock):
+    """Extends StringBlock.
+
+    A basic widget that displays a timestamp.
+
+    Args:
+        text: the text to display.
+    """
     tag="small"
     css_class="fw-light"
 
 
 class LabelBlock(StringBlock):
+    """Extends StringBlock.
+
+    A basic widget that displays a label.
+
+    Args:
+        text: the text to display.
+    """
 
     def __init__(self, text: str, color: str = "secondary", **kwargs):
         css_class = kwargs.get("css_class", "")
@@ -93,7 +138,14 @@ class LabelBlock(StringBlock):
 
 
 class TagBlock(StringBlock):
+    """Extends StringBlock.
 
+    A basic widget that displays a colored tag.
+
+    Args:
+        text: the text to display.
+        color: the bootstrap color class.
+    """
     def __init__(self, text: str, color: str = "secondary", **kwargs):
         css_class = kwargs.get("css_class", "")
         css_class += f" badge bg-{color}"

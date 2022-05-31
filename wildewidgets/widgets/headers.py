@@ -5,6 +5,19 @@ from .base import TemplateWidget
 from .buttons import ModalButton, CollapseButton, LinkButton, FormButton
 
 class BasicHeader(TemplateWidget):
+    """Extends TemplateWidget.
+
+    The base header class, which contains the bulk of the functionality.
+
+    Args:
+        header_level (str, optional): the header depth, as in h1, h2, h3...
+        header_type (str, optional): the Boostrap 5 header class, either h-*, or display-*.
+        header_text (str): the text of the header.
+        css_class (str, optional): any css classes to apply to the header.
+        css_id (str, optional): an ID to add to the header DIV.
+        badge_text (str, optional): text to add in a badge to the right of the main header text.
+        badge_class (str, optional): the css class to add to the badge. Default is 'warning'.
+    """
     template_name = 'wildewidgets/header_with_controls.html'
     header_level = 1
     header_type = 'h'
@@ -41,6 +54,10 @@ class BasicHeader(TemplateWidget):
 
 
 class HeaderWithLinkButton(BasicHeader):
+    """Extends BasicHeader.
+
+    This is deprecated. Use `HeaderWithWidget` instead.
+    """
     template_name = 'wildewidgets/header_with_link_button.html'
     url = None
     link_text = None
@@ -55,6 +72,10 @@ class HeaderWithLinkButton(BasicHeader):
 
 
 class HeaderWithFormButton(BasicHeader):
+    """Extends BasicHeader.
+
+    This is deprecated. Use `HeaderWithWidget` instead.
+    """
     template_name = 'wildewidgets/header_with_form_button.html'
     url = None
     button_text = None
@@ -67,6 +88,10 @@ class HeaderWithFormButton(BasicHeader):
 
 
 class HeaderWithCollapseButton(BasicHeader):
+    """Extends BasicHeader.
+
+    This is deprecated. Use `HeaderWithWidget` instead.
+    """
     template_name = 'wildewidgets/header_with_collapse_button.html'
     collapse_id = None
     button_text = None
@@ -87,6 +112,10 @@ class HeaderWithCollapseButton(BasicHeader):
 
 
 class HeaderWithModalButton(BasicHeader):
+    """Extends BasicHeader.
+
+    This is deprecated. Use `HeaderWithWidget` instead.
+    """
     template_name = 'wildewidgets/header_with_modal_button.html'
     modal_id = None
     button_text = None
@@ -107,6 +136,14 @@ class HeaderWithModalButton(BasicHeader):
 
 
 class HeaderWithWidget(BasicHeader):
+    """Extends BasicHeader.
+
+    The base class for more complex headers with buttons or other widgets attached. It can be 
+    used stand-alone.
+
+    Args:
+        widget (obj): the widget to add to the header.
+    """
     template_name = 'wildewidgets/header_with_widget.html'
 
     def __init__(self, widget=None, **kwargs):
@@ -114,22 +151,37 @@ class HeaderWithWidget(BasicHeader):
         self.widget = widget
 
     def add_form_button(self, **kwargs):
+        """
+        Add a form button to the end of the headers. The arguments are those of the `FormButton`.
+        """
         widget = FormButton(**kwargs)
         self.widget = widget
 
     def add_link_button(self, **kwargs):
+        """
+        Add a form button to the end of the headers. The arguments are those of the `LinkButton`.
+        """
         widget = LinkButton(**kwargs)
         self.widget = widget
 
     def add_modal_button(self, **kwargs):
+        """
+        Add a form button to the end of the headers. The arguments are those of the `ModalButton`.
+        """
         widget = ModalButton(**kwargs)
         self.widget = widget
 
     def add_collapse_button(self, **kwargs):
+        """
+        Add a form button to the end of the headers. The arguments are those of the `CollapseButton`.
+        """
         widget = CollapseButton(**kwargs)
         self.widget = widget
 
     def set_widget(self, widget):
+        """
+        Add a widget to the header.
+        """
         self.widget = widget
 
     def get_context_data(self, **kwargs):
@@ -139,15 +191,27 @@ class HeaderWithWidget(BasicHeader):
 
 
 class PageHeader(HeaderWithWidget):
+    """Extends HeaderWithWidget.
+
+    Provides a standard page header.
+    """
     css_class = "my-4"
 
 
 class CardHeader(HeaderWithWidget):
+    """Extends HeaderWithWidget.
+
+    Provides a standard card header.
+    """
     css_class = "my-3"
     header_level = 2
 
 
 class WidgetListLayoutHeader(HeaderWithWidget):
+    """Extends HeaderWithWidget.
+
+    Provides a standard WidgetListLayout header.
+    """
     css_class = "mb-4"
     header_level = 2
 
