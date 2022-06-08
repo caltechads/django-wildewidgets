@@ -35,6 +35,9 @@ class CrispyFormModalWidget(ModalWidget):
     form = None
 
     def __init__(self, form=None, form_class=None, **kwargs):
+        form_class = kwargs.pop('form_class', self.form_class)
+        form = kwargs.pop('form', self.form)
+        
         if form_class:
             modal_form = form_class()
         elif form:
