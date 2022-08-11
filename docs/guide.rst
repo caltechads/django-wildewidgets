@@ -6,8 +6,7 @@ User Guide
    :caption: Contents:
 
    install
-   business_charts
-   scientific_charts
+   charts
    tables
    widgets
    
