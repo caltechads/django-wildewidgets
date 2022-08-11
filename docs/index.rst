@@ -3,21 +3,43 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to django-wildewidgets' documentation!
-===============================================
+django-wildewidgets documentation
+=================================
 
-django-wildewidgets is a Django library designed to help you make charts, graphs, tables, and UI widgets 
-quickly and easily with libraries like Chartjs, Altair, and Datatables.
+django-wildewidgets is a Django design library providing several tools for building
+full-featured, widget-based web applications with a standard, consistent design, based 
+on Bootstrap.
+
+Features include:
+
+ * Large library of standard widgets
+ * Custom widgets
+ * Widgets can be composable
+ * Teplateless design
+ * AJAX data for tables, charts, and other data based widgets
+ * Several supporting views
+
+The standard library widgets include:
+
+  * Basic blocks
+  * Template based widgets
+  * Basic Buttons
+  * Form, Modal, and Collapse Buttons
+  * Header widgets
+  * Chart widgets, including Altair, Apex, and ChartJS
+  * Layout and structure widgets, like Card and Tab widgets
+  * Modal widgets
+  * Form widgets
+  * Table widgets
+  * Text widgets, like HTML, Code, Markdown, and Label widgets
+  * Other miscillaneous widgets, like Breadcrumb, Gravatar, and KeyValueList widgets.
 
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
 
    install
-   business_charts
-   scientific_charts
-   tables
-   widgets
+   guide
    api
 
 Indices and tables

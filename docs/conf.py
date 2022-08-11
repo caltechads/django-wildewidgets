@@ -13,13 +13,13 @@
 # import os
 # import sys
 # sys.path.insert(0, os.path.abspath('.'))
-import sphinx_rtd_theme
+# import sphinx_rtd_theme
 
 
 # -- Project information -----------------------------------------------------
 
 project = 'django-wildewidgets'
-copyright = '2021, California Institute of Technology'
+copyright = '2022, California Institute of Technology'
 author = 'Glenn Bach'
 
 # The full version, including alpha/beta/rc tags
@@ -51,8 +51,8 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = "sphinx_rtd_theme"
-html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
+html_theme = "pydata_sphinx_theme"
+# html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 html_context = {
     "display_github": True, # Integrate github
     "github_user": "caltech-imss-ads", # Username
@@ -73,8 +73,23 @@ html_theme_options = {
     'collapse_navigation': True,
     'display_version': True,
     'navigation_depth': 3,
+    "show_prev_next": False,
+    "logo": {
+      "image_light": "wildewidgets_logo.png",
+      "image_dark": "wildewidgets_dark_mode_logo.png",
+      "text": "Wildewidgets",
+    },
+    "icon_links": [
+        {
+            "name": "GitHub",
+            "url": "https://github.com/caltechads/django-wildewidgets",  
+            "icon": "fab fa-github-square",
+            "type": "fontawesome",
+        }
+   ]
 }
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
+html_logo = "_static/wildewidgets.png"

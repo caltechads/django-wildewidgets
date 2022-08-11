@@ -1,6 +1,6 @@
-************
-Installation
-************
+***************
+Getting Started
+***************
 
 django-wildewidgets is a Django library designed to help you make charts, graphs, tables, and UI widgets 
 quickly and easily with libraries like Chartjs, Altair, and Datatables.
