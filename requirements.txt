@@ -4,4 +4,4 @@ flake8==4.0.1                                 # https://github.com/PyCQA/flake8
 ipython>=7.27.0                               # https://github.com/ipython/ipython
 pycodestyle==2.8.0                            # https://github.com/PyCQA/pycodestyle
 pydata-sphinx-theme==0.9.0                    # https://github.com/pydata/pydata-sphinx-theme
-Sphinx==2.0.1                                 # https://github.com/sphinx-doc/sphinx
+Sphinx==5.1.1                                 # https://github.com/sphinx-doc/sphinx
