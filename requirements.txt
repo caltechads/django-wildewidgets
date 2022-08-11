@@ -1,7 +1,7 @@
 autopep8==1.6.0                               # https://github.com/hhatto/autopep8
 bumpversion==0.6.0                            # https://github.com/peritus/bumpversion
-flake8==4.0.1                                 # https://github.com/PyCQA/flake8
-ipython>=7.27.0                               # https://github.com/ipython/ipython
+# flake8==4.0.1                                 # https://github.com/PyCQA/flake8
+# ipython>=7.27.0                               # https://github.com/ipython/ipython
 pycodestyle==2.8.0                            # https://github.com/PyCQA/pycodestyle
 pydata-sphinx-theme==0.9.0                    # https://github.com/pydata/pydata-sphinx-theme
 Sphinx==5.1.1                                 # https://github.com/sphinx-doc/sphinx
