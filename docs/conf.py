@@ -77,7 +77,7 @@ html_theme_options = {
     "logo": {
       "image_light": "wildewidgets_logo.png",
       "image_dark": "wildewidgets_dark_mode_logo.png",
-      "text": "Wildewidgets",
+      "text": "Django-Wildewidgets",
     },
     "icon_links": [
         {
