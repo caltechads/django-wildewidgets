@@ -27,7 +27,7 @@ The standard library widgets include:
   * Form, Modal, and Collapse Buttons
   * Header widgets
   * Chart widgets, including Altair, Apex, and ChartJS
-  * Layout and structure widgets, like Card and Tab widgets
+  * Layout and structural widgets, like Card and Tab widgets
   * Modal widgets
   * Form widgets
   * Table widgets
