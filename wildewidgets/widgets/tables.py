@@ -991,13 +991,17 @@ class BasicModelTable(DataTable):
         datetime_format = "%m/%d/%Y %H:%M"
         if hasattr(settings, 'WILDEWIDGETS_DATETIME_FORMAT'):
             datetime_format = settings.WILDEWIDGETS_DATETIME_FORMAT
-        return value.strftime(datetime_format)
+        if value:
+            return value.strftime(datetime_format)
+        return ""
 
     def render_date_type_column(self, value):
         date_format = "%m/%d/%Y"
         if hasattr(settings, 'WILDEWIDGETS_DATE_FORMAT'):
             date_format = settings.WILDEWIDGETS_DATE_FORMAT
-        return value.strftime(date_format)
+        if value:
+            return value.strftime(date_format)
+        return ""
 
     def render_column(self, row, column):
         value = super().render_column(row, column)
