@@ -23,7 +23,7 @@ copyright = '2022, California Institute of Technology'
 author = 'Glenn Bach'
 
 # The full version, including alpha/beta/rc tags
-release = '0.13.46'
+release = '0.13.47'
 
 
 # -- General configuration ---------------------------------------------------
