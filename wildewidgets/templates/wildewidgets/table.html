@@ -113,15 +113,41 @@
       }
     };
   }
+
+  function export_column_checker( idx, data, node ) {
+    {% if has_form_actions %}
+      var has_form_actions = true;
+    {% else %}
+      var has_form_actions = false;
+    {% endif %}
+    {% if has_actions %}
+      var has_actions = true;
+      var action_column = {{action_column}};
+    {% else %}
+      var has_actions = false;
+    {% endif %}
+    if (has_form_actions) {
+      if (idx == 0) {
+        return false;
+      }
+    }
+    if (has_actions) {
+      if (idx == action_column) {
+        return false;
+      }
+    }
+    return true;
+  }
+
   $(document).ready(function() {
     var {{name}} = $('.{{name}}').DataTable({
         dom: '<"d-flex justify-content-between px-3 my-3"<"d-flex flex-row"l{{options.buttons|yesno:"B,'',''"}}>f>rtip',
         {% if options.buttons %}
         buttons: [
-            { extend: 'copy', className: 'btn btn-info btn-sm ms-5' },
-            { extend: 'csv', className: 'btn btn-info btn-sm' },
-            { extend: 'pdf', className: 'btn btn-info btn-sm' },
-            { extend: 'print', className: 'btn btn-info btn-sm' }
+          { extend: 'copy', className: 'btn btn-info btn-sm ms-5', exportOptions: {columns:export_column_checker}},
+          { extend: 'csv', className: 'btn btn-info btn-sm', exportOptions: {columns:export_column_checker}},
+          { extend: 'pdf', className: 'btn btn-info btn-sm', exportOptions: {columns:export_column_checker}},
+          { extend: 'print', className: 'btn btn-info btn-sm', exportOptions: {columns:export_column_checker}}
         ],
         {% endif %}
       language: dt_language,

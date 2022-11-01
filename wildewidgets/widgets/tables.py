@@ -757,6 +757,12 @@ class DataTable(Widget, WidgetInitKwargsMixin, DatatableAJAXView):
             context = {"async": True}
         html_template = template.loader.get_template(template_file)
         context['header'] = self.column_fields
+        context['has_form_actions'] = self.has_form_actions()
+        if self.actions:
+            context['has_actions'] = True
+            context['action_column'] = len(self.column_fields) - 1
+        else:
+            context['has_actions'] = False        
         context['filters'] = filters
         context['stylers'] = self.column_styles
         context['has_filters'] = has_filters
