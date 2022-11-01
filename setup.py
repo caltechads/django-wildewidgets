@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 setup(
     name='django-wildewidgets',
     version="0.13.48",
-    description='django-wildewidgets is a Django library designed to help you make charts, graphs, tables, and UI widgets quickly and easily with libraries like Chartjs, Altair, and Datatables.',
+    description='django-wildewidgets is a Django design library providing several tools for building full-featured, widget-based web applications with a standard, consistent design, based on Bootstrap.',
     long_description=open('README.md', 'rt').read(),
     long_description_content_type="text/markdown",
     author="IMSS ADS",

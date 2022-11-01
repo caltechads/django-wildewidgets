@@ -9,8 +9,9 @@
     |__/             |___/                                                   |___/              
 ```
 
-`django-wildewidgets` is a Django library designed to help you make charts, graphs, tables, and UI widgets 
-quickly and easily with libraries like Chartjs, Altair, and Datatables.
+`django-wildewidgets` is a Django design library providing several tools for building
+full-featured, widget-based web applications with a standard, consistent design, based 
+on Bootstrap.
 
 ## Quick start
 
