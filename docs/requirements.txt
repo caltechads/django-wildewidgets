@@ -1,7 +1,7 @@
 Django==3.2.5
 mkdocs==1.2.3
 jinja2==3.0.0
-django-wildewidgets==0.13.47
+django-wildewidgets==0.13.48
 pycodestyle==2.8.0                            # https://github.com/PyCQA/pycodestyle
 pydata-sphinx-theme==0.9.0                    # https://github.com/pydata/pydata-sphinx-theme
 Sphinx==5.1.1                                 # https://github.com/sphinx-doc/sphinx
