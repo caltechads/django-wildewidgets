@@ -732,7 +732,8 @@ class DataTable(Widget, WidgetInitKwargsMixin, DatatableAJAXView):
         self.column_styles.append(styler)
 
     def build_context(self):
-        return {'rows': self.prepare_results(self.data)}
+        return {'rows': self.data}
+        # return {'rows': self.prepare_results(self.data)}
 
     def get_content(self, **kwargs):
         if self.actions:

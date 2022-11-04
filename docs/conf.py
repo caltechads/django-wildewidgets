@@ -34,6 +34,7 @@ release = '0.13.49'
 extensions = [
     'sphinx.ext.napoleon',
     'sphinx.ext.autodoc',
+    'sphinxcontrib.images',
 ]
 
 

@@ -34,6 +34,18 @@ The standard library widgets include:
   * Text widgets, like HTML, Code, Markdown, and Label widgets
   * Other miscillaneous widgets, like Breadcrumb, Gravatar, and KeyValueList widgets.
 
+|
+
+.. thumbnail:: demo_ss_home.png
+    :width: 200px
+    :height: 173px
+
+.. thumbnail:: demo_ss_simple_table.png
+    :width: 232px
+    :height: 173px
+
+|
+
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
