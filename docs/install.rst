@@ -15,6 +15,10 @@ If you plan on using `Altair charts <https://github.com/altair-viz/altair>`_, ru
 
     pip install altair
 
+If you plan on using the Markdown Widget, install `django-markdownify <https://github.com/erwinmatijsen/django-markdownify>`_::
+
+    pip install django-markdownify
+
 Configure
 ---------
 
@@ -34,6 +38,21 @@ Include the wildewidgets URLconf in your project urls.py like this::
         path('<urlbasepath>/wildewidgets_json', WildewidgetDispatch.as_view(), name='wildewidgets_json'),
     ]
 
+If you plan on using the Markdown Widget, add `markdownify` to your `INSTALLED_APPS`::
+
+    INSTALLED_APPS = [
+        ...
+        'markdownify',
+    ]
+
+and optionally configure it in your `settings.py`::
+
+    MARKDOWNIFY = {
+        "default": {
+            "WHITELIST_TAGS": bleach.sanitizer.ALLOWED_TAGS + ["p", "h1", "h2"]
+        },
+    }
+
 Static Resources
 ----------------
 
@@ -41,7 +60,7 @@ Add the appropriate resources to your template files.
 
 If using `WidgetListLayout`, add the following to your template::
 
-    {% static 'css/wildewidgets.css' %}
+    {% static 'wildewidgets/css/wildewidgets.css' %}
 
 For `ChartJS <https://www.chartjs.org/>`_ (regular business type charts), add the corresponding javascript file::
 
@@ -75,7 +94,7 @@ If you want to add the export buttons to a DataTable, also add::
     
 and, if using `Tabler <https://tabler.io>`_, include::
 
-    <link rel="stylesheet" href="{% static 'css/table_extra.css' %}"> 
+    <link rel="stylesheet" href="{% static 'wildewidgets/css/table_extra.css' %}"> 
 
 For `ApexCharts <https://apexcharts.com>`_, use::
 
@@ -83,4 +102,4 @@ For `ApexCharts <https://apexcharts.com>`_, use::
 
 If you plan on using `CodeWidget`, you'll need to include the following to get syntax highlighting::
 
-    <link rel="stylesheet" href="{% static 'css/highlighting.css' %}">
+    <link rel="stylesheet" href="{% static 'wildewidgets/css/highlighting.css' %}">

@@ -27,7 +27,7 @@ class ApexDatasetBase(Widget):
         }
         if self.name:
             options['name'] = self.name if self.name is not None else ""
-        if self.type:
+        if self.chart_type:
             options['type'] = self.chart_type
         return options
 
