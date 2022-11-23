@@ -8,6 +8,15 @@ from django.core.exceptions import ImproperlyConfigured
 
 
 class ModalWidget(TemplateWidget):
+    """Extends TemplateWidget.
+    Renders a Bootstrap 5 Modal.
+
+    Args:
+        modal_id: The CSS ID of the modal.
+        modal_title: The title of the modal.
+        modal_body: The body of the modal, any Block.
+        modal_size (optional): The size of the modal. One of 'sm', 'lg', or 'xl'.
+    """    
     template_name = 'wildewidgets/modal.html'
     modal_id = None
     modal_title = None
@@ -31,6 +40,13 @@ class ModalWidget(TemplateWidget):
 
 
 class CrispyFormModalWidget(ModalWidget):
+    """Extends ModalWidget.
+    Renders a Bootstrap 5 Modal with a CrispyFormWidget as the body.
+
+    Args:
+        form: The form to render in the modal.
+        form_class: The form class to render in the modal.
+    """
     form_class = None
     form = None
 

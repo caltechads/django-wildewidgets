@@ -1,0 +1,24 @@
+{% extends 'academy_theme/base.html' %}
+{% load academy_theme i18n static sass_tags %}
+
+{% block title %}{% trans 'Book Manager Demo' %}{% endblock %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% sass_src 'core/css/core.scss' %}">
+  <link href="https://cdn.datatables.net/1.10.21/css/jquery.dataTables.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="{% static 'wildewidgets/css/highlighting.css' %}">
+{% endblock %}
+
+{% block extra_header_js %}
+  <script src="https://cdn.datatables.net/1.10.21/js/jquery.dataTables.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.8.4/moment.min.js"></script>
+  <script src="https://cdn.datatables.net/plug-ins/1.10.21/sorting/datetime-moment.js"></script>
+{% endblock %}
+
+{% block breadcrumbs %}
+  <ol class="breadcrumb ribbon__content__login__breadcrumbs__breadcrumb">
+  {% block breadcrumb-items %}
+    {% breadcrumb 'Home' 'core:home' %}
+  {% endblock %}
+  </ol>
+{% endblock %}

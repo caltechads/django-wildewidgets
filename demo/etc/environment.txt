@@ -1,0 +1,26 @@
+DB_NAME=demo
+DB_HOST=db
+DB_USER=demo_u
+DB_PASSWORD=password
+
+DJANGO_SECRET_KEY=__SECRET_KEY__
+
+############################################################################
+# DEV SETTINGS - Don't put anything below this line in your prod environment
+############################################################################
+# DEBUG is the django setting. DEVELOPMENT exists to let us specify "dev mode" even when DEBUG is False.
+# This let you do "Developmenty" things, like disable emails, even while DEBUG needs to be False for testing stuff.
+DEBUG=True
+DEVELOPMENT=True
+# You should set CACHE_TEMPLATES to False in dev, but leave it undefined in prod. Set it to True in dev for
+# those unusual times when you want to cache templates, like when using StreamField-heavy editors a lot.
+CACHE_TEMPLATES=False
+GUNICORN_RELOAD=True
+# Set this to True to disable all caching.
+DISABLE_CACHE=False
+# Disable the creation of .pyc files.
+PYTHONDONTWRITEBYTECODE=1
+# Set either of these to True to enable django-queryinspect and/or django-debug-toolbar.
+# Note that these two are forced to False unless DEVELOPMENT is True.
+ENABLE_QUERYINSPECT=False
+ENABLE_DEBUG_TOOLBAR=False

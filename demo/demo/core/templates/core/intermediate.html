@@ -1,0 +1,17 @@
+{% extends 'academy_theme/base--wildewidgets.html' %}
+{% load i18n static %}
+
+{% block extra_footer_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4/dist/Chart.min.js"></script> 
+<script src="https://cdn.jsdelivr.net/npm/vega@5"></script>
+<script src="https://cdn.jsdelivr.net/npm/vega-lite@4"></script>
+<script src="https://cdn.jsdelivr.net/npm/vega-embed@6"></script>  
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+{% endblock %}
+
+{% block ribbon_bar_links %}
+  <div>
+    <a href="https://github.com/caltechads/django-wildewidgets"><span class='bi-github text-body'>&nbsp;Source Code</span></a>
+    <a href="https://django-wildewidgets.readthedocs.io/en/latest/" class="ms-2"><span class='bi-book text-body'> Documentation</span></a>
+  </div>
+{% endblock %}
