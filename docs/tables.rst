@@ -129,7 +129,7 @@ You can specify custom filters by field::
 
 Generally, for these filters to work, you will have to override the default searching function for the corresponding field::
 
-        def search_pressure_column(self, qs, column, value):
+        def filter_pressure_column(self, qs, column, value):
             if value=='level_1000':
                 qs = qs.filter(pressure__lt=1000)    
             elif value=='level_2000':
@@ -140,12 +140,12 @@ Generally, for these filters to work, you will have to override the default sear
                 qs = qs.filter(pressure__contains=value)
             return qs
 
-        def search_restricted_column(self, qs, column, value):
+        def filter_restricted_column(self, qs, column, value):
             test = value=='True'
             qs = qs.filter(restricted=test)
             return qs
 
-        def search_open_column(self, qs, column, value):
+        def filter_open_column(self, qs, column, value):
             test = value=='True'
             qs = qs.filter(open=test)
             return qs

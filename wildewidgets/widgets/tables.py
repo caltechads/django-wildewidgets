@@ -489,7 +489,7 @@ class DatatableAJAXView(BaseDatatableView):
 
         :rtype: QuerySet
         """
-        attr_name = 'search_{}_column'.format(column)
+        attr_name = 'filter_{}_column'.format(column)
         if hasattr(self, attr_name):
             qs = getattr(self, attr_name)(qs, column, value)
         elif column in self.searchable_columns():
@@ -512,8 +512,12 @@ class DatatableAJAXView(BaseDatatableView):
         """
         query = None
         for column in self.searchable_columns():
-            kwarg_name = '{}__icontains'.format(column)
-            q = Q(**{kwarg_name: value})
+            attr_name = 'search_{}_column'.format(column)
+            if hasattr(self, attr_name):
+                q = getattr(self, attr_name)(column, value)
+            else:
+                kwarg_name = '{}__icontains'.format(column)
+                q = Q(**{kwarg_name: value})
             query = query | q if query else q
         return query
 
