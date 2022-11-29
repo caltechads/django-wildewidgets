@@ -834,6 +834,8 @@ The standard library widgets include:
   * Text widgets, like HTML, Code, Markdown, and Label widgets
   * Other miscillaneous widgets, like Breadcrumb, Gravatar, and KeyValueList widgets.
 
+**This entire site is built using django-wildewidgets, with only a single shared template.**
+
 ## Quick start
 
 Install:

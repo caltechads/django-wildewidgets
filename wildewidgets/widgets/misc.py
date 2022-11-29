@@ -122,3 +122,39 @@ class InitialsAvatarWidget(TemplateWidget):
         kwargs['background_color'] = self.background_color
         kwargs['fullname'] = self.fullname
         return kwargs
+
+
+class FontIcon(Block):
+
+    tag = 'i'
+    prefix: str = 'bi'
+    color: Optional[str] = None
+    background: Optional[str] = None
+
+    def __init__(
+        self,
+        icon: str,
+        color: Optional[str] = None,
+        background: Optional[str] = None,
+        **kwargs
+    ) -> None:
+        super().__init__(**kwargs)
+        self.color = color or self.color
+        self.background = background or self.background
+        self.icon = f'{self.prefix}-{icon}'
+        if self._css_class is None:
+            self._css_class = ''
+        self._css_class += f' {self.icon}'
+        if self.color:
+            self._css_class += f' text-{self.color} bg-transparent'
+        elif self.background:
+            self._css_class += f' bg-{self.background} text-{self.background}-fg'
+
+
+class TablerFontIcon(FontIcon):
+    """
+    FontIcon for Tabler Icons
+
+    Requires <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons@latest/iconfont/tabler-icons.min.css">
+    """
+    prefix = 'ti ti'
