@@ -153,8 +153,10 @@ class FontIcon(Block):
 
 class TablerFontIcon(FontIcon):
     """
-    FontIcon for Tabler Icons
+    :py:class:`FontIcon` for Tabler Icons.
 
-    Requires <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons@latest/iconfont/tabler-icons.min.css">
+    Requires::
+    
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons@latest/iconfont/tabler-icons.min.css">
     """
     prefix = 'ti ti'
