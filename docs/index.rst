@@ -35,6 +35,8 @@ The standard library widgets include:
   * Other miscillaneous widgets, like Breadcrumb, Gravatar, and KeyValueList widgets.
 
 |
+`DEMO <https://wildewidgets.caltech.edu>`_
+|
 
 .. thumbnail:: demo_ss_home.png
     :width: 200px
