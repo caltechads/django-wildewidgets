@@ -85,6 +85,12 @@ html_theme_options = {
             "url": "https://github.com/caltechads/django-wildewidgets",  
             "icon": "fab fa-github-square",
             "type": "fontawesome",
+        },
+        {
+            "name": "Demo",
+            "url": "https://wildewidgets.caltech.edu",  
+            "icon": "fa fa-desktop",
+            "type": "fontawesome",
         }
    ],
 }
