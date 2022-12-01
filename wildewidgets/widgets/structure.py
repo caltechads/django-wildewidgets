@@ -51,7 +51,7 @@ class TabbedWidget(TemplateWidget):
         return kwargs
 
 
-class CardWidget(TemplateWidget):
+class CardWidget(Block):
     """Extends TemplateWidget.
     Renders a Bootstrap 5 Card.
 
@@ -64,25 +64,29 @@ class CardWidget(TemplateWidget):
         widget_css (str): CSS to apply to the widget displayed in the card body
         css_class (str): CSS to apply to the card itself in addition to the defaults
     """
-    template_name = 'wildewidgets/card.html'
+    template_name = 'wildewidgets/card_block.html'
     header = None
     header_text = None
     card_title = None
     card_subtitle = None
     widget = None
     widget_css = None
-    css_class = None
 
-    def __init__(self, **kwargs):
-        self.header = kwargs.get('header', self.header)
-        self.header_text = kwargs.get('header_text', self.header_text)
+    def __init__(self, *args, **kwargs):
+        self.header = kwargs.pop('header', self.header)
+        self.header_text = kwargs.pop('header_text', self.header_text)
         if self.header_text and not self.header:
             self.header = CardHeader(header_text=self.header_text)
-        self.card_title = kwargs.get('card_title', self.card_title)
-        self.card_subtitle = kwargs.get('card_subtitle', self.card_subtitle)
-        self.widget = kwargs.get('widget', self.widget)
-        self.widget_css = kwargs.get('widget_css', self.widget_css)
-        self.css_class = kwargs.get("css_class", self.css_class)
+        self.card_title = kwargs.pop('card_title', self.card_title)
+        self.card_subtitle = kwargs.pop('card_subtitle', self.card_subtitle)
+        self.widget = kwargs.pop('widget', self.widget)
+        self.widget_css = kwargs.pop('widget_css', self.widget_css)
+        css_class = kwargs.get('css_class', "")
+        if css_class:
+            kwargs['css_class'] = f"card {css_class}"
+        else:
+            kwargs['css_class'] = "card"
+        super().__init__(*args, **kwargs)
 
     def get_context_data(self, **kwargs):
         kwargs = super().get_context_data(**kwargs)
@@ -341,6 +345,7 @@ class HorizontalLayoutBlock(Block):
             Default is `center`.
         justify (str, optional): Flex justification as defined in Bootstrap 5 (start, end, center, between...).
             Default is `between`.
+        flex_size (str, optional): Flex size as defined in Bootstrap 5 - sm, md, lg, xl, xxl. Default is None.
 
     Example::
 
@@ -354,12 +359,18 @@ class HorizontalLayoutBlock(Block):
     """
     align="center"
     justify="between"
+    flex_size=None
 
     def __init__(self, *blocks, **kwargs):
         align = kwargs.pop("align", self.align)
         justify = kwargs.pop("justify", self.justify)
+        flex_size = kwargs.pop("flex_size", self.flex_size)
+        if flex_size:
+            flex = f"d-{flex_size}-flex"
+        else:
+            flex = "d-flex"
         css_class = kwargs.get("css_class", "")
-        css_class += f" d-flex align-items-{align} justify-content-{justify}"
+        css_class += f" {flex} align-items-{align} justify-content-{justify}"
         kwargs["css_class"] = css_class
         super().__init__(*blocks, **kwargs)
 
@@ -424,7 +435,7 @@ class ListModelWidget(MultipleModelWidget):
         )
         if hasattr(object, 'get_absolute_url'):
             url = object.get_absolute_url()
-            widget.add_block(HTMLWidget(html=f'<a href="{url}">{str(object)}</a>'))
+            widget.add_block(HTMLWidget(html=f'<a href="{url}">{self.get_object_text(object)}</a>'))
         else:
             widget.add_block(StringBlock(self.get_object_text(object)))
         remove_url = self.get_remove_url(object)

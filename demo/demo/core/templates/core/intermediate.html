@@ -1,6 +1,11 @@
 {% extends 'academy_theme/base--wildewidgets.html' %}
 {% load i18n static %}
 
+{% block extra_css %}
+  {{block.super}}
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons@latest/iconfont/tabler-icons.min.css">
+{% endblock %}
+
 {% block extra_footer_js %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4/dist/Chart.min.js"></script> 
 <script src="https://cdn.jsdelivr.net/npm/vega@5"></script>

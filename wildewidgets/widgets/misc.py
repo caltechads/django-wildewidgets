@@ -124,6 +124,23 @@ class InitialsAvatarWidget(TemplateWidget):
         return kwargs
 
 
+class HTMLList(Block):
+    template_name: str = 'wildewidgets/html_list.html'
+    tag: str = 'ul'
+
+    def __init__(self, *args, items: list = [], **kwargs):
+        super().__init__(*args, **kwargs)
+        self.items = items
+
+    def add_item(self, item):
+        self.items.append(item)
+
+    def get_context_data(self, **kwargs) -> Dict[str, Any]:
+        kwargs = super().get_context_data(**kwargs)
+        kwargs['items'] = self.items
+        return kwargs
+
+
 class FontIcon(Block):
 
     tag = 'i'

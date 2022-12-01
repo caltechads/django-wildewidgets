@@ -27,15 +27,18 @@ from wildewidgets import (
     DataTable, 
     DataTableFilter,
     DoughnutChart, 
+    FontIcon,
     Histogram, 
     HorizontalHistogram, 
     HorizontalLayoutBlock,
     HorizontalStackedBarChart,
+    HTMLList,
     HTMLWidget,
     LabelBlock,
     LinkButton,
     ListModelWidget,
     MarkdownWidget,
+    ModalButton,
     ModalWidget,
     PagedModelWidget,
     PageHeader,
@@ -43,6 +46,7 @@ from wildewidgets import (
     StackedBarChart, 
     StringBlock,
     TabbedWidget,
+    TablerFontIcon,
     TagBlock,
     TimeStamp,
     WidgetStream,
@@ -805,117 +809,140 @@ class CrispyFormModalCard(CardWidget):
         widget = Block(header, modal)
         return widget
 
-home_docs = """
-django-wildewidgets is a Django design library providing several tools for building
-full-featured, widget-based web applications with a standard, consistent design, based 
-on Bootstrap.
 
-Features include:
-
- * Large library of standard widgets
- * Custom widgets
- * Widgets can be composable
- * Teplateless design
- * AJAX data for tables, charts, and other data based widgets
- * Several supporting views
-
-The standard library widgets include:
-
-  * Basic blocks
-  * Template based widgets
-  * Basic Buttons
-  * Form, Modal, and Collapse Buttons
-  * Header widgets
-  * Chart widgets, including Altair, Apex, and ChartJS
-  * Layout and structural widgets, like Card and Tab widgets
-  * Modal widgets
-  * Form widgets
-  * Table widgets
-  * Text widgets, like HTML, Code, Markdown, and Label widgets
-  * Other miscillaneous widgets, like Breadcrumb, Gravatar, and KeyValueList widgets.
-
-**This entire site is built using django-wildewidgets, with only a single shared template.**
-
-## Quick start
-
-Install:
-
-    pip install django-wildewidgets
+class HomeTable(BasicModelTable):
+    model = Book
+    fields = ['title', 'isbn', 'binding']
+    hide_controls = True
+    page_length = 5
+    striped = True
+    small = True
 
 
-If you plan on using [Altair charts](https://github.com/altair-viz/altair), run:
+class AuthorListModelWidget(ListModelWidget):
 
-    pip install altair
-
-Add "wildewidgets" to your INSTALLED_APPS setting like this:
-
-    INSTALLED_APPS = [
-        ...
-        'wildewidgets',
-    ]
-
-Include the wildewidgets URLconf in your project urls.py like this:
-
-    from wildewidgets import WildewidgetDispatch
-
-    urlpatterns = [
-        ...
-        path('<urlbasepath>/wildewidgets_json', WildewidgetDispatch.as_view(), name='wildewidgets_json'),
-    ]
-
-Add the appropriate resources to your template files.
-
-First, add this to your `<head>`:
-
-    <link rel="stylesheet" href="{% static 'wildewidgets/css/wildewidgets.css' %}"> 
-
-For [ChartJS](https://www.chartjs.org/) (regular business type charts), add the corresponding javascript file:
-
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4/dist/Chart.min.js"></script> 
+    def get_object_text(self, obj):
+        return f"{str(FontIcon(icon='person-fill', css_class='pe-2'))} {str(obj)}"
 
 
-For [Altair](https://github.com/altair-viz/altair) (scientific charts), use:
-
-    <script src="https://cdn.jsdelivr.net/npm/vega@5"></script>
-    <script src="https://cdn.jsdelivr.net/npm/vega-lite@4"></script>
-    <script src="https://cdn.jsdelivr.net/npm/vega-embed@6"></script>  
-
-For [DataTables](https://github.com/DataTables/DataTables), use:
-
-    <script src="https://cdn.datatables.net/1.10.21/js/jquery.dataTables.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.8.4/moment.min.js"></script>
-    <script src="https://cdn.datatables.net/plug-ins/1.10.21/sorting/datetime-moment.js"></script>
-
-and:
-
-    <link href="https://cdn.datatables.net/1.10.21/css/jquery.dataTables.min.css" rel="stylesheet" />
-
-and, if using [Tabler](https://tabler.io), include:
-
-    <link rel="stylesheet" href="{% static 'css/table_extra.css' %}"> 
-
-For [ApexCharts](https://apexcharts.com), use:
-
-    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
-
-If you plan on using CodeWidget, you'll need to include the following to get syntax highlighting:
-
-    <link rel="stylesheet" href="{% static 'css/highlighting.css' %}">
-
-## Documentation
-
-[django-wildewidgets.readthedocs.io](http://django-wildewidgets.readthedocs.io/) is the full
-reference for django-wildewidgets.
-"""
 class HomeBlock(Block):
 
+    description = """
+    django-wildewidgets is a Django design library providing several tools for building full-featured, 
+    widget-based web applications with a standard, consistent design, based on Bootstrap.
+    """
+    features = [
+        "Large library of standard widgets",
+        "Custom widgets",
+        "Widgets can be composable",
+        "Teplateless design",
+        "AJAX data for tables, charts, and other data based widgets",
+        "Several supporting views",
+    ]
+    standard_widgets = [
+        "Basic blocks",
+        "Template based widgets",
+        "Basic Buttons",
+        "Form, Modal, and Collapse Buttons",
+        "Header widgets",
+        "Chart widgets, including Altair, Apex, and ChartJS",
+        "Layout and structural widgets, like Card and Tab widgets",
+        "Modal widgets",
+        "Form widgets",
+        "Table widgets",
+        "Text widgets, like HTML, Code, Markdown, and Label widgets",
+        "Other miscillaneous widgets, like Breadcrumb, Gravatar, and KeyValueList widgets.",
+    ]
+    notice = "This entire site is built using django-wildewidgets, with only a single shared template."
+
     def __init__(self, *args, **kwargs):
-        file_path = os.path.dirname(__file__)
-        print(file_path)
+        # file_path = os.path.dirname(__file__)
+        # print(file_path)
         header = PageHeader(header_text="Welcome to the Django Wildewidgets Demo")
+
+        pie = PieChart(width=100, height=100)
+        pie.set_categories(["January", "February", "March", "April", "May", "June", "July"])
+        pie.add_dataset([75, 44, 92, 11, 44, 95, 35])
+
+        modal = ModalWidget(
+            modal_id="modal1", 
+            modal_title="Modal Title",
+            modal_body=StringBlock("This is a modal widget"),
+        )
+
         super().__init__(
             header,
-            MarkdownWidget(text=home_docs, css_class='w-75'),
-            StringBlock("This is the home page"),
+            CardWidget(widget=StringBlock(self.description, css_class='w-75')),
+            HorizontalLayoutBlock(
+                Block(
+                    CardWidget(
+                        widget=Block(
+                            StringBlock("Features include:", css_class='mb-3'),
+                            HTMLList(items=self.features),
+                        ),                        
+                    ),
+                    CardWidget(
+                        widget=Block(
+                            StringBlock("The standard library widgets include:", css_class='mb-3'),
+                            HTMLList(items=self.standard_widgets),
+                        ),
+                        # css_class="mt-3",
+                    ),
+                ),
+                Block(
+                    # HorizontalLayoutBlock(
+                    #     CardWidget(
+                    #     widget=TestDoughnutChart(legend=False, width=100, height=100),
+                    #     ),
+                    #     CardWidget(
+                    #         widget=pie,
+                    #     ),                        
+                    #     justify="start",
+                    # ),
+                    # CardWidget(
+                    #     widget=TestHorizontalHistogram(color=True, width='200', height='100'),
+                    #     attributes={'style': 'width: 312px;'},
+                    # ),
+                    CardWidget(widget=TestDoughnutChart(legend=False, width=240, height=287)),
+                    CardWidget(
+                        widget=HorizontalLayoutBlock(
+                            ModalButton(
+                                text=Block(FontIcon(icon="window", css_class="pe-1"), "Modal"),
+                                color="primary",
+                                target=f"#modal1",
+                            ),
+                            LinkButton(
+                                url="https://github.com/caltechads/django-wildewidgets", 
+                                text=Block(TablerFontIcon(icon="brand-github", css_class="pe-1"), "Github"),
+                                color="secondary",
+                            ),
+                            justify="evenly",
+                        ),
+                        # attributes={'style': 'width: 312px;'},
+                    ),
+                    CardWidget(
+                        widget=AuthorListModelWidget(queryset = Author.objects.all()[5:8]),
+                        # attributes={'style': 'width: 312px;height: 266px;'},
+                    ),
+                ),
+                Block(
+                    CardWidget(widget=TestChart(width="300px", height="344px")),
+                    CardWidget(widget=ApexLineChart()),
+                    # CardWidget(
+                    #     widget=CodeWidget(code=inspect.getsource(MarkdownCard), language='python'),
+                    #     attributes={'style': 'width: 356px;height: 280px;'},
+                    #     ),
+                ),
+                align="top", 
+                flex_size="xl",
+                # css_class="mt-3",
+                # justify="start",
+            ),
+            CardWidget(
+                widget=HomeTable(),
+                css_class=' overflow-auto',
+            ),
+            StringBlock(self.notice, css_class='w-75 my-3 fw-bold'),
+            modal,
         )
         
