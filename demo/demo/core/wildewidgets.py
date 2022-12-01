@@ -858,7 +858,10 @@ class HomeBlock(Block):
     def __init__(self, *args, **kwargs):
         # file_path = os.path.dirname(__file__)
         # print(file_path)
-        header = PageHeader(header_text="Welcome to the Django Wildewidgets Demo")
+        header = PageHeader(
+            header_text="Django Wildewidgets Demo",
+            css_class=f'{PageHeader.css_class} mx-1',
+        )
 
         pie = PieChart(width=100, height=100)
         pie.set_categories(["January", "February", "March", "April", "May", "June", "July"])
@@ -872,38 +875,32 @@ class HomeBlock(Block):
 
         super().__init__(
             header,
-            CardWidget(widget=StringBlock(self.description, css_class='w-75')),
+            CardWidget(
+                widget=Block(
+                    StringBlock(self.description, css_class='w-75'),
+                    StringBlock(self.notice, css_class='w-75 my-3 fw-bold'),
+                ),
+                css_class='mb-2 mx-1',
+            ),
             HorizontalLayoutBlock(
                 Block(
                     CardWidget(
-                        widget=Block(
-                            StringBlock("Features include:", css_class='mb-3'),
-                            HTMLList(items=self.features),
-                        ),                        
+                        header=BasicHeader(header_text="Features", css_class="my-0", header_level=3),
+                        widget=HTMLList(items=self.features),
+                        css_class='mb-2',
                     ),
                     CardWidget(
-                        widget=Block(
-                            StringBlock("The standard library widgets include:", css_class='mb-3'),
-                            HTMLList(items=self.standard_widgets),
-                        ),
-                        # css_class="mt-3",
+                        header=BasicHeader(header_text="Standard Widgets", css_class="my-0", header_level=3),
+                        widget=HTMLList(items=self.standard_widgets),
+                        css_class='mb-2',
                     ),
+                    css_class='mx-1',
                 ),
                 Block(
-                    # HorizontalLayoutBlock(
-                    #     CardWidget(
-                    #     widget=TestDoughnutChart(legend=False, width=100, height=100),
-                    #     ),
-                    #     CardWidget(
-                    #         widget=pie,
-                    #     ),                        
-                    #     justify="start",
-                    # ),
-                    # CardWidget(
-                    #     widget=TestHorizontalHistogram(color=True, width='200', height='100'),
-                    #     attributes={'style': 'width: 312px;'},
-                    # ),
-                    CardWidget(widget=TestDoughnutChart(legend=False, width=240, height=287)),
+                    CardWidget(
+                        widget=TestDoughnutChart(legend=False, width=240, height=300),
+                        css_class='mb-2',
+                        ),
                     CardWidget(
                         widget=HorizontalLayoutBlock(
                             ModalButton(
@@ -918,31 +915,34 @@ class HomeBlock(Block):
                             ),
                             justify="evenly",
                         ),
-                        # attributes={'style': 'width: 312px;'},
+                        css_class='py-3 mb-2',
                     ),
                     CardWidget(
                         widget=AuthorListModelWidget(queryset = Author.objects.all()[5:8]),
-                        # attributes={'style': 'width: 312px;height: 266px;'},
+                        css_class='mb-2',
+                        attributes={'style': 'height: 223px;'},
                     ),
+                    css_class='mx-1',
                 ),
                 Block(
-                    CardWidget(widget=TestChart(width="300px", height="344px")),
-                    CardWidget(widget=ApexLineChart()),
-                    # CardWidget(
-                    #     widget=CodeWidget(code=inspect.getsource(MarkdownCard), language='python'),
-                    #     attributes={'style': 'width: 356px;height: 280px;'},
-                    #     ),
+                    CardWidget(
+                        widget=TestChart(width="300px", height="371px"),
+                        css_class='mb-2',
+                    ),
+                    CardWidget(
+                        widget=ApexLineChart(),
+                        css_class='mb-2 pt-4',                        
+                    ),
+                    css_class='mx-1',
                 ),
                 align="top", 
                 flex_size="xl",
-                # css_class="mt-3",
-                # justify="start",
+                # css_class='mb-2',
             ),
             CardWidget(
                 widget=HomeTable(),
-                css_class=' overflow-auto',
-            ),
-            StringBlock(self.notice, css_class='w-75 my-3 fw-bold'),
+                css_class=' overflow-auto mx-1',
+            ),            
             modal,
         )
         

@@ -426,6 +426,13 @@ class ListModelWidget(MultipleModelWidget):
     def get_object_text(self, object):
         return str(object)
 
+    def get_model_subblock(self, object):
+        if hasattr(object, 'get_absolute_url'):
+            url = object.get_absolute_url()
+            return HTMLWidget(html=f'<a href="{url}">{self.get_object_text(object)}</a>')
+        else:
+            return StringBlock(self.get_object_text(object))
+
     def get_model_widget(self, object=object, **kwargs):
         if self.model_widget:
             return super().get_model_widget(object=object, **kwargs)
@@ -433,11 +440,7 @@ class ListModelWidget(MultipleModelWidget):
             tag='li',
             css_class='list-group-item'
         )
-        if hasattr(object, 'get_absolute_url'):
-            url = object.get_absolute_url()
-            widget.add_block(HTMLWidget(html=f'<a href="{url}">{self.get_object_text(object)}</a>'))
-        else:
-            widget.add_block(StringBlock(self.get_object_text(object)))
+        widget.add_block(self.get_model_subblock(object))
         remove_url = self.get_remove_url(object)
         if remove_url:
             widget.add_block(
