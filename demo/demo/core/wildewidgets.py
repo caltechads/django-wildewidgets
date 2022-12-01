@@ -859,7 +859,7 @@ class HomeBlock(Block):
         # file_path = os.path.dirname(__file__)
         # print(file_path)
         header = PageHeader(
-            header_text="Django Wildewidgets Demo",
+            header_text="django-wildewidgets Demo",
             css_class=f'{PageHeader.css_class} mx-1',
         )
 
