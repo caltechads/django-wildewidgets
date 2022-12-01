@@ -13,6 +13,8 @@
 full-featured, widget-based web applications with a standard, consistent design, based 
 on Bootstrap.
 
+The package includes the source to a [demo](https://wildewidgets.caltech.edu).
+
 ## Quick start
 
 Install:
