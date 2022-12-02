@@ -416,7 +416,6 @@ class BookModelTable(BasicModelTable):
     model = Book
     alignment = {'authors': 'left'}
     verbose_names = {'authors__full_name': 'Authors'}
-    # unsearchable = ['authors']
     buttons = True
     striped = True
 
