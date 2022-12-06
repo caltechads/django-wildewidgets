@@ -77,6 +77,7 @@ class WidgetListSidebarWidget(Block):
         *args,
         title: str = None,
         width: int = 3,
+        breakpoint: str = 'xl',
         bare_widgets: List[Widget] = None,
         actions: List[Widget] = None,
         **kwargs
@@ -85,7 +86,12 @@ class WidgetListSidebarWidget(Block):
             self.title = title
         if self.css_class is None:
             self.css_class = ''
-        self.css_class += f"col-{width}"
+        if breakpoint:
+            print(f"col-{breakpoint}-{width}")
+            self.css_class += f"col-{breakpoint}-{width}"
+        else:
+            print("no breakpoint")
+            self.css_class += f"col-{width}"
         super().__init__(*args, **kwargs)
         actions = actions if actions is not None else self.actions
         bare_widgets = bare_widgets if bare_widgets is not None else self.bare_widgets
@@ -226,8 +232,9 @@ class WidgetListLayout(Block):
     sidebar_title: str = 'Actions'
     # Number of columns
     sidebar_width: int = 3
+    sidebar_breakpoint: str = 'xl'
 
-    def __init__(self, title: str, sidebar_title: str = None, sidebar_width: int = None, **kwargs) -> None:
+    def __init__(self, title: str, sidebar_title: str = None, sidebar_width: int = None, sidebar_breakpoint: str = None, **kwargs) -> None:
         """
         Extend `Block.__init__()`.
 
@@ -245,7 +252,8 @@ class WidgetListLayout(Block):
         self.header: Widget = PageHeader(header_text=title)
         self.sidebar: Widget = WidgetListSidebarWidget(
             title=sidebar_title if sidebar_title is not None else self.sidebar_title,
-            width=sidebar_width if sidebar_width is not None else self.sidebar_width
+            width=sidebar_width if sidebar_width is not None else self.sidebar_width,
+            breakpoint=sidebar_breakpoint if sidebar_breakpoint is not None else self.sidebar_breakpoint,
         )
         self.main = WidgetListMainWidget()
         self.modals: List[Widget] = []

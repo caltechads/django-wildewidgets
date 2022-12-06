@@ -173,16 +173,16 @@ class SciChart(AltairChart):
 class WidgetCodeTab(TabbedWidget):
 
     def __init__(self, *args, **kwargs):
+        title = kwargs.pop('title', "")
+        code = kwargs.pop('code', [])
+        widget = kwargs.pop('widget', None)
         super().__init__(*args, **kwargs)
-        title = kwargs.get('title', "")
-        code = kwargs.get('code', [])
         if not type(code) == list:
             code = [code]
         code_stream = WidgetStream()
         for code_block in code:       
             code_widget = CodeWidget(code=code_block, language='python')
             code_stream.add_widget(code_widget)
-        widget = kwargs.get('widget', None)
         self.add_tab(f'{title} Widget', widget)
         self.add_tab(f"{title} Code", code_stream)
 

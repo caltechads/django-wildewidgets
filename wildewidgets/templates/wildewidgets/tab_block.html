@@ -1,5 +1,7 @@
+{% extends 'wildewidgets/block.html' %}
 {% load wildewidgets %}
-<div class='card'>
+
+{% block block_content %}
   <ul class="nav nav-tabs">
   {% for tab in tabs %}
   <li class="nav-item">
@@ -32,4 +34,4 @@
       {% endfor %}
     </div>
   </div>
-</div>
+{% endblock %}

@@ -17,7 +17,7 @@ from .headers import CardHeader
 from django.core.exceptions import ImproperlyConfigured
 
 
-class TabbedWidget(TemplateWidget):
+class TabbedWidget(Block):
     """Extends TemplateWidget.
     Render a tabbed interace. 
     
@@ -27,11 +27,24 @@ class TabbedWidget(TemplateWidget):
         tab.add_tab('My First Widget', widget1)
         tab.add_tab('My Second Widget', widget2)
     """
-    template_name = 'wildewidgets/tabbed_widget.html'
+    template_name = 'wildewidgets/tab_block.html'
     slug_suffix = None
+    overflow = "auto"
 
     def __init__(self, *args, **kwargs):
+        css_class = kwargs.get('css_class', "")
+        if css_class:
+            kwargs['css_class'] = f"card {css_class}"
+        else:
+            kwargs['css_class'] = "card"
+        attributes = kwargs.get('attributes', {})
+        if "style" in attributes:
+            attributes['style'] += f" overflow: {self.overflow};"
+        else:
+            attributes['style'] = f"overflow: {self.overflow};"
+        kwargs['attributes'] = attributes
         self.tabs = []
+        super().__init__(*args, **kwargs)
 
     def add_tab(self, name, widget):
         """
@@ -48,7 +61,8 @@ class TabbedWidget(TemplateWidget):
         if not self.slug_suffix:
             self.slug_suffix = random.randrange(0, 10000)
         kwargs['identifier'] = self.slug_suffix
-        return kwargs
+        # kwargs['overflow'] = self.overflow
+        return super().get_context_data(**kwargs)
 
 
 class CardWidget(Block):
@@ -71,6 +85,7 @@ class CardWidget(Block):
     card_subtitle = None
     widget = None
     widget_css = None
+    overflow = "auto"
 
     def __init__(self, *args, **kwargs):
         self.header = kwargs.pop('header', self.header)
@@ -80,12 +95,19 @@ class CardWidget(Block):
         self.card_title = kwargs.pop('card_title', self.card_title)
         self.card_subtitle = kwargs.pop('card_subtitle', self.card_subtitle)
         self.widget = kwargs.pop('widget', self.widget)
+        self.overflow = kwargs.pop('overflow', self.overflow)
         self.widget_css = kwargs.pop('widget_css', self.widget_css)
         css_class = kwargs.get('css_class', "")
         if css_class:
             kwargs['css_class'] = f"card {css_class}"
         else:
             kwargs['css_class'] = "card"
+        attributes = kwargs.get('attributes', {})
+        if "style" in attributes:
+            attributes['style'] += f" overflow: {self.overflow};"
+        else:
+            attributes['style'] = f"overflow: {self.overflow};"
+        kwargs['attributes'] = attributes
         super().__init__(*args, **kwargs)
 
     def get_context_data(self, **kwargs):
