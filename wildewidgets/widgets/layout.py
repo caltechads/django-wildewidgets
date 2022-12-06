@@ -87,10 +87,8 @@ class WidgetListSidebarWidget(Block):
         if self.css_class is None:
             self.css_class = ''
         if breakpoint:
-            print(f"col-{breakpoint}-{width}")
             self.css_class += f"col-{breakpoint}-{width}"
         else:
-            print("no breakpoint")
             self.css_class += f"col-{width}"
         super().__init__(*args, **kwargs)
         actions = actions if actions is not None else self.actions
