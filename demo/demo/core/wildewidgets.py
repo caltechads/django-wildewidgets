@@ -706,6 +706,7 @@ class CrispyFormCard(CardWidget):
 
     def get_crispy_form_widget(self):
         form = MinimalBookForm()
+        form.helper.form_method = "get"
         widget = CrispyFormWidget(form=form)
         return widget
 
@@ -728,6 +729,7 @@ class CollapseCard(CardWidget):
             target=f"#collapse1",
         )
         form = MinimalBookForm()
+        form.helper.form_method = "get"
         form_widget = CollapseWidget(
             CrispyFormWidget(form=form),
             css_id="collapse1",
@@ -800,6 +802,7 @@ class CrispyFormModalCard(CardWidget):
             target=f"#modal2",
         )
         form = MinimalBookForm()
+        form.helper.form_method = "get"
         modal = CrispyFormModalWidget(
             modal_id="modal2", 
             modal_title="Modal Title",
@@ -879,7 +882,7 @@ class HomeBlock(Block):
                     StringBlock(self.description, css_class='w-75'),
                     StringBlock(self.notice, css_class='w-75 my-3 fw-bold'),
                 ),
-                css_class='mb-2 mx-1',
+                css_class='mb-2',
             ),
             HorizontalLayoutBlock(
                 Block(
@@ -893,7 +896,7 @@ class HomeBlock(Block):
                         widget=HTMLList(items=self.standard_widgets),
                         css_class='mb-2',
                     ),
-                    css_class='mx-1',
+                    # css_class='mx-1',
                 ),
                 Block(
                     CardWidget(
@@ -921,7 +924,7 @@ class HomeBlock(Block):
                         css_class='mb-2',
                         attributes={'style': 'height: 223px;'},
                     ),
-                    css_class='mx-1',
+                    css_class='mx-xl-2',
                 ),
                 Block(
                     CardWidget(
@@ -932,7 +935,7 @@ class HomeBlock(Block):
                         widget=ApexLineChart(),
                         css_class='mb-2 pt-4',                        
                     ),
-                    css_class='mx-1',
+                    # css_class='mx-1',
                 ),
                 align="top", 
                 flex_size="xl",
@@ -940,7 +943,7 @@ class HomeBlock(Block):
             ),
             CardWidget(
                 widget=HomeTable(),
-                css_class=' overflow-auto mx-1',
+                css_class=' overflow-auto',
             ),            
             modal,
         )
