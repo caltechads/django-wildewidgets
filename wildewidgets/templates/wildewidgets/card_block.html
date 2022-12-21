@@ -3,7 +3,7 @@
 
 {% block block_content %}
   {% if header or header_text %}
-    <div class="card-header">
+    <div class="card-header {{header_css}}">
       {% if header %}
         {% wildewidgets header %}
       {% elif header_text %}
@@ -11,7 +11,7 @@
       {% endif %}
     </div>
   {% endif %}
-  <div class="card-body">
+  <div class="card-body {{body_css}}">
     {% if title %}
       <div class="card-title">{{ title }}</div>
       {% if subtitle %}

@@ -11,3 +11,8 @@
 {% endblock %}
 </{{tag}}>
 
+{% if script %}
+<script>
+{{script|safe}}
+</script>
+{% endif %}

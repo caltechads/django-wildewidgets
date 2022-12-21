@@ -129,6 +129,7 @@ class LabelBlock(StringBlock):
     Args:
         text: the text to display.
     """
+    tag: str = "label"
 
     def __init__(self, text: str, color: str = "secondary", **kwargs):
         css_class = kwargs.get("css_class", "")

@@ -9,10 +9,10 @@ from django.core.paginator import InvalidPage, Paginator
 from django.db.models import QuerySet
 from django.http import Http404
 
-from .base import TemplateWidget, Block
-from .text import HTMLWidget, StringBlock
+from .base import TemplateWidget, Block, InputBlock
+from .text import HTMLWidget, StringBlock, LabelBlock
 from .buttons import FormButton
-from .headers import CardHeader
+from .headers import CardHeader, HeaderWithWidget
 
 from django.core.exceptions import ImproperlyConfigured
 
@@ -81,6 +81,7 @@ class CardWidget(Block):
     template_name = 'wildewidgets/card_block.html'
     header = None
     header_text = None
+    header_css = None
     card_title = None
     card_subtitle = None
     widget = None
@@ -90,6 +91,7 @@ class CardWidget(Block):
     def __init__(self, *args, **kwargs):
         self.header = kwargs.pop('header', self.header)
         self.header_text = kwargs.pop('header_text', self.header_text)
+        self.header_css = kwargs.pop('header_css', self.header_css)
         if self.header_text and not self.header:
             self.header = CardHeader(header_text=self.header_text)
         self.card_title = kwargs.pop('card_title', self.card_title)
@@ -114,6 +116,7 @@ class CardWidget(Block):
         kwargs = super().get_context_data(**kwargs)
         kwargs['header'] = self.header
         kwargs['header_text'] = self.header_text
+        kwargs['header_css'] = self.header_css
         kwargs['title'] = self.card_title
         kwargs['subtitle'] = self.card_subtitle
         kwargs['widget'] = self.widget
@@ -432,7 +435,7 @@ class ListModelWidget(MultipleModelWidget):
         super().__init__(*args, **kwargs)
         widgets = self.get_model_widgets(self.get_queryset().all())
         if not widgets:
-            self.add_block(StringBlock(f"No {self.item_label}s", tag='li', css_class="list-group-item fw-light fst-italic"))
+            self.add_block(StringBlock(f"No {self.item_label}s", tag='li', css_class="list-group-item fw-light fst-italic border"))
         for widget in widgets:
             self.add_block(widget)
 
@@ -451,9 +454,9 @@ class ListModelWidget(MultipleModelWidget):
     def get_model_subblock(self, object):
         if hasattr(object, 'get_absolute_url'):
             url = object.get_absolute_url()
-            return HTMLWidget(html=f'<a href="{url}">{self.get_object_text(object)}</a>')
+            return Block(HTMLWidget(html=f'<a href="{url}"><label>{self.get_object_text(object)}</label></a>'))
         else:
-            return StringBlock(self.get_object_text(object))
+            return Block(StringBlock(self.get_object_text(object), tag='label'))
 
     def get_model_widget(self, object=object, **kwargs):
         if self.model_widget:
@@ -473,4 +476,107 @@ class ListModelWidget(MultipleModelWidget):
                 ),
             )
         return widget
+
+
+class ListModelCardHeader(HeaderWithWidget):
+    css_class = "my-3 bg-light"
+    header_level = 2
+
+
+list_model_card_filter_script = """
+var filter_input = document.getElementById("{filter_id}");
+filter_input.onkeyup = function(e) {{
+    var filter=filter_input.value.toLowerCase();
+    document.querySelectorAll("{query} label").forEach(label => {{
+        var test_string = label.innerText.toLowerCase();
+        if (test_string.includes(filter)) {{        
+            label.parentElement.parentElement.classList.remove('d-none');
+        }}
+        else {{
+            label.parentElement.parentElement.classList.add('d-none');
+        }}        
+    }});
+    let children = document.querySelectorAll("{query} li");
+    for (let i=0;i<children.length;i++) {{
+        let child=children[i];
+        child.classList.remove('border-top');
+    }};
+    for (let i=0;i<children.length;i++) {{
+        let child=children[i];
+        if (child.classList.contains('d-none')) {{            
+        }}
+        else {{
+            child.classList.add('border-top');
+            break;
+        }}
+    }};
+}};
+
+"""
+
+class ListModelCardWidget(CardWidget):
+    list_model_widget_class = ListModelWidget
+    list_model_header_class = None
+    base_css_class = "card"
+
+    def __init__(self, *args, **kwargs):
+        self.id_base = f"list_modal_card_{random.randrange(0, 1000)}"
+        self.list_model_widget_id = f"{self.id_base}_list_model_widget"
+        self.filter_id = f"{self.id_base}_filter"
+        self.list_model_widget_class = kwargs.pop("list_model_widget_class", self.list_model_widget_class)
+        css_class = kwargs.get("css_class", "")
+        css_class += f" {self.base_css_class}"
+        kwargs["css_class"] = css_class.strip()
+        widget_kwargs = {
+            'remove_url': kwargs.pop("remove_url", None),
+            'model': kwargs.pop("model", None),
+            'model_widget': kwargs.pop("model_widget", None),
+            'ordering': kwargs.pop("ordering", None),
+            'queryset': kwargs.pop("queryset", None),
+            'model_kwargs': kwargs.pop("model_kwargs", {}),
+            'item_label': kwargs.pop("item_label", "item"),
+            'css_id': self.list_model_widget_id,
+        }
+        self.widget = self.get_list_model_widget(**widget_kwargs)
+        kwargs['widget'] = self.widget
+        header_kwargs = {
+            'title': kwargs.pop("title", ""),
+        }
+        kwargs['header'] = self.get_list_model_header(**header_kwargs)
+        kwargs['header_css'] = "bg-light"
+        print(self.filter_id)
+        filter_label_query = f"#{self.list_model_widget_id}"
+        kwargs['script'] = list_model_card_filter_script.format(query=filter_label_query, filter_id=self.filter_id)
+        super().__init__(*args, **kwargs)        
+        
+    def get_list_model_widget(self, *args, **kwargs):
+        return self.list_model_widget_class(*args, **kwargs)
+        
+    def get_list_model_header(self, *args, **kwargs):
+        if self.list_model_header_class:
+            return self.list_model_header_class(*args, **kwargs)
+        header = Block(
+            Block(
+                LabelBlock(
+                    f'Filter {self.widget.item_label}s', 
+                    css_class="d-none",
+                    attributes={
+                        'for': self.filter_id,
+                    },
+                ),
+                InputBlock(
+                    attributes={
+                        'type': 'text',
+                        'placeholder': f'Filter {self.widget.item_label}s',
+                    },                    
+                    css_id=f'{self.id_base}_filter',
+                    css_class='form-control',  
+                ),
+                css_class='w-25',  
+            ),
+            Block(""),
+            css_class="d-flex flex-row-reverse w-100"
+        )
+        return header
+        
 

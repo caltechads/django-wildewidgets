@@ -95,22 +95,32 @@ class Block(TemplateWidget):
     attributes: Dict[str, str] = {}
     data_attributes: Dict[str, str] = {}
     aria_attributes: Dict[str, str] = {}
+    empty = False
+    script: Optional[str] = None
 
     def __init__(self, *blocks, tag=None, name=None, modifier=None, css_class=None, css_id=None,
-                 attributes=None, data_attributes=None, aria_attributes=None):
+                 empty=False, script=None, attributes=None, data_attributes=None, aria_attributes=None):
         self._name = name if name is not None else copy(self.name)
         self._modifier = modifier if modifier is not None else self.modifier
         self._css_class = css_class if css_class is not None else self.css_class
         self._css_id = css_id if css_id is not None else self.css_id
         self._tag = tag if tag is not None else self.tag
+        self.empty = empty if empty is not None else self.empty
+        self.script = script if script is not None else self.script
+        if self.empty:
+            self.template_name = 'wildewidgets/block--simple.html'
         self._attributes = attributes if attributes is not None else copy(self.attributes)
         self._data_attributes = data_attributes if data_attributes is not None else copy(self.data_attributes)
         self._aria_attributes = aria_attributes if aria_attributes is not None else copy(self.aria_attributes)
+        if self.empty and len(blocks) > 0:
+            raise ValueError("This block takes no content because empty=True.")
         self.blocks = []
         for block in blocks:
             self.add_block(block)
 
     def add_block(self, block):
+        if self.empty:
+            raise ValueError("This block takes no content because empty=True.")
         self.blocks.append(block)
 
     def get_context_data(self, **kwargs) -> Dict[str, Any]:
@@ -126,6 +136,7 @@ class Block(TemplateWidget):
         context['block_name'] = block
         context['name'] = name
         context['css_classes'] = ' '.join([name, modifier, block, css_class]).strip()
+        context['script'] = self.script
         context['css_id'] = self._css_id
         context['blocks'] = self.blocks
         context['attributes'] = self._attributes
@@ -156,3 +167,11 @@ class WidgetStream(Block):
         context = super().get_context_data(**kwargs)
         context['widgets'] = self._widgets
         return context
+
+
+class InputBlock(Block):
+    """
+    A block for rendering an input element.
+    """
+    empty: bool = True
+    tag: str = 'input'

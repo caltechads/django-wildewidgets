@@ -40,6 +40,7 @@ from .wildewidgets import (
     ApexHeader,
     ApexSparklineCard,
     AuthorListCard,
+    AuthorListModelCardWidgetCard,
     BarChartCard,
     Block,
     BookModelTableCard,
@@ -241,6 +242,7 @@ class ListWidgetView(DemoStandardMixin, TemplateView):
         layout = WidgetListLayout(f"List Widgets", css_class='mt-4')    
         layout.add_widget(PagedBookCard())
         layout.add_widget(AuthorListCard())
+        layout.add_widget(AuthorListModelCardWidgetCard())
         return layout
 
     def get_breadcrumbs(self):

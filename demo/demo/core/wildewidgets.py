@@ -36,6 +36,7 @@ from wildewidgets import (
     HTMLWidget,
     LabelBlock,
     LinkButton,
+    ListModelCardWidget,
     ListModelWidget,
     MarkdownWidget,
     ModalButton,
@@ -417,7 +418,7 @@ class BookModelTable(BasicModelTable):
     alignment = {'authors': 'left'}
     verbose_names = {'authors__full_name': 'Authors'}
     buttons = True
-    striped = True
+    striped = True    
 
     def render_authors__full_name_column(self, row, column):
         authors = row.authors.all()
@@ -603,7 +604,7 @@ class StringCard(CardWidget):
         widget = Block(
             StringBlock("This is a string block", css_class="mb-2"),
             TimeStamp("4:53 PM - this is a time block."),
-            LabelBlock("This is a label block", css_class="my-2"),
+            Block(LabelBlock("This is a label block", css_class="my-2")),
             TagBlock("This is a tag block"),
 
         )
@@ -658,6 +659,21 @@ class AuthorListCard(CardWidget):
 
     def get_author_list_widget(self):
         widget = ListModelWidget(queryset = Author.objects.all()[:10])
+        return widget
+
+
+class AuthorListModelCardWidgetCard(CardWidget):
+    title = "List Model Card Widget"
+    icon = "person-square"
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        code = get_code_block(AuthorListModelCardWidgetCard.get_author_list_widget)
+        tab = WidgetCodeTab(code=code, widget=self.get_author_list_widget())
+        self.set_widget(tab, "mb-5")
+
+    def get_author_list_widget(self):
+        widget = ListModelCardWidget(queryset = Author.objects.all()[:10])
         return widget
 
 
@@ -819,6 +835,7 @@ class HomeTable(BasicModelTable):
     page_length = 5
     striped = True
     small = True
+    unsearchable = ['binding']
 
 
 class AuthorListModelWidget(ListModelWidget):

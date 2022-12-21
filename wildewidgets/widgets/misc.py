@@ -12,6 +12,7 @@ from .text import (
     StringBlock,
 )
 
+
 @dataclass
 class BreadcrumbItem:
     title: str
