@@ -151,6 +151,15 @@ class CardWidget(Block):
 class MultipleModelWidget(Block):
     """Extends Block.
     Base class for `PagedModelWidget` and `ListModelWidget`.
+
+    Args:
+        model (str, optional): The model to use for the queryset. The default is `None`.
+        model_widget (str, optional): The class to use for the model widget. The default is `None`.
+        model_kwargs (str, optional): The kwargs to use for the model widget. 
+        ordering (str, optional): The ordering to use for the queryset. The default is `None`.
+        queryset (str, optional): The queryset to use for the list model widget. 
+        item_label (str, optional): The label to use for the item. The default is `item`.        
+
     """
     model = None
     model_widget = None
@@ -478,11 +487,6 @@ class ListModelWidget(MultipleModelWidget):
         return widget
 
 
-class ListModelCardHeader(HeaderWithWidget):
-    css_class = "my-3 bg-light"
-    header_level = 2
-
-
 list_model_card_filter_script = """
 var filter_input = document.getElementById("{filter_id}");
 filter_input.onkeyup = function(e) {{
@@ -515,6 +519,33 @@ filter_input.onkeyup = function(e) {{
 """
 
 class ListModelCardWidget(CardWidget):
+    """
+    Extends `CardWidget`. This class provides a card with a header and a list of objects
+    defined by a QuerySet, displayed in a ListModelWidget. A filter input is provided
+    to filter the list of objects.
+
+        Args:
+        list_model_widget_class (str, optional): The class to use for the list model widget. 
+            The default is `ListModelWidget`.
+        list_model_header_class (str, optional): The class to use for the header.
+        remove_url (str, optional): The url to `POST` to in order to remove the object.
+            The url should contain a `{}` that will be replaced with the object id.
+        model (str, optional): The model to use for the queryset. The default is `None`.
+        model_widget (str, optional): The class to use for the model widget. The default
+            is `HorizontalLayoutBlock`.
+        model_kwargs (str, optional): The kwargs to use for the model widget. 
+        ordering (str, optional): The ordering to use for the queryset. The default is `None`.
+        queryset (str, optional): The queryset to use for the list model widget. 
+        item_label (str, optional): The label to use for the item. The default is `item`.
+        css_class (str, optional): The css class to add the default classes. 
+
+    Example::
+
+        widget = ListModelCardWidget(
+            queryset = Author.objects.all()[:10]
+        )
+
+    """
     list_model_widget_class = ListModelWidget
     list_model_header_class = None
     base_css_class = "card"

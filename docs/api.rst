@@ -1,7 +1,7 @@
-API
-===
+Reference
+=========
 
-This is some text
+Below is a list of all the components available in the library. 
 
 .. toctree::
     :maxdepth: 2
@@ -16,4 +16,6 @@ This is some text
     api_structure
     api_tables
     api_text
+    api_views
+    api_menus
 

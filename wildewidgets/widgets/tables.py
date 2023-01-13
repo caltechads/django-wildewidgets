@@ -500,7 +500,10 @@ class DatatableAJAXView(BaseDatatableView):
     def search_query(self, qs, value):
         # 2020-08-05 rrollins TODO: This is very likely wrong. It doesn't use qs at all, and doesn't return a QuerySet.
         """
-        Return an ORed Q() object that will search the searchable fields for ``value``
+        Return an ORed Q() object that will search the searchable fields for ``value``.
+        If there are columns that cannot be searched with an ``__icontains`` filter, you
+        can implement a ``search_COLUMN_column(self, column, value)`` method that returns
+        a Q() object to your subclass and that will be called instead.  
 
         :param qs: the Django QuerySet
         :type qs: QuerySet
@@ -648,6 +651,26 @@ class DataTableForm:
 
 
 class DataTable(Widget, WidgetInitKwargsMixin, DatatableAJAXView):
+    """
+    Extends DatatableAJAXView. A Django Widget that renders a DataTables.js table.
+
+    Args:
+        width (str, optional): The table width. Defaults to '100%'.
+        height (str, optional): The table height. Defaults to None.
+        title (str, optional): The table title. Defaults to None.
+        searchable (bool, optional): Whether the table is searchable. Defaults to True.
+        paging (bool, optional): Whether the table is paged. Defaults to True.
+        page_length (int, optional): The number of rows per page. Defaults to None.
+        small (bool, optional): Whether the row height is small. Defaults to False.
+        buttons (bool, optional): Whether the table has export buttons. Defaults to False.
+        striped (bool, optional): Whether the table is striped. Defaults to False.
+        table_id (str, optional): The table id. Defaults to None.
+        async (bool, optional): Whether the table is asynchronous. Defaults to True.
+        data (list, optional): The table data. Defaults to None.
+        sort_ascending (bool, optional): Whether the table is sorted in ascending order. Defaults to True.
+        action_button_size (str, optional): The size of the action button. Defaults to 'normal'. 
+            Valid values are 'normal', 'sm', 'lg'.
+    """
     template_file = 'wildewidgets/table.html'
     actions = False
     form_actions = None
@@ -868,6 +891,27 @@ class DataTable(Widget, WidgetInitKwargsMixin, DatatableAJAXView):
 
 
 class BasicModelTable(DataTable):
+    """
+    Extends DataTable.  This class is used to create a table from a model.
+    It provides a full featured table with a minimum of code. Many derived 
+    classes will only need to define class variables.
+
+    Example::
+
+        class BookModel`Table(BasicModelTable):
+            fields = ['title', 'authors__full_name', 'isbn']
+            model = Book
+            alignment = {'authors': 'left'}
+            verbose_names = {'authors__full_name': 'Authors'}
+            buttons = True
+            striped = True
+
+            def render_authors__full_name_column(self, row, column):
+                authors = row.authors.all()
+                if authors.count() > 1:
+                    return f"{authors[0].full_name} ... "
+                return authors[0].full_name
+    """
     fields = None
     hidden = []
     verbose_names = {}

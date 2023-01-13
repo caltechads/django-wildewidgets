@@ -7,6 +7,21 @@ from wildewidgets.views import WidgetInitKwargsMixin
 
 
 class BasicMenu(WidgetInitKwargsMixin):
+    """
+    Basic menu widget.
+
+    A basic menu requires only one class variable defined, `items`::
+
+        class MainMenu(BasicMenu):
+
+            items = [
+                ('Users', 'core:home'), 
+                ('Uploads','core:uploads'),
+            ]
+
+    The `items` variable is a list of tuples, where the first element is the menu item text and the second element is the URL name. If the `items` variable is defined dynamically in `__init__`, a third optional element in the tuple is a dictionary of get arguments.
+`
+    """
     template_file = "wildewidgets/menu.html"
     navbar_classes = "navbar-expand-lg navbar-light"
     container = "container-lg"
@@ -106,18 +121,49 @@ class BasicMenu(WidgetInitKwargsMixin):
 
 
 class DarkMenu(BasicMenu):
+    """
+    Horizontal dark menu.
+    """
     navbar_classes = "navbar-expand-lg navbar-dark bg-secondary"
 
 
 class VerticalDarkMenu(BasicMenu):
+    """
+    Vertical dark menu.
+    """
     navbar_classes = "navbar-vertical navbar-expand-lg navbar-dark"
 
 
 class LightMenu(BasicMenu):
+    """
+    Horizontal light menu, often used as a secondary menu.    
+    """
     navbar_classes = "navbar-expand-lg navbar-light"
 
 
 class MenuMixin:
+    """
+    Mixin for adding a menu to a view. This is often used in conjunction with the
+    `StandardWidgetMixin`.
+
+    The view mixin `MenuMixin` only requires you to specify the menu class, and the name of the menu item that should be selected::
+
+        class TestView(MenuMixin, TemplateView):
+            menu_class = MainMenu
+            menu_item = 'Users'
+            ...
+
+    If several views use the same menu, you can create a subclass::
+
+        class UsersMenuMixin(MenuMixin):
+            menu_class = MainMenu
+            menu_item = 'Users'
+
+    Then the view won't need to define these variables::
+
+        class TestView(UsersMenuMixin, TemplateView):
+            ...`
+`    """
     menu_class = None
     menu_item = None
     submenu_class = None
@@ -127,6 +173,9 @@ class MenuMixin:
         return self.menu_class
 
     def get_menu_item(self):
+        """
+        Returns the name of the menu item that should be selected. This can be used for dynamic menus.
+        """
         return self.menu_item
 
     def get_menu(self):
@@ -140,6 +189,9 @@ class MenuMixin:
         return self.submenu_class
 
     def get_submenu_item(self):
+        """
+        Returns the name of the submenu item that should be selected. This can be used for dynamic menus.
+        """
         return self.submenu_item
 
     def get_submenu(self):

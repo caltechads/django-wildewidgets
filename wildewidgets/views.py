@@ -160,10 +160,17 @@ class WildewidgetDispatch(WidgetInitKwargsMixin, View):
 
 
 class TableActionFormView(View):
+    """Extends View. 
+    A view that handles a form action on a table. You just need to define the `process_form_action` method.
+    """
     http_method_names = ['post']
     url = None
 
     def process_form_action(self, action, items):
+        """
+        This method is called when the form is submitted. The `action` if the value of the 
+        action menu, and `items` is a list of the selected items.
+        """
         pass
 
     def post(self, request, *args, **kwargs):
@@ -186,6 +193,47 @@ class TableView(TemplateView):
 
 
 class StandardWidgetMixin():
+    """A mixin for views that use the standard widget template. This is used with a template-less design.
+
+    The template used by your derived class, should include at least the following::
+
+        {% extends "<your_base_template>.html" %}
+        {% load  wildewidgets %}
+
+        {% block title %}{{page_title}}{% endblock %}
+
+        {% block breadcrumb-items %}
+        {% if breadcrumbs %}
+            {% wildewidgets breadcrumbs %}
+        {% endif %}
+        {% endblock %}
+
+        {% block content %}
+        {% wildewidgets content %}
+        {% endblock %}
+
+    The `content` block is where the content of the page is rendered. The `breadcrumbs` block is where 
+    the breadcrumbs are rendered.
+
+    An example derived class, which will be used by most of the views in the project::
+
+        class DemoStandardMixin(StandardWidgetMixin, MenuMixin):
+            template_name='core/standard.html'
+            menu_class = DemoMenu
+
+    The `DemoStandardMixin` class is used in the following way::
+
+        class HomeView(DemoStandardMixin, TemplateView):
+        menu_item = 'Home'
+
+        def get_content(self):
+            return HomeBlock()
+
+        def get_breadcrumbs(self):
+            breadcrumbs = DemoBaseBreadcrumbs()
+            breadcrumbs.add_breadcrumb('Home')
+            return breadcrumbs
+    """
 
     def get_context_data(self, **kwargs):
         kwargs['content'] = self.get_content()
@@ -196,10 +244,16 @@ class StandardWidgetMixin():
         return super().get_context_data(**kwargs)
 
     def get_content(self):
+        """
+        Override this method to return the content for the page in the form of a widget.
+        """
         raise ImproperlyConfigured(
                 "You must override get_content in {}".format(self.__class__.__name__)
             )
         return None
 
     def get_breadcrumbs(self):
+        """
+        Override this method to return the breadcrumbs for the page in the form of a widget.
+        """
         return None
