@@ -1,4 +1,3 @@
-from collections.abc import Iterable
 from copy import deepcopy
 from typing import Any, Dict, List, Optional, Tuple, Union, cast
 

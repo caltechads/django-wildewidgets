@@ -12,9 +12,9 @@ from django.db.models import QuerySet, Model
 from django.http import Http404
 
 from .base import Block, InputBlock, Widget
-from .text import HTMLWidget, StringBlock, LabelBlock
+from .text import HTMLWidget, LabelBlock
 from .buttons import FormButton
-from .headers import BasicHeader, CardHeader, HeaderWithWidget
+from .headers import BasicHeader, CardHeader
 
 
 class TabbedWidget(Block):
@@ -704,7 +704,10 @@ class ListModelCardWidget(CardWidget):
         kwargs['header'] = self.get_list_model_header(**header_kwargs)
         kwargs['header_css'] = "bg-light"
         filter_label_query = f"#{self.list_model_widget_id}"
-        kwargs['script'] = list_model_card_filter_script.format(query=filter_label_query, filter_id=self.filter_id)
+        kwargs['script'] = list_model_card_filter_script.format(
+            query=filter_label_query,
+            filter_id=self.filter_id
+        )
         super().__init__(*args, **kwargs)
 
     def get_list_model_widget(self, *args, **kwargs):
@@ -712,7 +715,7 @@ class ListModelCardWidget(CardWidget):
 
     def get_list_model_header(self, *args, **kwargs):
         if self.list_model_header_class:
-            return self.list_model_header_class(*args, **kwargs)
+            return self.list_model_header_class(*args, **kwargs)  # pylint: disable=not-callable
         header = Block(
             Block(
                 LabelBlock(
@@ -736,4 +739,3 @@ class ListModelCardWidget(CardWidget):
             css_class="d-flex flex-row-reverse w-100"
         )
         return header
-

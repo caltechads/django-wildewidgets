@@ -49,9 +49,10 @@ class CodeWidget(TemplateWidget):
 
 
 class MarkdownWidget(TemplateWidget):
-    """Extends TemplateWidget.
+    """
+    Extends :py:class:`wildewidgets.widgets.base.TemplateWidget`.
 
-    A widget to display markdown as HTML. 
+    A widget to display markdown as HTML.
 
     Args:
         text (str): the markdown to render as HTML.
@@ -62,6 +63,7 @@ class MarkdownWidget(TemplateWidget):
     css_class = ""
 
     def __init__(self, *args, **kwargs):
+        super().__init__()
         self.text = kwargs.get("text", self.text)
         self.css_class = kwargs.get("css_class", self.css_class)
 
@@ -73,9 +75,10 @@ class MarkdownWidget(TemplateWidget):
 
 
 class HTMLWidget(TemplateWidget):
-    """Extends TemplateWidget.
+    """
+    Extends :py:class:`wildewidgets.widgets.base.TemplateWidget`.
 
-    A widget to display raw HTML. 
+    A widget to display raw HTML.
 
     Args:
         html (str): the HTML to render.
@@ -109,22 +112,24 @@ class StringBlock(Block):
         super().__init__(*[text], **kwargs)
 
 
-class TimeStamp(StringBlock):
-    """Extends StringBlock.
+class TimeStamp(Block):
+    """
+    Extends :py:class:`wildewidgets.widgets.base.Block`.
 
     A basic widget that displays a timestamp.
 
     Args:
         text: the text to display.
     """
-    tag="small"
-    css_class="fw-light"
+    tag = "small"
+    css_class = "fw-light"
 
 
-class LabelBlock(StringBlock):
-    """Extends StringBlock.
+class LabelBlock(Block):
+    """
+    Extends :py:class:`wildewidgets.widgets.base.Block`.
 
-    A basic widget that displays a label.
+    A ``<label>``.
 
     Args:
         text: the text to display.
@@ -132,14 +137,14 @@ class LabelBlock(StringBlock):
     tag: str = "label"
 
     def __init__(self, text: str, color: str = "secondary", **kwargs):
-        css_class = kwargs.get("css_class", "")
-        css_class += f" fw-bold"
-        kwargs["css_class"] = css_class.strip()
+        # FIXME: color is a kwarg, but it is not used
         super().__init__(text, **kwargs)
+        self.add_class('fw-bold')
 
 
-class TagBlock(StringBlock):
-    """Extends StringBlock.
+class TagBlock(Block):
+    """
+    Extends :py:class:`wildewidgets.widgets.base.Block`.
 
     A basic widget that displays a colored tag.
 
@@ -147,9 +152,8 @@ class TagBlock(StringBlock):
         text: the text to display.
         color: the bootstrap color class.
     """
-    def __init__(self, text: str, color: str = "secondary", **kwargs):
-        css_class = kwargs.get("css_class", "")
-        css_class += f" badge bg-{color}"
-        kwargs["css_class"] = css_class.strip()
-        super().__init__(text, **kwargs)
+    block: str = 'badge'
 
+    def __init__(self, text: str, color: str = "secondary", **kwargs):
+        super().__init__(text, **kwargs)
+        self.add_class(f'bg-{color}')

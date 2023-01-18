@@ -2,7 +2,7 @@ import base64
 import importlib
 import json
 import os
-from typing import List, Optional
+from typing import List, Optional, TYPE_CHECKING
 
 from django.apps import apps
 from django.core.exceptions import ImproperlyConfigured
@@ -17,15 +17,18 @@ from django.utils.functional import Promise
 from django.views.generic import View
 from django.views.generic.base import TemplateView
 
+if TYPE_CHECKING:
+    from .widgets import BreadcrumbBlock
+
 
 class LazyEncoder(DjangoJSONEncoder):
     """
     Encodes django's lazy i18n strings
     """
-    def default(self, obj):
-        if isinstance(obj, Promise):
-            return force_text(obj)
-        return super(LazyEncoder, self).default(obj)
+    def default(self, o):
+        if isinstance(o, Promise):
+            return force_text(o)
+        return super(LazyEncoder, self).default(o)
 
 
 # =================================
@@ -61,7 +64,7 @@ class WidgetInitKwargsMixin:
             start = '?'
         else:
             start = '&'
-        if type(extra_item) == dict:
+        if isinstance(extra_item, dict):
             extra_list = []
             for k, v in extra_item.items():
                 extra_list.append(f"{k}={v}")
@@ -106,7 +109,7 @@ class JSONResponseMixin:
         else:
             response = func_val
         # can't have 'view' here, because the view object can't be jsonified
-        junk = response.pop('view', None)
+        response.pop('view', None)
 
         dump = json.dumps(response, cls=LazyEncoder)
         return self.render_to_response(dump)
@@ -189,7 +192,7 @@ class TableView(TemplateView):
             raise ImproperlyConfigured(
                 "You must set a table_class attribute on {}".format(self.__class__.__name__)
             )
-        kwargs['table'] = self.table_class()
+        kwargs['table'] = self.table_class()  # pylint: disable=not-callable
         return super().get_context_data(**kwargs)
 
 
@@ -238,7 +241,6 @@ class StandardWidgetMixin:
                 return breadcrumbs
     """
 
-
     def get_context_data(self, **kwargs):
         kwargs['content'] = self.get_content()
         breadcrumbs = self.get_breadcrumbs()
@@ -248,10 +250,9 @@ class StandardWidgetMixin:
         return super().get_context_data(**kwargs)
 
     def get_content(self):
-        raise ImproperlyConfigured(
-                "You must override get_content in {}".format(self.__class__.__name__)
-            )
-        return None
+        raise NotImplementedError(
+            "You must override get_content in {}".format(self.__class__.__name__)
+        )
 
-    def get_breadcrumbs(self):
+    def get_breadcrumbs(self) -> "Optional[BreadcrumbBlock]":
         return None

@@ -279,4 +279,3 @@ class WidgetListLayoutHeader(HeaderWithWidget):
     """
     css_class: str = "mb-4"
     header_level: int = 2
-

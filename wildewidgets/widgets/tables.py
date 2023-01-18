@@ -373,7 +373,7 @@ class DatatableMixin:
                        'data': data
                        }
             return ret
-        except Exception as e:
+        except Exception as e:  # pylint: disable=broad-except
             return self.handle_exception(e)
 
 
@@ -446,9 +446,9 @@ class DatatableAJAXView(BaseDatatableView):
                     by_number[column_number][column_attribute] = value
         # Now make the real lookup be by column name
         by_name = {}
-        for key in by_number:
+        for key, value in by_number.items():
             # 'data' is the column name
-            by_name[by_number[key]['data']] = by_number[key]
+            by_name[by_number[key]['data']] = value
         return by_name
 
     @lru_cache(maxsize=4)
@@ -898,14 +898,14 @@ class DataTable(Widget, WidgetInitKwargsMixin, DatatableAJAXView):
             url = f"{url}&{url_extra}"
         if method == 'get':
             if js_function_name:
-                link_extra = f"onclick='{js_function_name}({row.id});'"
+                link_extra = f'onclick="{js_function_name}({row.id});"'
             else:
                 link_extra = ""
-            return f"<a href='{url}' class='btn btn-{color_class} {self.action_button_size_class} me-2' {link_extra}>{label}</a>"
+            return f'<a href="{url}" class="btn btn-{color_class} {self.action_button_size_class} me-2" {link_extra}>{label}</a>'
         token_input = f'<input type="hidden" name="csrfmiddlewaretoken" value="{self.csrf_token}">'
         id_input = f'<input type="hidden" name="{attr}" value="{row.id}">'
         button = f'<input type=submit value="{label}" class="btn btn-{color_class} {self.action_button_size_class} me-2">'
-        form = f"<form class='form form-inline' action={url} method='post'>{token_input}{id_input}{button}</form>"
+        form = f'<form class="form form-inline" action={url} method="post">{token_input}{id_input}{button}</form>'
         return form
 
     def get_conditional_action_buttons(self, row: Any) -> str:
@@ -917,7 +917,7 @@ class DataTable(Widget, WidgetInitKwargsMixin, DatatableAJAXView):
             url = row.get_absolute_url()
             view_button = self.get_action_button_with_url(row, self.default_action_button_label, url, color_class=self.default_action_button_color_class)
             response += view_button
-        if not type(self.actions) == bool:
+        if not isinstance(self.actions, bool):
             for action in self.actions:
                 if not len(action) > 1:
                     continue

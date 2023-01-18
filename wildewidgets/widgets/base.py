@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from collections.abc import Iterable as IterableABC
-from copy import copy, deepcopy
+from copy import deepcopy
 from typing import Union, List, Dict, Iterable, Any, Optional
 
 from django.template.loader import get_template
@@ -171,6 +171,7 @@ class Block(TemplateWidget):
         data_attributes: Dict[str, str] = None,
         aria_attributes: Dict[str, str] = None
     ):
+        super().__init__()
         self._name = name if name is not None else self.name
         self._modifier = modifier if modifier is not None else self.modifier
         self._css_class = css_class if css_class is not None else self.css_class

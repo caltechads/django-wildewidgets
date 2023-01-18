@@ -1,14 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from dataclasses import dataclass
 from typing import Dict, Any
 
 from .base import Block, TemplateWidget
 from .structure import HorizontalLayoutBlock
-from .text import (
-    CodeWidget,
-    StringBlock,
-)
+from .text import CodeWidget
 
 
 class KeyValueListBlock(Block):
@@ -19,8 +15,8 @@ class KeyValueListBlock(Block):
     def add_simple_key_value(self, key, value):
         self.add_block(
             HorizontalLayoutBlock(
-                StringBlock(key),
-                StringBlock(value),
+                Block(key),
+                Block(value),
                 tag="li",
                 css_class="list-group-item",
             )
@@ -29,7 +25,7 @@ class KeyValueListBlock(Block):
     def add_code_key_value(self, key, value, language=None):
         self.add_block(
             Block(
-                StringBlock(key),
+                Block(key),
                 CodeWidget(
                     code=value,
                     language=language,

@@ -1,5 +1,4 @@
 import random
-from typing import Any, Dict, List, Tuple, Union
 
 from django import template
 from django.urls import reverse
@@ -35,13 +34,13 @@ class BasicMenu(WidgetInitKwargsMixin):
     #: arguments
     items = []
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs):  # pylint: disable=super-init-not-called
         self.menu = {}
         self.active = None
         if args:
             self.active_hierarchy = args[0].split('/')
         else:
-            self.active_hierarchy
+            self.active_hierarchy = []
 
     def build_menu(self):
         if len(self.active_hierarchy) > 0:
@@ -152,7 +151,7 @@ class MenuMixin:
         menu_class = self.get_menu_class()
         if menu_class:
             menu_item = self.get_menu_item()
-            return menu_class(menu_item)
+            return menu_class(menu_item)  # pylint: disable=not-callable
         return None
 
     def get_submenu_class(self):
@@ -165,7 +164,7 @@ class MenuMixin:
         submenu_class = self.get_submenu_class()
         if submenu_class:
             submenu_item = self.get_submenu_item()
-            return submenu_class(submenu_item)
+            return submenu_class(submenu_item)  # pylint: disable=not-callable
         return None
 
     def get_context_data(self, **kwargs):

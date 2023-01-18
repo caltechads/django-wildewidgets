@@ -1,8 +1,5 @@
-import inspect
-
 from django.http import HttpResponseRedirect
 from django.templatetags.static import static
-from django.template.response import TemplateResponse
 from django.views.generic import TemplateView
 from django.urls import reverse, reverse_lazy
 
@@ -12,39 +9,20 @@ import pandas as pd
 import altair as alt
 
 from wildewidgets import (
-    AltairChart,
-    BarChart, 
     BreadrumbBlock,
-    CodeWidget,
-    DataTable,
-    BasicMenu,
-    DoughnutChart,
-    HorizontalStackedBarChart, 
-    HorizontalBarChart, 
-    ListModelWidget,
     MenuMixin,
-    PageHeader,
-    PagedModelWidget,
-    PieChart, 
-    StackedBarChart, 
     StandardWidgetMixin,
-    StringBlock,
     VerticalDarkMenu,
     WidgetListLayout,
 )
 
-from book_manager.models import Book, Author
-
 from .wildewidgets import (
     ApexChart1Card,
-    ApexHeader,
     ApexSparklineCard,
     AuthorListCard,
     AuthorListModelCardWidgetCard,
     BarChartCard,
-    Block,
     BookModelTableCard,
-    BusinessChartHeader,
     CollapseCard,
     CardCard,
     CodeCard,
@@ -62,17 +40,10 @@ from .wildewidgets import (
     ModalCard,
     PagedBookCard,
     PieCard,
-    SciChart,
     SciChartCard,
-    SciChartHeader,
     SciSyncChartCard,
     StringCard,
     TabCard,
-    TableHeader, 
-    TestChart, 
-    TestDoughnutChart, 
-    TestHistogram, 
-    TestHorizontalHistogram, 
     TestTableCard,
 )
 
@@ -83,52 +54,25 @@ class DemoMenu(VerticalDarkMenu):
     brand_text: str = "Wildewidgets Demo"
     brand_url: str = reverse_lazy("core:home")
     items = [
+        ("Home", "core:home"),
+        ('Tables', 'core:tables'),
+        ('Text Widgets', 'core:text'),
+        ('List Widgets', 'core:list'),
+        ('Structure Widgets', 'core:structure'),
+        ('Modal Widgets', 'core:modal'),
         (
-            "Home", 
-            "core:home"
-        ),
-        (
-            'Tables', 
-            'core:tables'
-        ),
-        (
-            'Text Widgets',
-            'core:text'
-        ),
-        (
-            'List Widgets',
-            'core:list'
-        ),
-        (
-            'Structure Widgets',
-            'core:structure'
-        ),
-        (
-            'Modal Widgets',
-            'core:modal'
-        ),
-        (
-            'Charts', 
+            'Charts',
             [
-                (
-                    'Business Charts (ChartJS)', 
-                    'core:charts'
-                ), 
-                (
-                    'Scientific Charts (Altair)', 
-                    'core:altair'
-                ), 
-                (
-                    'Apex Charts', 
-                    'core:apex'
-                )
+                ('Business Charts (ChartJS)', 'core:charts'),
+                ('Scientific Charts (Altair)', 'core:altair'),
+                ('Apex Charts', 'core:apex')
             ]
-        ), 
+        ),
     ]
 
 
 class DemoBaseBreadcrumbs(BreadrumbBlock):
-    title_class="fw-bold"
+    title_class = "fw-bold"
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -137,7 +81,7 @@ class DemoBaseBreadcrumbs(BreadrumbBlock):
 
 class DemoStandardMixin(StandardWidgetMixin, MenuMixin):
     # template_name='core/standard.html'
-    template_name='core/intermediate.html'
+    template_name = 'core/intermediate.html'
     menu_class = DemoMenu
 
 
@@ -157,7 +101,7 @@ class ChartView(DemoStandardMixin, TemplateView):
     menu_item = 'Charts'
 
     def get_content(self):
-        layout = WidgetListLayout(f"Basic Business Charts w/ ChartJS", css_class='mt-4')
+        layout = WidgetListLayout("Basic Business Charts w/ ChartJS", css_class='mt-4')
         layout.add_widget(PieCard(), "Pie Chart", "pie-chart")
         layout.add_widget(DonutCard(), "AJAX Donut Chart", "circle")
         layout.add_widget(BarChartCard(), "Bar Chart", "bar-chart")
@@ -176,7 +120,7 @@ class AltairView(DemoStandardMixin, TemplateView):
     menu_item = 'Charts'
 
     def get_content(self):
-        layout = WidgetListLayout(f"Scientific Charts w/ Altair", css_class='mt-4')    
+        layout = WidgetListLayout("Scientific Charts w/ Altair", css_class='mt-4')
         layout.add_widget(SciSyncChartCard(), "Altair Chart", "graph-up")
         layout.add_widget(SciChartCard(), "AJAX Altair Chart", "graph-down")
         return layout
@@ -191,7 +135,7 @@ class ApexChartView(DemoStandardMixin, TemplateView):
     menu_item = 'Charts'
 
     def get_content(self):
-        layout = WidgetListLayout(f"Apex Charts", css_class='mt-4')    
+        layout = WidgetListLayout("Apex Charts", css_class='mt-4')
         layout.add_widget(ApexChart1Card(), "AJAX Apex Chart", "graph-up")
         layout.add_widget(ApexSparklineCard(), "Apex Sparkline Chart", "graph-down")
         return layout
@@ -206,7 +150,7 @@ class TableView(DemoStandardMixin, TemplateView):
     menu_item = 'Tables'
 
     def get_content(self):
-        layout = WidgetListLayout(f"Tables", css_class='mt-4')    
+        layout = WidgetListLayout("Tables", css_class='mt-4')
         layout.add_widget(DataTableCard(), "Basic Static Table", "table")
         layout.add_widget(TestTableCard(), "AJAX Model Table", "table")
         layout.add_widget(BookModelTableCard(), "Basic Model Table", "table")
@@ -222,7 +166,7 @@ class TextWidgetView(DemoStandardMixin, TemplateView):
     menu_item = 'Text Widgets'
 
     def get_content(self):
-        layout = WidgetListLayout(f"Text Widgets", css_class='mt-4')    
+        layout = WidgetListLayout("Text Widgets", css_class='mt-4')
         layout.add_widget(MarkdownCard(), "Markdown Widget", "file-text")
         layout.add_widget(HTMLCard(), "HTML Widget", "file-code")
         layout.add_widget(CodeCard(), "Code Widget", "file-binary")
@@ -239,7 +183,7 @@ class ListWidgetView(DemoStandardMixin, TemplateView):
     menu_item = 'List Widgets'
 
     def get_content(self):
-        layout = WidgetListLayout(f"List Widgets", css_class='mt-4')    
+        layout = WidgetListLayout("List Widgets", css_class='mt-4')
         layout.add_widget(PagedBookCard())
         layout.add_widget(AuthorListCard())
         layout.add_widget(AuthorListModelCardWidgetCard())
@@ -255,7 +199,7 @@ class StructureWidgetView(DemoStandardMixin, TemplateView):
     menu_item = 'Structure Widgets'
 
     def get_content(self):
-        layout = WidgetListLayout(f"Structure Widgets", css_class='mt-4')    
+        layout = WidgetListLayout("Structure Widgets", css_class='mt-4')
         layout.add_widget(TabCard(), "Tab Widget", "folder")
         layout.add_widget(CardCard(), "Card Widget", "card-heading")
         layout.add_widget(CrispyFormCard(), "Crispy Form Widget", "ui-checks")
@@ -270,13 +214,13 @@ class StructureWidgetView(DemoStandardMixin, TemplateView):
         breadcrumbs = DemoBaseBreadcrumbs()
         breadcrumbs.add_breadcrumb('Structure Widgets')
         return breadcrumbs
-    
+
 
 class ModalView(DemoStandardMixin, TemplateView):
     menu_item = 'Modal Widgets'
 
     def get_content(self):
-        layout = WidgetListLayout(f"Modal Widget", css_class='mt-4')    
+        layout = WidgetListLayout("Modal Widget", css_class='mt-4')
         layout.add_widget(ModalCard(), "Modal Widget", "window-fullscreen")
         layout.add_widget(CrispyFormModalCard(), "Crispy Form Modal Widget", "ui-checks")
         return layout

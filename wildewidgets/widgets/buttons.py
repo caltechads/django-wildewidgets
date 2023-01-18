@@ -54,8 +54,8 @@ class Button(Block):
         close = kwargs.pop('close', False)
         if close:
             text = ""
-            kwargs["css_class"]="btn-close"
-            kwargs["aria_attributes"]={"label":"Close"}
+            kwargs["css_class"] = "btn-close"
+            kwargs["aria_attributes"] = {"label": "Close"}
         super().__init__(text, **kwargs)
         self._content = text
         self._attributes['type'] = 'button'
@@ -335,7 +335,7 @@ class FormButton(Block):
         }
         if self.close:
             button_kwargs['close'] = True
-            button_kwargs['aria_attributes'] = {"label":"Close"}
+            button_kwargs['aria_attributes'] = {"label": "Close"}
         confirm_text = kwargs.pop('confirm_text', self.confirm_text)
         if confirm_text is not None:
             button_kwargs['attributes']['onclick'] = f"return confirm('{confirm_text}');"
