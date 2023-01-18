@@ -4,6 +4,7 @@
 from collections.abc import Iterable as IterableABC
 from copy import deepcopy
 from typing import Union, List, Dict, Iterable, Any, Optional
+import warnings
 
 from django.template.loader import get_template
 from django.templatetags.static import static
@@ -489,7 +490,18 @@ class UnorderedList(Block):
 
     Example:
 
-        >>> ul = UnorderedList('foo', Link('bar', url='https://example.com'))
+        With constructor arguments::
+
+            >>> items = ['foo', 'bar', 'baz', Link['barney', url='https://example.com]]
+            >>> ul = UnorderedList(*items)
+
+        With :py:meth:`add_block`::
+
+            >>> items = ['foo', 'bar', 'baz', Link['barney', url='https://example.com]]
+            >>> ul = UnorderedList()
+            >>> for item in items:
+            ...     ul.add_block(item)
+
     """
 
     tag: str = 'ul'
@@ -501,7 +513,7 @@ class UnorderedList(Block):
         self.blocks.append(Block(block, tag='li'))
 
 
-class OrderedList(Block):
+class OrderedList(UnorderedList):
     """
     Extends :py:class:`UnorderedList`.
 
@@ -511,21 +523,45 @@ class OrderedList(Block):
 
     Example:
 
-        >>> ul = OrderedList('foo', Link('bar', url='https://example.com'))
-    """
+        With constructor arguments::
 
+            >>> items = ['foo', 'bar', 'baz', Link['barney', url='https://example.com]]
+            >>> ul = OrderedList(*items)
+
+        With :py:meth:`add_block`::
+
+            >>> items = ['foo', 'bar', 'baz', Link['barney', url='https://example.com]]
+            >>> ul = OrderedList()
+            >>> for item in items:
+            ...     ul.add_block(item)
+    """
     tag: str = 'ol'
 
 
-# Backwards compatibility
-
 class HTMLList(UnorderedList):
+    """
+    An unordered HTML list.
 
+    .. deprecated:: 0.14.0
+
+        Use :py:class:`UnorderedList` instead.  Change this::
+
+            >>> items = ['foo', 'bar', 'baz', Link['barney', url='https://example.com]]
+            >>> block = HTMLList(items=items)
+
+        To this::
+
+            >>> items = ['foo', 'bar', 'baz', Link['barney', url='https://example.com]]
+            >>> block = UnorderedList(*items)
+
+    """
     def __init__(self, *args, items: List[str] = None, **kwargs):
+        warnings.warn(
+            'Deprecated in 0.14.0.  Use UnorderedList instead', DeprecationWarning, stacklevel=2
+        )
         if not items:
             items = []
-        super().__init__(*args, **kwargs)
-        self.contents = items if items else self.contents
+        super().__init__(*items, **kwargs)
 
 
 class Image(Block):
