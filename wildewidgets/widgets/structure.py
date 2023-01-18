@@ -622,27 +622,26 @@ class ListModelWidget(MultipleModelWidget):
         return widget
 
 
-
 list_model_card_filter_script = """
 var filter_input = document.getElementById("{filter_id}");
 filter_input.onkeyup = function(e) {{
-    var filter=filter_input.value.toLowerCase();
+    var filter = filter_input.value.toLowerCase();
     document.querySelectorAll("{query} label").forEach(label => {{
         var test_string = label.innerText.toLowerCase();
         if (test_string.includes(filter)) {{
-            label.parentElement.parentElement.classList.remove('d-none');
+            label.parentElement.classList.remove('d-none');
         }}
         else {{
-            label.parentElement.parentElement.classList.add('d-none');
+            label.parentElement.classList.add('d-none');
         }}
     }});
     let children = document.querySelectorAll("{query} li");
-    for (let i=0;i<children.length;i++) {{
-        let child=children[i];
+    for (let i=0; i < children.length; i++) {{
+        let child = children[i];
         child.classList.remove('border-top');
     }};
-    for (let i=0;i<children.length;i++) {{
-        let child=children[i];
+    for (let i=0; i < children.length; i++) {{
+        let child = children[i];
         if (child.classList.contains('d-none')) {{
         }}
         else {{
