@@ -111,7 +111,7 @@ class StringBlock(Block):
 
     A basic widget that displays a string.
 
-    .. deprecated:: 0.16.0
+    .. deprecated:: 0.14.0
 
         Use :py:class:`wildewidgets.widgets.base.Block` directly instead.  It
         works exactly like :py:class:`StringBlock`
@@ -122,7 +122,7 @@ class StringBlock(Block):
 
     def __init__(self, text: str, **kwargs):
         warnings.warn(
-            'Deprecated in 0.16.0; use Block directly instead.',
+            'Deprecated in 0.14.0; use Block directly instead.',
             DeprecationWarning,
             stacklevel=2
         )
