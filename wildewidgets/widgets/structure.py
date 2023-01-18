@@ -238,6 +238,7 @@ class MultipleModelWidget(Block):
         Args:
             object: the model instance to pass into the model specific widget
         """
+        # FIXME: we should not be using ``object`` as a variable -- it is a built-in
         if self.model_widget:
             return self.model_widget(object=object, **kwargs)
         else:
