@@ -100,15 +100,26 @@ class HTMLWidget(TemplateWidget):
 
 
 class StringBlock(Block):
-    """Extends Block.
+    """
+    Extends :py:class:`wildewidgets.widgets.base.Block`.
 
     A basic widget that displays a string.
+
+    .. deprecated::
+
+        Use :py:class:`wildewidgets.widgets.base.Block` directly instead.  It
+        works exactly like :py:class:`StringBlock`
 
     Args:
         text: the text to display.
     """
 
     def __init__(self, text: str, **kwargs):
+        warnings.warn(
+            'Deprecated in 0.16.0; use Block directly instead.',
+            DeprecationWarning,
+            stacklevel=2
+        )
         super().__init__(*[text], **kwargs)
 
 
