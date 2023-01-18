@@ -15,7 +15,7 @@ django-storages==1.9.1                        # https://github.com/jschneier/dja
 django-xff==1.3.0                             # https://github.com/ferrix/xff/
 django-chartjs==2.2.1                         # https://github.com/peopledoc/django-chartjs
 django-generic-json-views==0.8                # https://github.com/bbengfort/django-generic-json-views
-django-theme-academy==0.2.2                   # https://github.com/caltechads/django-theme-academy
+django-theme-academy==0.3.0                   # https://github.com/caltechads/django-theme-academy
 django-book-manager==0.3.1                    # https://github.com/caltechads/django-book-manager
 
 # Other utils
@@ -28,9 +28,8 @@ ipython==8.6.0                                # https://github.com/ipython/ipyth
 mysqlclient==2.1.1                            # https://github.com/PyMySQL/mysqlclient-python
 pytz==2022.6                                  # https://github.com/stub42/pytz
 structlog==22.2.0                             # https://github.com/hynek/structlog
-django-wildewidgets==0.13.56                  # https://github.com/caltechads/django-wildewidgets
 # --- SASS Processing
-django-sass-processor==1.2.2                  # https://github.com/jrief/django-sass-processor  
+django-sass-processor==1.2.2                  # https://github.com/jrief/django-sass-processor
 libsass==0.22.0
 
 # Web server

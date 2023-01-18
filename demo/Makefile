@@ -2,15 +2,26 @@ VERSION = 0.13.56
 
 PACKAGE = wildewidgets_demo
 
+.PHONY: clean dist build force-build tag dev dev-detached devup devdown logall log exec restart docker-clean docker-destroy-db docker-destroy list  package
 #======================================================================
 
+clean:
+	rm -rf *.tar.gz dist *.egg-info *.rpm
+	find . -name "*.pyc" -exec rm '{}' ';'
 
-build:
+dist: clean
+	@python setup.py sdist
+
+package:
+	(cd ..; python setup.py sdist)
+	cp ../dist/django-wildewidgets-${VERSION}.tar.gz django-wildewidgets.tar.gz
+
+build: package
 	docker build -t ${PACKAGE}:${VERSION} .
 	docker tag ${PACKAGE}:${VERSION} ${PACKAGE}:latest
 	docker image prune -f
 
-force-build:
+force-build: package
 	docker build --no-cache -t ${PACKAGE}:${VERSION} .
 	docker tag ${PACKAGE}:${VERSION} ${PACKAGE}:latest
 	docker image prune -f
@@ -41,6 +52,10 @@ exec:
 docker-clean:
 	docker stop $(shell docker ps -a -q)
 	docker rm $(shell docker ps -a -q)
+
+docker-destroy-db: docker-clean
+	docker volume rm wildewidgets_demo_data
+
 
 .PHONY: list
 list:

@@ -33,28 +33,25 @@ RUN yum -y update && \
     /opt/python/bin/pip3.10 install supervisor && \
     # Create the virtualenv. Note that we NEED to use `python3`, here, since `python` is currently py2.7. Once we set
     # up the PATH on the next command, `python` becomes py3.6.
-    /opt/python/bin/python3.10 -m venv /demo-ve && \
+    /opt/python/bin/python3.10 -m venv /ve && \
     # Add the user under which gunicorn will run.
-    adduser -r gunicorn && \
-    # Set the container's timezone to Los Angeles time.
-    rm -rf /etc/localtime && \
-    ln -s /usr/share/zoneinfo/America/Los_Angeles /etc/localtime
+    adduser -r gunicorn
 
 # Ensure that we run the pip and python that are in the virtualenv, rather than the system copies.
-ENV PATH /demo-ve/bin:$PATH
+ENV PATH /ve/bin:/opt/python/3.10/bin:$PATH
+# Install the latest pip and our dependencies into the virtualenv.  We do this
+# before copying the codebase so that minor code changes don't force a rebuild
+# of the entire virtualenv.
+COPY requirements.txt /tmp/requirements.txt
+COPY django-wildewidgets.tar.gz /tmp/django-wildewidgets.tar.gz
+RUN pip install --upgrade pip wheel && \
+    pip install -r /tmp/requirements.txt && \
+    pip install /tmp/django-wildewidgets.tar.gz && \
+    # Purge the pip cache, which can save us a good few megabytes in the docker image.
+    rm -rf `pip cache dir`
 
-# Install the latest pip and our dependencies into the virtualenv.  We do this before copying the codebase so that minor
-# code changes don't force a rebuild of the entire virtualenv.
-#COPY requirements.txt /tmp/requirements.txt
-#COPY deps /tmp
-#RUN pip3 install --upgrade pip && \
-#    pip3 install -r /tmp/requirements.txt
-
-# Copy the code into the image. The .dockerignore file determines what gets left out of this operation. This step will
-# always invalidate the docker build cache, so it's done as late as possible to make sure the fewest number of steps
-# must be repeated on each build of the image.
-COPY . /demo
-WORKDIR /demo
+COPY . /app
+WORKDIR /app
 
 RUN pip install --upgrade pip && \
     pip install -r requirements.txt

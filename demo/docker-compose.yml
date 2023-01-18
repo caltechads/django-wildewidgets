@@ -7,14 +7,17 @@ services:
     restart: always
     hostname: "wildewidgets_demo"
     ports:
-      - 8062:443
-    env_file:
-      - "/etc/context.d/demo.env"
+      - 443:443
+    environment:
+      - DEBUG=True
+      - DEVELOPMENT=True
+      - GUNICORN_RELOAD=True
     depends_on:
       - mysql
     command: bin/wait-for-it.sh mysql:3306 --and /opt/python/bin/supervisord
     volumes:
       - .:/demo
+      - ../wildewidgets:/ve/lib/python3.10/site-packages/wildewidgets
 
   mysql:
     image: mysql:8.0.23
