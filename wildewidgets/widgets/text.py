@@ -12,8 +12,6 @@ except ModuleNotFoundError:
     # Only needed if using syntax highlighting
     pass
 
-from django.core.exceptions import ImproperlyConfigured
-
 from .base import TemplateWidget, Block
 
 
@@ -113,7 +111,7 @@ class StringBlock(Block):
 
     A basic widget that displays a string.
 
-    .. deprecated::
+    .. deprecated:: 0.16.0
 
         Use :py:class:`wildewidgets.widgets.base.Block` directly instead.  It
         works exactly like :py:class:`StringBlock`
