@@ -1,7 +1,9 @@
 from copy import copy
+import datetime
 from functools import lru_cache
 import random
 import re
+from typing import Any, Dict, List, Optional, Type
 
 from django import template
 from django.conf import settings
@@ -20,24 +22,31 @@ logger = logging.getLogger(__name__)
 
 
 class DatatableMixin:
-    model = None
+
+    model: Type[models.Model] = None
 
     columns = []
-    _columns = []               # internal cache for columns definition
+    #: internal cache for columns definition
+    _columns = []
     order_columns = []
 
-    max_display_length = 100    # max limit of records returned, do not allow to kill our server by huge sets  of data
-    pre_camel_case_notation = False  # datatables 1.10 changed query string parameter names
-    none_string = ''
-    escape_values = True        # if set to true then values returned by render_column will be escaped
+    #: The max number of of records that will be returned, so that we can protect our
+    #: our server from rendering huge amounts of data
+    max_display_length: int = 100
+    # datatables 1.10 changed query string parameter names
+    pre_camel_case_notation: bool = False
+    none_string: str = ''
+    # If set to ``True`` then values returned by :py:meth:`render_column`` will be escaped
+    escape_values: bool = True
     columns_data = []
-    # is_data_list determines the type of results. If JavaScript passes data attribute that is not an integer, it
-    # expects a dictionary with specific fields in the response, see:
-    # https://datatables.net/reference/option/columns.data
-    is_data_list = True
+    #: This determines the type of results. If the AJAX call passes us a data attribute
+    #: that is not an integer, it expects a dictionary with specific fields in
+    #: the response, see: `dataTables columns.data
+    #: <https://datatables.net/reference/option/columns.data>`_
+    is_data_list: bool = True
 
-    FILTER_ISTARTSWITH = 'istartswith'
-    FILTER_ICONTAINS = 'icontains'
+    FILTER_ISTARTSWITH: str = 'istartswith'
+    FILTER_ICONTAINS: str = 'icontains'
 
     @property
     def _querydict(self):
@@ -46,7 +55,7 @@ class DatatableMixin:
         else:
             return self.request.GET
 
-    def get_filter_method(self):
+    def get_filter_method(self) -> str:
         """
         Returns preferred filter method.
         """
@@ -60,12 +69,13 @@ class DatatableMixin:
         if 'iSortingCols' in self._querydict:
             self.pre_camel_case_notation = True
 
-    def get_order_columns(self):
+    def get_order_columns(self) -> List[str]:
         """
         Return list of columns used for ordering.
 
-        By default returns self.order_columns but if these are not defined it tries to get columns from the request
-        using the ``columns[i][name]`` attribute. This requires proper client side definition of columns, eg::
+        By default returns :py:attr`order_columns` but if these are not defined it
+        tries to get columns from the request using the ``columns[i][name]``
+        attribute. This requires proper client side definition of columns, eg::
 
             columns: [
                 {
@@ -108,9 +118,10 @@ class DatatableMixin:
         """
         Returns the list of columns to be returned in the result set.
 
-        By default returns self.columns but if these are not defined it tries to get columns from the request using the
-        ``columns[i][data]`` or columns[i][name] attribute.  This requires proper client side definition of columns,
-        e.g.::
+        By default returns :py:attr:`columns` but if these are not defined it tries to
+        get columns from the request using the ``columns[i][data]`` or
+        columns[i][name] attribute.  This requires proper client side definition
+        of columns, e.g.::
 
             columns: [
                 {
@@ -127,8 +138,9 @@ class DatatableMixin:
         columns = []
         for column_def in self.columns_data:
             if self.is_data_list:
-                # if self.is_data_list is True then 'data' atribute is an integer - column index, so we
-                # cannot use it as a column name, let's try 'name' attribute instead
+                # if self.is_data_list is True then 'data' atribute is an
+                # integer - column index, so we cannot use it as a column name,
+                # let's try 'name' attribute instead
                 col_name = column_def['name']
             else:
                 col_name = column_def['data']
@@ -150,9 +162,10 @@ class DatatableMixin:
 
         return getattr(obj, key, None)
 
-    def _render_column(self, row, column):
+    def _render_column(self, row: Any, column: str) -> str:
         """
-        Renders a column on a row. column can be given in a module notation eg. ``document.invoice.type``
+        Renders a column on a row. column can be given in a module notation eg.
+        ``document.invoice.type``
         """
         # try to find rightmost object
         obj = row
@@ -176,9 +189,10 @@ class DatatableMixin:
 
         return value
 
-    def render_column(self, row, column):
+    def render_column(self, row: Any, column: str) -> str:
         """
-        Renders a column on a row. column can be given in a module notation eg. ``document.invoice.type``
+        Renders a column on a row. column can be given in a module notation eg.
+        ``document.invoice.type``
         """
         value = self._render_column(row, column)
         # if value and hasattr(row, 'get_absolute_url'):
@@ -648,37 +662,78 @@ class DataTableForm:
 
 
 class DataTable(Widget, WidgetInitKwargsMixin, DatatableAJAXView):
-    template_file = 'wildewidgets/table.html'
+    """
+    Extends :py:class:`DatatableAJAXView`.
+
+    A widget that renders a `DataTables.js table <https://datatables.net/>`_.
+
+    Keyword Args:
+        width: The table width. Defaults to '100%'.
+        height: The table height. Defaults to None.
+        title: The table title. Defaults to None.
+        searchable: Whether the table is searchable. Defaults to True.
+        paging: Whether the table is paged. Defaults to True.
+        page_length: The number of rows per page. Defaults to None.
+        small: Whether the row height is small. Defaults to False.
+        buttons: Whether the table has export buttons. Defaults to False.
+        striped: Whether the table is striped. Defaults to False.
+        table_id: The table CSS id. Defaults to None.
+        async: Whether the table is asynchronous. Defaults to True.
+        data: The table data. Defaults to None.
+        sort_ascending: Whether the table is sorted in ascending order. Defaults to True.
+        action_button_size: The size of the action button. Defaults to 'normal'.
+            Valid values are 'normal', 'sm', 'lg'.
+    """
+
+    template_file: str = 'wildewidgets/table.html'
     actions = False
     form_actions = None
-    form_url = ''
-    hide_controls = False
-    table_id = None
-    default_action_button_label = 'View'
-    default_action_button_color_class = 'secondary'
-    sort_ascending = True
-    action_button_size = 'normal'
+    form_url: str = ''
+    hide_controls: bool = False
+    table_id: Optional[str] = None
+    default_action_button_label: str = 'View'
+    default_action_button_color_class: str = 'secondary'
+    sort_ascending: bool = True
+    action_button_size: str = 'normal'
 
-    def __init__(self, *args, **kwargs):
+    def __init__(
+        self,
+        *args,
+        width: str = '100%',
+        height: str = None,
+        title: str = None,
+        searchable: str = True,
+        paging: str = True,
+        page_length: int = None,
+        small: bool = False,
+        buttons: bool = False,
+        striped: bool = False,
+        table_id: str = None,
+        sort_ascending: bool = None,
+        action_button_size: str = None,
+        data: List[Any] = None,
+        **kwargs
+    ):
         super().__init__(*args, **kwargs)
         self.options = {
-            'width': kwargs.get('width', '100%'),
-            'height': kwargs.get('height', None),
-            "title": kwargs.get('title', None),
-            "searchable": kwargs.get('searchable', True),
-            "paging": kwargs.get('paging', True),
-            "page_length": kwargs.get('page_length', None),
-            "small": kwargs.get('small', False),
-            "buttons": kwargs.get('buttons', False),
-            "striped": kwargs.get('striped', False),
+            'width': width,
+            'height': height,
+            "title": title,
+            "searchable": searchable,
+            "paging": paging,
+            "page_length": page_length,
+            "small": small,
+            "buttons": buttons,
+            "striped": striped,
             "hide_controls": self.hide_controls
         }
-        self.table_id = kwargs.get('table_id', self.table_id)
+        self.table_id = table_id if table_id else self.table_id
+        # We have to do this this way because ``async`` is a reserved keyword
         self.async_if_empty = kwargs.get('async', True)
         self.column_fields = {}
         self.column_filters = {}
         self.column_styles = []
-        self.data = kwargs.get('data', [])
+        self.data = data if data else []
         self._form_actions = copy(self.form_actions)
         if self.form_actions:
             self.column_fields['checkbox'] = DataTableColumn(
@@ -687,15 +742,15 @@ class DataTable(Widget, WidgetInitKwargsMixin, DatatableAJAXView):
                 searchable=False,
                 sortable=False
             )
-        self.sort_ascending = kwargs.get('sort_ascending', self.sort_ascending)
-        self.action_button_size = kwargs.get('action_button_size', self.action_button_size)
+        self.sort_ascending = sort_ascending if sort_ascending is not None else self.sort_ascending
+        self.action_button_size = action_button_size if action_button_size else self.action_button_size
         if not self.action_button_size == 'normal':
             self.action_button_size_class = f"btn-{self.action_button_size}"
         else:
             self.action_button_size_class = ''
 
-    def has_form_actions(self):
-        return not self._form_actions == None
+    def has_form_actions(self) -> bool:
+        return self._form_actions is not None
 
     def get_form_actions(self):
         return self._form_actions
@@ -710,8 +765,17 @@ class DataTable(Widget, WidgetInitKwargsMixin, DatatableAJAXView):
                 cols.append(field)
         return cols
 
-    def add_column(self, field, verbose_name=None, searchable=True, sortable=True, align='left',
-                   head_align='left', visible=True, wrap=True):
+    def add_column(
+        self,
+        field: str,
+        verbose_name: str = None,
+        searchable: bool = True,
+        sortable: bool = True,
+        align: str = 'left',
+        head_align: str = 'left',
+        visible: bool = True,
+        wrap: bool = True
+    ) -> None:
         self.column_fields[field] = DataTableColumn(
             field=field,
             verbose_name=verbose_name,
@@ -723,23 +787,22 @@ class DataTable(Widget, WidgetInitKwargsMixin, DatatableAJAXView):
             wrap=wrap
         )
 
-    def add_filter(self, field, filter):
-        self.column_filters[field] = filter
+    def add_filter(self, field: str, dt_filter: DataTableFilter) -> None:
+        self.column_filters[field] = dt_filter
 
-    def remove_filter(self, field):
+    def remove_filter(self, field: str):
         del self.column_filters[field]
 
-    def add_styler(self, styler):
+    def add_styler(self, styler: DataTableStyler) -> None:
         styler.test_index = list(self.column_fields.keys()).index(styler.test_cell)
         if styler.target_cell:
             styler.target_index = list(self.column_fields.keys()).index(styler.target_cell)
         self.column_styles.append(styler)
 
-    def build_context(self):
+    def build_context(self) -> Dict[str, Any]:
         return {'rows': self.data}
-        # return {'rows': self.prepare_results(self.data)}
 
-    def get_content(self, **kwargs):
+    def get_content(self, **kwargs) -> str:
         if self.actions:
             self.add_column(field='actions', searchable=False, sortable=False)
         has_filters = False
@@ -767,7 +830,7 @@ class DataTable(Widget, WidgetInitKwargsMixin, DatatableAJAXView):
             context['has_actions'] = True
             context['action_column'] = len(self.column_fields) - 1
         else:
-            context['has_actions'] = False        
+            context['has_actions'] = False
         context['filters'] = filters
         context['stylers'] = self.column_styles
         context['has_filters'] = has_filters
@@ -783,22 +846,32 @@ class DataTable(Widget, WidgetInitKwargsMixin, DatatableAJAXView):
         content = html_template.render(context)
         return content
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.get_content()
 
-    def add_row(self, **kwargs):
+    def add_row(self, **kwargs) -> None:
         row = []
-        for field in self.column_fields.keys():
+        for field in self.column_fields:
             if field in kwargs:
                 row.append(kwargs[field])
             else:
                 row.append('')
         self.data.append(row)
 
-    def get_action_button(self, row, label, url_name, method='get', color_class='secondary', attr='id',
-                          js_function_name=None):
+    def get_action_button(
+        self,
+        row: Any,
+        label: str,
+        url_name: str,
+        method: str = 'get',
+        color_class: str = 'secondary',
+        attr: str = 'id',
+        js_function_name: str = None
+    ) -> str:
         if url_name:
             base = reverse_lazy(url_name)
+            # FIXME: This assumes we're using QueryStringKwargsMixin, which people
+            # outside our group don't use
             if method == 'get':
                 url = f"{base}?{attr}={row.id}"
             else:
@@ -807,14 +880,22 @@ class DataTable(Widget, WidgetInitKwargsMixin, DatatableAJAXView):
             url = "javascript:void(0)"
         return self.get_action_button_with_url(row, label, url, method, color_class, attr, js_function_name)
 
-    def get_action_button_url_extra_attributes(self, row):
+    def get_action_button_url_extra_attributes(self, row: Any) -> str:
         return ""
 
-    def get_action_button_with_url(self, row, label, url, method='get', color_class='secondary', attr='id',
-                                   js_function_name=None):
+    def get_action_button_with_url(
+        self,
+        row: Any,
+        label: str,
+        url: str,
+        method: str = 'get',
+        color_class: str = 'secondary',
+        attr: str = 'id',
+        js_function_name: str = None
+    ) -> str:
         url_extra = self.get_action_button_url_extra_attributes(row)
         if url_extra:
-            url = f"{url}&{url_extra}"                                   
+            url = f"{url}&{url_extra}"
         if method == 'get':
             if js_function_name:
                 link_extra = f"onclick='{js_function_name}({row.id});'"
@@ -827,10 +908,10 @@ class DataTable(Widget, WidgetInitKwargsMixin, DatatableAJAXView):
         form = f"<form class='form form-inline' action={url} method='post'>{token_input}{id_input}{button}</form>"
         return form
 
-    def get_conditional_action_buttons(self, row):
+    def get_conditional_action_buttons(self, row: Any) -> str:
         return ''
 
-    def render_actions_column(self, row, column):
+    def render_actions_column(self, row: Any, column: str) -> str:
         response = "<div class='d-flex flex-row justify-content-end'>"
         if hasattr(row, 'get_absolute_url'):
             url = row.get_absolute_url()
@@ -868,17 +949,41 @@ class DataTable(Widget, WidgetInitKwargsMixin, DatatableAJAXView):
 
 
 class BasicModelTable(DataTable):
-    fields = None
-    hidden = []
-    verbose_names = {}
-    page_length = None
-    small = None
+    """
+    Extends :py:class:`DataTable`.
+
+    This class is used to create a table from a :py:class:`Model`.  It provides a full
+    featured table with a minimum of code. Many derived classes will only need
+    to define class variables.
+
+    Example::
+
+        class BookModelTable(BasicModelTable):
+            fields = ['title', 'authors__full_name', 'isbn']
+            model = Book
+            alignment = {'authors': 'left'}
+            verbose_names = {'authors__full_name': 'Authors'}
+            buttons = True
+            striped = True
+
+            def render_authors__full_name_column(self, row, column):
+                authors = row.authors.all()
+                if authors.count() > 1:
+                    return f"{authors[0].full_name} ... "
+                return authors[0].full_name
+    """
+
+    fields: List[str] = []
+    hidden: List[str] = []
+    verbose_names: Dict[str, str] = {}
+    page_length: int = None
+    small: bool = None
     buttons = None
-    striped = None
-    unsortable = []
-    unsearchable = []
-    field_types = {}
-    alignment = {}
+    striped: bool = None
+    unsortable: List[str] = []
+    unsearchable: List[str] = []
+    field_types: Dict[str, str] = {}
+    alignment: Dict[str, str] = {}
     bool_icons = {}
 
     def __init__(self, *args, **kwargs):
@@ -888,9 +993,9 @@ class BasicModelTable(DataTable):
                 kwargs[field] = value
         super().__init__(*args, **kwargs)
 
-        self.model_fields = {}
-        self.related_fields = {}
-        self.field_names = []
+        self.model_fields: Dict[str, models.Field] = {}
+        self.related_fields: Dict[str, models.Field] = {}
+        self.field_names: List[str] = []
         for field in self.model._meta.get_fields():
             if field.name == 'id':
                 continue
@@ -928,7 +1033,7 @@ class BasicModelTable(DataTable):
             final_field = None
         return final_field
 
-    def get_field(self, field_name):
+    def get_field(self, field_name: str) -> models.Field:
         if field_name in self.model_fields:
             field = self.model_fields[field_name]
         elif field_name in self.related_fields:
@@ -937,7 +1042,7 @@ class BasicModelTable(DataTable):
             field = None
         return field
 
-    def set_standard_column_attributes(self, field_name, kwargs):
+    def set_standard_column_attributes(self, field_name: str, kwargs: Dict[str, Any]) -> None:
         if field_name in self.hidden:
             kwargs['visible'] = False
         if field_name in self.unsearchable:
@@ -953,7 +1058,7 @@ class BasicModelTable(DataTable):
             else:
                 kwargs['align'] = 'right'
 
-    def load_field(self, field_name):
+    def load_field(self, field_name: str) -> None:
         if field_name in self.model_fields:
             field = self.model_fields[field_name]
             verbose_name = field.name.replace('_', ' ')
@@ -977,19 +1082,19 @@ class BasicModelTable(DataTable):
             self.set_standard_column_attributes(field_name, kwargs)
             self.add_column(field_name, **kwargs)
 
-    def load_all_fields(self):
+    def load_all_fields(self) -> None:
         for field_name in self.field_names:
             self.load_field(field_name)
 
-    def render_currency_type_column(self, value):
+    def render_currency_type_column(self, value: Any) -> str:
         return f"${value}"
 
-    def render_bool_type_column(self, value):
+    def render_bool_type_column(self, value: Any) -> str:
         if value == "True":
             return "<i class='bi-check-lg text-success'><span style='display:none'>True</span></i>"
         return ""
 
-    def render_bool_icon_column(self, value, icon_data):
+    def render_bool_icon_column(self, value: Any, icon_data):
         if len(icon_data) == 0:
             return value
         if value == "True":
@@ -998,7 +1103,7 @@ class BasicModelTable(DataTable):
             return f"<i class='bi-{icon_data[1][0]} {icon_data[1][1]}'><span style='display:none'>False</span></i>"
         return ""
 
-    def render_datetime_type_column(self, value):
+    def render_datetime_type_column(self, value: datetime.datetime) -> str:
         datetime_format = "%m/%d/%Y %H:%M"
         if hasattr(settings, 'WILDEWIDGETS_DATETIME_FORMAT'):
             datetime_format = settings.WILDEWIDGETS_DATETIME_FORMAT
@@ -1006,7 +1111,7 @@ class BasicModelTable(DataTable):
             return value.strftime(datetime_format)
         return ""
 
-    def render_date_type_column(self, value):
+    def render_date_type_column(self, value: datetime.date) -> str:
         date_format = "%m/%d/%Y"
         if hasattr(settings, 'WILDEWIDGETS_DATE_FORMAT'):
             date_format = settings.WILDEWIDGETS_DATE_FORMAT
@@ -1014,7 +1119,7 @@ class BasicModelTable(DataTable):
             return value.strftime(date_format)
         return ""
 
-    def render_column(self, row, column):
+    def render_column(self, row: Any, column: str) -> str:
         value = super().render_column(row, column)
         if column in self.model_fields:
             field = self.model_fields[column]

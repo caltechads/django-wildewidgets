@@ -1,1 +1,7 @@
 <{{tag}}{% for key, value in attributes.items %} {{key}}="{{value}}"{% endfor %}{% if css_id is not None %} id="{{css_id}}"{% endif %}{% if css_classes is not None %} class="{{css_classes}}"{% endif %}{% for key, value in data_attributes.items %} data-bs-{{key}}="{{value}}"{% endfor %}{% for key, value in aria_attributes.items %} aria-{{key}}="{{value}}"{% endfor %}>
+
+{% if script %}
+<script>
+{{script|safe}}
+</script>
+{% endif %}

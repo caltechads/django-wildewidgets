@@ -1,19 +1,38 @@
 import random
+from typing import Any, Dict, List, Tuple, Union
 
 from django import template
-from django.urls import reverse_lazy
+from django.urls import reverse
 
 from wildewidgets.views import WidgetInitKwargsMixin
 
 
 class BasicMenu(WidgetInitKwargsMixin):
-    template_file = "wildewidgets/menu.html"
-    navbar_classes = "navbar-expand-lg navbar-light"
-    container = "container-lg"
+    """
+    Basic menu widget.
+
+    A basic menu requires only one class attribute defined, :py:attr:`items`::
+
+        class MainMenu(BasicMenu):
+
+            items = [
+                ('Users', 'core:home'),
+                ('Uploads','core:uploads'),
+            ]
+
+    """
+
+    template_file: str = "wildewidgets/menu.html"
+    navbar_classes: str = "navbar-expand-lg navbar-light"
+    container: str = "container-lg"
     brand_image = None
-    brand_image_width = "100%"
-    brand_text = None
-    brand_url = "#"
+    brand_image_width: str = "100%"
+    brand_text: str = None
+    brand_url: str = "#"
+    #: a list of tuples that define the items to list in the menu, where the
+    #: first element is the menu item text and the second element is the URL
+    #: name.  A third optional element in the tuple can be a dictionary of get
+    #: arguments
     items = []
 
     def __init__(self, *args, **kwargs):
@@ -28,20 +47,20 @@ class BasicMenu(WidgetInitKwargsMixin):
         if len(self.active_hierarchy) > 0:
             for item in self.items:
                 data = {}
-                if type(item[1]) == str:
-                    data['url'] = reverse_lazy(item[1])
+                if isinstance(item[1], str):
+                    data['url'] = reverse(item[1])
                     data['extra'] = ''
                     data['kind'] = 'item'
 
                     if len(item) > 2:
                         extra = item[2]
-                        if type(extra) == dict:
+                        if isinstance(extra, dict):
                             extra_list = []
                             for k, v in extra.items():
                                 extra_list.append(f"{k}={v}")
                             extra = f"?{'&'.join(extra_list)}"
                             data['extra'] = extra
-                elif type(item[1]) == list:
+                elif isinstance(item[1], list):
                     if len(self.active_hierarchy) > 1:
                         submenu_active = self.active_hierarchy[1]
                     else:
@@ -61,7 +80,7 @@ class BasicMenu(WidgetInitKwargsMixin):
         }
         sub_menu_items = []
         for item in items:
-            if not type(item) == tuple:
+            if not isinstance(item, tuple):
                 continue
             if item[0] == 'divider':
                 subdata = {
@@ -70,7 +89,7 @@ class BasicMenu(WidgetInitKwargsMixin):
             else:
                 subdata = {
                     'title': item[0],
-                    'url': reverse_lazy(item[1]),
+                    'url': reverse(item[1]),
                     'extra': '',
                     'divider': False,
                     'active': item[0] == submenu_active,

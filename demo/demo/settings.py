@@ -64,10 +64,10 @@ else:
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.mysql',
-            'NAME': env('DB_NAME', None),
-            'USER': env('DB_USER', default=None),
-            'PASSWORD': env('DB_PASSWORD', default=None),
-            'HOST': env('DB_HOST', default=None),
+            'NAME': env('DB_NAME', default='demo'),
+            'USER': env('DB_USER', default='demo_u'),
+            'PASSWORD': env('DB_PASSWORD', default='password'),
+            'HOST': env('DB_HOST', default='db'),
             'ATOMIC_REQUESTS': True,
             'CONN_MAX_AGE': env.int('CONN_MAX_AGE', default=60),
             # This is needed in case the database doesn't have the newer default settings that enable "strict mode".

@@ -15,12 +15,26 @@
 # sys.path.insert(0, os.path.abspath('.'))
 # import sphinx_rtd_theme
 
+import django
+import os
+import sys
+sys.path.insert(0, os.path.abspath('../demo'))
+os.environ['DJANGO_SETTINGS_MODULE'] = 'demo.settings'
+django.setup()
+
+
 
 # -- Project information -----------------------------------------------------
 
+# the master toctree document
+master_doc = "index"
+
 project = 'django-wildewidgets'
-copyright = '2022, California Institute of Technology'
-author = 'Glenn Bach'
+copyright = '2023, California Institute of Technology'   # pylint: disable=redefined-builtin
+author = 'Glenn Bach, Chris Malek'
+
+from typing import List, Dict, Tuple, Optional
+
 
 # The full version, including alpha/beta/rc tags
 release = '0.13.56'
@@ -36,6 +50,7 @@ extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.viewcode',
     'sphinxcontrib.images',
+    'sphinx.ext.intersphinx',
 ]
 
 
@@ -47,6 +62,24 @@ templates_path = ['_templates']
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
+add_function_parentheses: bool = False
+add_module_names: bool = False
+
+autodoc_member_order = 'groupwise'
+
+# Make Sphinx not expand all our Type Aliases
+autodoc_type_aliases = {}
+
+# the locations and names of other projects that should be linked to this one
+intersphinx_mapping: Dict[str, Tuple[str, Optional[str]]] = {
+    'python': ('https://docs.python.org/3', None),
+    'django': ('http://docs.djangoproject.com/en/dev/', 'http://docs.djangoproject.com/en/dev/_objects/'),
+}
+
+# Configure the path to the Django settings module
+django_settings = "demo.settings_docker"
+# Include the database table names of Django models
+django_show_db_tables = True
 
 # -- Options for HTML output -------------------------------------------------
 
@@ -56,15 +89,11 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 html_theme = "pydata_sphinx_theme"
 # html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 html_context = {
-    "display_github": True, # Integrate github
-    "github_user": "caltech-imss-ads", # Username
-    "github_repo": "django-wildewidgets", # Repo name
-    "github_version": "master", # Version
-    # "display_bitbucket": True, # Integrate Bitbucket
-    # "bitbucket_user": "caltech-imss-ads", # Username
-    # "bitbucket_repo": "deployfish", # Repo name
-    # "bitbucket_version": "master", # Version
-    "conf_py_path": "/docs/", # Path in the checkout to the docs root
+    "display_github": True,  # Integrate github
+    "github_user": "caltech-imss-ads",  # Username
+    "github_repo": "django-wildewidgets",  # Repo name
+    "github_version": "main",  # Version
+    "conf_py_path": "/docs/",  # Path in the checkout to the docs root
 }
 
 # Theme options are theme-specific and customize the look and feel of a theme
@@ -76,24 +105,24 @@ html_theme_options = {
     'navigation_depth': 3,
     "show_prev_next": False,
     "logo": {
-      "image_light": "wildewidgets_logo.png",
-      "image_dark": "wildewidgets_dark_mode_logo.png",
-      "text": "Django-Wildewidgets",
+        "image_light": "wildewidgets_logo.png",
+        "image_dark": "wildewidgets_dark_mode_logo.png",
+        "text": "Django-Wildewidgets",
     },
     "icon_links": [
         {
             "name": "GitHub",
-            "url": "https://github.com/caltechads/django-wildewidgets",  
+            "url": "https://github.com/caltechads/django-wildewidgets",
             "icon": "fab fa-github-square",
             "type": "fontawesome",
         },
         {
             "name": "Demo",
-            "url": "https://wildewidgets.caltech.edu",  
+            "url": "https://wildewidgets.caltech.edu",
             "icon": "fa fa-desktop",
             "type": "fontawesome",
         }
-   ],
+    ],
 }
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,

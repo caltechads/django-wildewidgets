@@ -1,58 +1,64 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from copy import copy
+from copy import deepcopy
 import random
+from typing import Any, Dict, List, Optional, Type, Tuple, Union
 from urllib.parse import urlencode
 
 from django.core.exceptions import ImproperlyConfigured
 from django.core.paginator import InvalidPage, Paginator
-from django.db.models import QuerySet
+from django.forms import Form
+from django.db.models import QuerySet, Model
 from django.http import Http404
 
-from .base import TemplateWidget, Block, InputBlock
+from .base import Block, InputBlock, Widget
 from .text import HTMLWidget, StringBlock, LabelBlock
 from .buttons import FormButton
-from .headers import CardHeader, HeaderWithWidget
-
-from django.core.exceptions import ImproperlyConfigured
+from .headers import BasicHeader, CardHeader, HeaderWithWidget
 
 
 class TabbedWidget(Block):
-    """Extends TemplateWidget.
-    Render a tabbed interace. 
-    
-    Example::
-
-        tab = TabbedWidget()
-        tab.add_tab('My First Widget', widget1)
-        tab.add_tab('My Second Widget', widget2)
     """
-    template_name = 'wildewidgets/tab_block.html'
-    slug_suffix = None
-    overflow = "auto"
+    Extends :py:class:`wildewidgets.widgets.base.Block`.
 
-    def __init__(self, *args, **kwargs):
-        css_class = kwargs.get('css_class', "")
-        if css_class:
-            kwargs['css_class'] = f"card {css_class}"
+    This class implements a `Tabler Tabbed Card <https://preview.tabler.io/docs/cards.html>`_.
+
+    Example:
+
+        >>> tab = TabbedWidget()
+        >>> tab.add_tab('My First Widget', widget1)
+        >>> tab.add_tab('My Second Widget', widget2)
+    """
+
+    template_name: str = 'wildewidgets/tab_block.html'
+    block: str = 'card'
+
+    slug_suffix: Optional[str] = None
+    overflow: str = "auto"
+
+    def __init__(
+        self,
+        *blocks,
+        slug_suffix: str = None,
+        overflow: str = None,
+        **kwargs
+    ):
+        self.slug_suffix = slug_suffix if slug_suffix else self.slug_suffix
+        self.overflow = overflow if overflow else self.overflow
+        super().__init__(*blocks, **kwargs)
+        if "style" in self._attributes:
+            self._attributes['style'] += f" overflow: {self.overflow};"
         else:
-            kwargs['css_class'] = "card"
-        attributes = kwargs.get('attributes', {})
-        if "style" in attributes:
-            attributes['style'] += f" overflow: {self.overflow};"
-        else:
-            attributes['style'] = f"overflow: {self.overflow};"
-        kwargs['attributes'] = attributes
+            self._attributes['style'] = f"overflow: {self.overflow};"
         self.tabs = []
-        super().__init__(*args, **kwargs)
 
-    def add_tab(self, name, widget):
+    def add_tab(self, name: str, widget: Block) -> None:
         """
         Add a Bootstrap 5 tab named `name` that displays `widget`.
 
         Args:
-            name (str): Tab name/title.
-            widget (obj): Widget to display in tab.
+            name: the name of the tab
+            widget: the block to display in this tab
         """
         self.tabs.append((name, widget))
 
@@ -66,51 +72,62 @@ class TabbedWidget(Block):
 
 
 class CardWidget(Block):
-    """Extends TemplateWidget.
-    Renders a Bootstrap 5 Card.
-
-    Args:
-        header (header widget, optional): A header widget to display above the card.
-        header_text (str, optional): Text used to build a header widget is one is not provided
-        card_title (str): Card title
-        card_subtitle (str): Card subtitle
-        widget (obj): Widget to display in card body
-        widget_css (str): CSS to apply to the widget displayed in the card body
-        css_class (str): CSS to apply to the card itself in addition to the defaults
     """
-    template_name = 'wildewidgets/card_block.html'
-    header = None
-    header_text = None
-    header_css = None
-    card_title = None
-    card_subtitle = None
-    widget = None
-    widget_css = None
-    overflow = "auto"
+    Extends :py:class:`wildewidgets.widgets.base.Block`.
 
-    def __init__(self, *args, **kwargs):
-        self.header = kwargs.pop('header', self.header)
-        self.header_text = kwargs.pop('header_text', self.header_text)
-        self.header_css = kwargs.pop('header_css', self.header_css)
+    Renders a `Bootstrap 5 Card <https://getbootstrap.com/docs/5.2/components/card/>`_.
+
+    Keyword Args:
+        header: A header widget to display above the card.
+        header_text: Text used to build a header widget is one is not provided
+        card_title: Card title
+        card_subtitle: Card subtitle
+        widget: Widget to display in card body
+        widget_css: CSS to apply to the widget displayed in the card body
+        css_class: CSS to apply to the card itself in addition to the defaults
+        overflow:
+    """
+    template_name: str = 'wildewidgets/card_block.html'
+
+    block: str = 'card'
+
+    header: Optional[BasicHeader] = None
+    header_text: Optional[str] = None
+    header_css: Optional[str] = None
+    card_title: Optional[str] = None
+    card_subtitle: Optional[str] = None
+    widget: Optional[Widget] = None
+    widget_css: Optional[str] = None
+    overflow: str = "auto"
+
+    def __init__(
+        self,
+        *blocks,
+        header: BasicHeader = None,
+        header_text: str = None,
+        header_css: str = None,
+        card_title: str = None,
+        card_subtitle: str = None,
+        widget: Widget = None,
+        widget_css: str = None,
+        overflow: str = None,
+        **kwargs
+    ):
+        self.header = header if header else deepcopy(self.header)
+        self.header_text = header_text if header_text else self.header_text
+        self.header_css = header_css if header_css else self.header_css
         if self.header_text and not self.header:
             self.header = CardHeader(header_text=self.header_text)
-        self.card_title = kwargs.pop('card_title', self.card_title)
-        self.card_subtitle = kwargs.pop('card_subtitle', self.card_subtitle)
-        self.widget = kwargs.pop('widget', self.widget)
-        self.overflow = kwargs.pop('overflow', self.overflow)
-        self.widget_css = kwargs.pop('widget_css', self.widget_css)
-        css_class = kwargs.get('css_class', "")
-        if css_class:
-            kwargs['css_class'] = f"card {css_class}"
+        self.card_title = card_title if card_title else self.card_title
+        self.card_subtitle = card_subtitle if card_subtitle else self.card_subtitle
+        self.widget = widget if widget else deepcopy(self.widget)
+        self.overflow = overflow if overflow else self.overflow
+        self.widget_css = widget_css if widget_css else self.widget_css
+        super().__init__(*blocks, **kwargs)
+        if "style" in self._attributes:
+            self._attributes['style'] += f" overflow: {self.overflow};"
         else:
-            kwargs['css_class'] = "card"
-        attributes = kwargs.get('attributes', {})
-        if "style" in attributes:
-            attributes['style'] += f" overflow: {self.overflow};"
-        else:
-            attributes['style'] = f"overflow: {self.overflow};"
-        kwargs['attributes'] = attributes
-        super().__init__(*args, **kwargs)
+            self._attributes['style'] = f"overflow: {self.overflow};"
 
     def get_context_data(self, **kwargs):
         kwargs = super().get_context_data(**kwargs)
@@ -149,34 +166,77 @@ class CardWidget(Block):
 
 
 class MultipleModelWidget(Block):
-    """Extends Block.
-    Base class for `PagedModelWidget` and `ListModelWidget`.
     """
-    model = None
-    model_widget = None
-    model_kwargs = {}
-    ordering = None
-    queryset = None
-    item_label="item"
+    Extends :py:class:`wildewidgets.widgets.base.Block`.
 
-    def __init__(self, *args, item_label="", **kwargs):
-        self.model = kwargs.pop('model', self.model)
-        self.model_widget = kwargs.pop('model_widget', self.model_widget)
-        self.ordering = kwargs.pop('ordering', self.ordering)
-        self.queryset = kwargs.pop('queryset', self.queryset)
-        self.model_kwargs = kwargs.pop('model_kwargs', copy(self.model_kwargs))
+    Base class for :py:class:`PagedModelWidget` and :py:class:`ListModelWidget`.
+
+    Keyword Args:
+        model: if this is defined, do ``self.model.objects.all()`` to get our list
+            of instances.  Define either this or :py:attr:`queryset`, but not both.
+        queryset: use this queryset to get our list of instances.  Define either this or
+            :py:attr:`model`, but not both.
+        ordering: the ordering to use for the queryset.  This will be applied to both
+            :py:attr:`model` and :py:attr:`queryset`
+        model_widget: use this widget class to render each model instance.
+        model_kwargs: When instantiating :py:attr:`model_widget`, pass this dict into
+            the widget constructor as the keyword arguments
+        item_label: The label to use for each instance.  This is used in the confirmation
+            dialog when deleting instances.
+
+    """
+    #: If this is defined, do ``self.model.objects.all()`` to get our list of instances.
+    #: Define either this or :py:attr:`queryset`, but not both.
+    model: Type[Model] = None
+    #: Use this queryset to get our list of instances.  Define either this or
+    #: :py:attr:`model`, but not both.
+    queryset: QuerySet = None
+    #: The ordering to use for the queryset.  This will be applied to both
+    #: :py:attr:`model` and :py:attr:`queryset`
+    ordering: Union[str, Tuple[str, ...]] = None
+
+    #: Use this widget class to render each model instance.
+    model_widget: Type[Widget] = None
+    #: When instantiating :py:attr:`model_widget`, pass this dict into the widget constructor
+    #: as the keyword arguments
+    model_kwargs: Dict[str, Any] = {}
+
+    #: The label to use for each instance.  This is used in the confirmation
+    #: dialog when deleting instances.
+    item_label: str = ""
+
+    def __init__(
+        self,
+        *blocks,
+        model: Type[Model] = None,
+        queryset: QuerySet = None,
+        ordering: str = None,
+        model_widget: Widget = None,
+        model_kwargs: Dict[str, Any] = None,
+        item_label: str = None,
+        **kwargs
+    ) -> None:
+        self.model = model if model else self.model
+        self.model_widget = model_widget if model_widget else deepcopy(self.model_widget)
+        self.model_kwargs = model_kwargs if model_kwargs else deepcopy(self.model_kwargs)
+        self.queryset = queryset if queryset else self.queryset
+        self.ordering = ordering if ordering else self.ordering
         self.item_label = item_label if item_label else self.item_label
-        super().__init__(*args, **kwargs)
+        super().__init__(*blocks, **kwargs)
 
-    def get_item_label(self, object):
+    def get_item_label(self, instance: Model) -> str:
         """
-        Returns the type of the item displayed. This is used in the confirmation dialog when deleting.
+        Returns the type of the item displayed. This is used in the confirmation
+        dialog when deleting.
         """
         return self.item_label
 
-    def get_model_widget(self, object=object, **kwargs):
+    def get_model_widget(self, object: Model, **kwargs) -> Widget:
         """
         Returns the individual widget to display as part of the list.
+
+        Args:
+            object: the model instance to pass into the model specific widget
         """
         if self.model_widget:
             return self.model_widget(object=object, **kwargs)
@@ -187,23 +247,28 @@ class MultipleModelWidget(Block):
                 "%(cls)s.get_model_widget()." % {'cls': self.__class__.__name__}
             )
 
-    def get_model_widgets(self, object_list):
-        widgets = []
-        for object in object_list:
-            widgets.append(self.get_model_widget(object=object, **self.model_kwargs))
-        return widgets
+    def get_model_widgets(self, instances: List[Model]) -> List[Widget]:
+        return [
+            self.get_model_widget(object=instance, **self.model_kwargs)
+            for instance in instances
+        ]
 
-    def get_queryset(self):
+    def get_queryset(self) -> Union[List[Model], QuerySet]:
         """
         Return the list of items for this widget.
+
         The return value must be an iterable and may be an instance of
-        `QuerySet` in which case `QuerySet` specific behavior will be enabled.
+        :py:class:`QuerySet` in which case query set specific behavior will be
+        enabled.
         """
         if self.queryset is not None:
             queryset = self.queryset
             if isinstance(queryset, QuerySet):
                 queryset = queryset.all()
         elif self.model is not None:
+            # FIXME: why are we using _default_manager here instead of .objects ?
+            # The class may have replaced .objects with a more targeted manager and
+            # we won't get that if we always hit _default_manager
             queryset = self.model._default_manager.all()
         else:
             raise ImproperlyConfigured(
@@ -223,8 +288,10 @@ class MultipleModelWidget(Block):
 
 class PagedModelWidget(MultipleModelWidget):
     """
-    Extends `MultipleModelWidget`. A widget that displays a pageable list of widgets 
-    defined by a queryset. A model or queryset must be provided, and either a model_widget 
+    Extends :py:class:`MultipleModelWidget`.
+
+    A widget that displays a pageable list of widgets
+    defined by a queryset. A model or queryset must be provided, and either a model_widget
     or the funtion `get_model_widget` must be provided.
 
     Args:
@@ -247,17 +314,25 @@ class PagedModelWidget(MultipleModelWidget):
             },
         )
     """
-    template_name = 'wildewidgets/paged_model_widget.html'
-    page_kwarg = 'page'
-    paginate_by = None
-    max_page_controls = 5
-    css_class = "wildewidgets-paged-model-widget "
+    template_name: str = 'wildewidgets/paged_model_widget.html'
+    block: str = "wildewidgets-paged-model-widget"
 
-    def __init__(self, *args, **kwargs):
-        self.page_kwarg = kwargs.pop('page_kwarg', self.page_kwarg)
-        self.paginate_by = kwargs.pop('paginate_by', self.paginate_by)
-        self.extra_url = kwargs.pop('extra_url', {})
-        super().__init__(*args, **kwargs)
+    page_kwarg: str = 'page'
+    paginate_by: int = 25
+    max_page_controls: int = 5
+
+    def __init__(
+        self,
+        *blocks,
+        page_kwarg: str = None,
+        paginate_by: int = None,
+        extra_url: Dict[str, Any] = None,
+        **kwargs
+    ):
+        self.page_kwarg = page_kwarg if page_kwarg else self.page_kwarg
+        self.paginate_by = paginate_by if paginate_by else self.paginate_by
+        self.extra_url = extra_url if extra_url else {}
+        super().__init__(*blocks, **kwargs)
 
     def get_context_data(self, **kwargs):
         kwargs = super().get_context_data(**kwargs)
@@ -282,7 +357,7 @@ class PagedModelWidget(MultipleModelWidget):
                 page_number = page.number
                 max_controls_half = int(self.max_page_controls / 2)
                 range_start = 1 if page_number - max_controls_half < 1 else page_number - max_controls_half
-                kwargs['page_range'] = range(range_start, range_start+pages)
+                kwargs['page_range'] = range(range_start, range_start + pages)
             except InvalidPage as e:
                 raise Http404(
                     'Invalid page (%(page_number)s): %(message)s' % {
@@ -305,18 +380,27 @@ class PagedModelWidget(MultipleModelWidget):
 
 
 class CrispyFormWidget(Block):
-    """Extends Block.
-    A widget that displays a crispy_form widget.
+    """
+    Extends :py:class:`wildewidgets.widgets.base.Block`.
 
-    Args:
-        form (obj, optional): A crispy form to display. If none is specified, 
+    A widget that displays a Crispy Form widget.
+
+    Note:
+
+        If the form is present in the template context already, (because your
+        view inserted it for you) you don't need to supply the :py:attr:`form`
+        keyword argument -- :py:class:`CrispyFormWidget` will pick it up
+        automatically.
+
+    Keyword Args:
+        form: A crispy form to display. If none is specified,
             it will be assumed that `form` is specified elsewhere in the context.
     """
-    template_name = 'wildewidgets/crispy_form_widget.html'
-    css_class = "wildewidgets-crispy-form-widget"
+    template_name: str = 'wildewidgets/crispy_form_widget.html'
+    block: str = "wildewidgets-crispy-form-widget"
 
-    def __init__(self, *args, form=None, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, *blocks, form: Form = None, **kwargs):
+        super().__init__(*blocks, **kwargs)
         self.form = form
 
     def get_context_data(self, **kwargs):
@@ -327,144 +411,204 @@ class CrispyFormWidget(Block):
 
 
 class CollapseWidget(Block):
-    """Extends Block.
-    A widget that is initially displayed hidden. It is typically used in conjunction
-    with a `CollapseButton`. Pressing the `CollapseButton` toggles the visibility of
-    the widget.
+    """
+    Extends :py:class:`wildewidgets.widgets.base.Block`.
 
-    Args:
-        css_id (str): This ID will be shared with the `CollapseButton`.
+    A `Boostrap Collapse widget <https://getbootstrap.com/docs/5.2/components/collapse/>`_.
 
-    Example::
+    It is typically used in conjunction with a :py:class:`CollapseButton`. Pressing the
+    :py:class:`CollapseButton` toggles the visibility of the widget.
 
-        CollapseWidget(
-            CrispyFormWidget(
-                form=form,
-            ),
+    Example:
+
+        >>> collapse_id = 'my-collapse-id'
+        >>> collapse = CollapseWidget(
+            CrispyFormWidget(form=form),
             css_id=collapse_id,
             css_class="pt-3",
         )
-        header = CardHeader(header_text="Services")
-        header.add_collapse_button(
+        >>> header = CardHeader(header_text="Services")
+        >>> header.add_collapse_button(
             text="Manage",
             color="primary",
             target=f"#{collapse_id}",
         )
-    """
-    css_class="collapse"
 
-    def __init__(self, *args, **kwargs):
-        if "css_class" in kwargs:
-            kwargs['css_class'] = f"{kwargs['css_class']} collapse"
-        else:
-            kwargs['css_class'] = self.css_class
-        super().__init__(*args, **kwargs)
+    Keyword Args:
+        css_id: This ID will be shared with the :py:class:`CollapseButton`.
+
+    """
+    block: str = "collapse"
 
 
 class HorizontalLayoutBlock(Block):
-    """Extends Block.
+    """
+    Extends :py:class:`wildewidgets.widgets.base.Block`.
+
     A container widget intended to display several other widgets aligned horizontally.
 
-    Args:
-        align (str, optional): Flex alignment as defined in Bootstrap 5 (start, end, center...). 
-            Default is `center`.
-        justify (str, optional): Flex justification as defined in Bootstrap 5 (start, end, center, between...).
-            Default is `between`.
-        flex_size (str, optional): Flex size as defined in Bootstrap 5 - sm, md, lg, xl, xxl. Default is None.
+    Example:
 
-    Example::
-
-        HorizontalLayoutBlock(
+        >>> layout = HorizontalLayoutBlock(
             LabelBlock(label),
             block1,
             block2,
             justify="end",
             css_class="mt-3",
         )
-    """
-    align="center"
-    justify="between"
-    flex_size=None
 
-    def __init__(self, *blocks, **kwargs):
-        align = kwargs.pop("align", self.align)
-        justify = kwargs.pop("justify", self.justify)
-        flex_size = kwargs.pop("flex_size", self.flex_size)
-        if flex_size:
-            flex = f"d-{flex_size}-flex"
+    Keyword Args:
+        align: how to align items veritcally within this widget.  Valid choices: ``start``,
+            ``center``, ``end``, ``baselin``, ``stretch``.  See `Bootstrap: Flex,
+            justify content <https://getbootstrap.com/docs/5.2/utilities/flex/#align-items>`_.
+            If not supplied here and :py:attr:`align` is ``None``, do whatever vertical aligment
+            Bootstrap does by default.
+        justify: how to align items horizontally within this widget.  Valid choices: ``start``,
+            ``center``, ``end``, ``between``, ``around``, ``evenly``.  See `Bootstrap: Flex,
+            justify content <https://getbootstrap.com/docs/5.2/utilities/flex/#justify-content>`_.
+            If not supplied here and :py:attr:`justify` is ``None``, do whatever horizontal aligment
+            Bootstrap does by default.
+        flex_size: the Boostrap viewport size below which this will be a vertical list instead
+            of a horizontal one.
+
+    """
+
+    #: The valid column content ``justify-content-`` values
+    VALID_JUSTIFICATIONS: List[str] = [
+        'start',
+        'center',
+        'end',
+        'between',
+        'around',
+        'evenly'
+    ]
+    #: The valid column content ``justify-content-`` values
+    VALID_ALIGNMENTS: List[str] = [
+        'start',
+        'center',
+        'end',
+        'baseline',
+        'stretch',
+    ]
+
+    #: How to align items veritcally within this widget.  Valid choices: ``start``,
+    #: ``center``, ``end``, ``baselin``, ``stretch``.  See `Bootstrap: Flex,
+    #: justify content <https://getbootstrap.com/docs/5.2/utilities/flex/#align-items>`_.
+    #: If not supplied here and :py:attr:`align` is ``None``, do whatever vertical aligment
+    #: Bootstrap does by default.
+    align: str = "center"
+    #: How to align items horizontally within this widget.  Valid choices: ``start``,
+    #: ``center``, ``end``, ``between``, ``around``, ``evenly``.  See `Bootstrap: Flex,
+    #: justify content <https://getbootstrap.com/docs/5.2/utilities/flex/#justify-content>`_.
+    #: If not supplied here and :py:attr:`justify` is ``None``, do whatever horizontal aligment
+    #: Bootstrap does by default.
+    justify: str = "between"
+    #: the Boostrap viewport size below which this will be a vertical list instead
+    #: of a horizontal one.
+    flex_size: Optional[str] = None
+
+    def __init__(
+        self,
+        *blocks,
+        align: str = None,
+        justify: str = None,
+        flex_size: str = None,
+        **kwargs
+    ):
+        self.align = align if align else self.align
+        self.justify = justify if justify else self.justify
+        self.flex_size = flex_size if flex_size else self.flex_size
+        if self.align not in self.VALID_ALIGNMENTS:
+            raise ValueError(
+                f'"{self.align}" is not a valid vertical alignment value.  Valid values '
+                f'are {", ".join(self.VALID_ALIGNMENTS)}'
+            )
+        if self.justify not in self.VALID_JUSTIFICATIONS:
+            raise ValueError(
+                f'"{self.justify}" is not a valid horizontal alignment value.  Valid values '
+                f'are {", ".join(self.VALID_JUSTIFICATIONS)}'
+            )
+        super().__init__(*blocks, **kwargs)
+        if self.flex_size:
+            flex = f"d-{self.flex_size}-flex"
         else:
             flex = "d-flex"
-        css_class = kwargs.get("css_class", "")
-        css_class += f" {flex} align-items-{align} justify-content-{justify}"
-        kwargs["css_class"] = css_class
-        super().__init__(*blocks, **kwargs)
+        self.add_class(flex)
+        self.add_class(f'align-items-{self.align}')
+        self.add_class(f'justify-content-{self.justify}')
 
 
 class ListModelWidget(MultipleModelWidget):
     """
-    Extends `MultipleModelWidget`. This class provides a list of objects
-    defined by a QuerySet, displayed in a list-group `ul` block. By default,
-    a widget will be provided that simply displays whatever returns from
-    the conversion of the object to a `str`. If a `remove_url` is provided,
-    an `X` icon to the right of each object will act as a button to remove
-    the item.
+    Extends :py:class:`MultipleModelWidget`.
 
-    Args:
-        remove_url (str, optional): The url to `POST` to in order to delete or 
-            remove the object. 
+    This class provides a list of objects defined by a :py:class:`QuerySet`,
+    displayed in a "``list-group``" ``<ul>`` block. By default, a widget will be
+    provided that simply displays whatever returns from the conversion of the
+    object to a ``str``. If a :py:attr:`remove_url` is provided, an `X` icon to
+    the right of each object will act as a button to remove the item.
 
-    Example::
+    Example:
 
-        widget = ListModelWidget(
+        >>> widget = ListModelWidget(
             queryset=myparent.children,
             item_label='child',
             remove_url=reverse('remove_url') + "?id={}",
         )
+
+    Args:
+        remove_url: The url to "POST" to in order to delete or remove the object.
+
     """
-    base_css_class = "wildewidgets-list-model-widget list-group"
-    tag='ul'
-    remove_url=None
+    block: str = 'list-group'
+    name: str = 'wildewidgets-list-model-widget'
+    tag: str = 'ul'
+
+    #: The url to "POST" to in order to delete or remove the object.
+    remove_url: Optional[str] = None
 
     def __init__(self, *args, remove_url=None, **kwargs):
         self.remove_url = remove_url if remove_url else self.remove_url
-        css_class = kwargs.get("css_class", "")
-        css_class += f" {self.base_css_class}"
-        kwargs["css_class"] = css_class.strip()
-        super().__init__(*args, **kwargs)
-        self.remove_url = remove_url
         super().__init__(*args, **kwargs)
         widgets = self.get_model_widgets(self.get_queryset().all())
         if not widgets:
-            self.add_block(StringBlock(f"No {self.item_label}s", tag='li', css_class="list-group-item fw-light fst-italic border"))
+            self.add_block(
+                Block(
+                    f"No {self.item_label}s",
+                    tag='li',
+                    name='list-group-item',
+                    css_class="fw-light fst-italic border"
+                )
+            )
         for widget in widgets:
             self.add_block(widget)
 
-    def get_remove_url(self, object):
+    def get_remove_url(self, instance: Model) -> str:
         if self.remove_url:
-            return self.remove_url.format(object.id)
+            return self.remove_url.format(instance.id)
         return ""
 
-    def get_confirm_text(self, object):
-        item_label = self.get_item_label(object)
+    def get_confirm_text(self, instance: Model) -> str:
+        item_label = self.get_item_label(instance)
         return f"Are you sure you want to remove this {item_label}?"
 
-    def get_object_text(self, object):
-        return str(object)
+    def get_object_text(self, instance: Model) -> str:
+        return str(instance)
 
-    def get_model_subblock(self, object):
-        if hasattr(object, 'get_absolute_url'):
-            url = object.get_absolute_url()
-            return Block(HTMLWidget(html=f'<a href="{url}"><label>{self.get_object_text(object)}</label></a>'))
+    def get_model_subblock(self, instance: Model):
+        if hasattr(instance, 'get_absolute_url'):
+            url = instance.get_absolute_url()
+            # FIXME: use a Link here
+            return Block(HTMLWidget(
+                html=f'<a href="{url}"><label>{self.get_object_text(instance)}</label></a>')
+            )
         else:
-            return Block(StringBlock(self.get_object_text(object), tag='label'))
+            return Block(self.get_object_text(instance), tag='label')
 
-    def get_model_widget(self, object=object, **kwargs):
+    def get_model_widget(self, object: Model = None, **kwargs):
         if self.model_widget:
             return super().get_model_widget(object=object, **kwargs)
-        widget = HorizontalLayoutBlock(
-            tag='li',
-            css_class='list-group-item'
-        )
+        widget = HorizontalLayoutBlock(tag='li', name='list-group-item')
         widget.add_block(self.get_model_subblock(object))
         remove_url = self.get_remove_url(object)
         if remove_url:
@@ -478,10 +622,6 @@ class ListModelWidget(MultipleModelWidget):
         return widget
 
 
-class ListModelCardHeader(HeaderWithWidget):
-    css_class = "my-3 bg-light"
-    header_level = 2
-
 
 list_model_card_filter_script = """
 var filter_input = document.getElementById("{filter_id}");
@@ -489,12 +629,12 @@ filter_input.onkeyup = function(e) {{
     var filter=filter_input.value.toLowerCase();
     document.querySelectorAll("{query} label").forEach(label => {{
         var test_string = label.innerText.toLowerCase();
-        if (test_string.includes(filter)) {{        
+        if (test_string.includes(filter)) {{
             label.parentElement.parentElement.classList.remove('d-none');
         }}
         else {{
             label.parentElement.parentElement.classList.add('d-none');
-        }}        
+        }}
     }});
     let children = document.querySelectorAll("{query} li");
     for (let i=0;i<children.length;i++) {{
@@ -503,7 +643,7 @@ filter_input.onkeyup = function(e) {{
     }};
     for (let i=0;i<children.length;i++) {{
         let child=children[i];
-        if (child.classList.contains('d-none')) {{            
+        if (child.classList.contains('d-none')) {{
         }}
         else {{
             child.classList.add('border-top');
@@ -514,19 +654,38 @@ filter_input.onkeyup = function(e) {{
 
 """
 
+
 class ListModelCardWidget(CardWidget):
-    list_model_widget_class = ListModelWidget
-    list_model_header_class = None
-    base_css_class = "card"
+    """
+    Extends :py:class:`CardWidget`.
+
+    This class provides a :py:class:`CardWidget` with a header and a list of
+    objects defined by a :py:class:`QuerySet`, displayed in a
+    :py:class:`ListModelWidget`. A filter input is provided to filter the list
+    of objects.
+
+    Example:
+
+        >>> widget = ListModelCardWidget(
+            queryset = Author.objects.all()[:10]
+        )
+
+    Keyword Args:
+        list_model_widget_class: The class to use for the list model widget.
+            The default is :py:class:`ListModelWidget`.
+        list_model_header_class: The class to use for the header.
+
+
+    """
+
+    list_model_widget_class: Type[Widget] = ListModelWidget
+    list_model_header_class: Type[Widget] = None
 
     def __init__(self, *args, **kwargs):
         self.id_base = f"list_modal_card_{random.randrange(0, 1000)}"
         self.list_model_widget_id = f"{self.id_base}_list_model_widget"
         self.filter_id = f"{self.id_base}_filter"
         self.list_model_widget_class = kwargs.pop("list_model_widget_class", self.list_model_widget_class)
-        css_class = kwargs.get("css_class", "")
-        css_class += f" {self.base_css_class}"
-        kwargs["css_class"] = css_class.strip()
         widget_kwargs = {
             'remove_url': kwargs.pop("remove_url", None),
             'model': kwargs.pop("model", None),
@@ -544,21 +703,20 @@ class ListModelCardWidget(CardWidget):
         }
         kwargs['header'] = self.get_list_model_header(**header_kwargs)
         kwargs['header_css'] = "bg-light"
-        print(self.filter_id)
         filter_label_query = f"#{self.list_model_widget_id}"
         kwargs['script'] = list_model_card_filter_script.format(query=filter_label_query, filter_id=self.filter_id)
-        super().__init__(*args, **kwargs)        
-        
+        super().__init__(*args, **kwargs)
+
     def get_list_model_widget(self, *args, **kwargs):
         return self.list_model_widget_class(*args, **kwargs)
-        
+
     def get_list_model_header(self, *args, **kwargs):
         if self.list_model_header_class:
             return self.list_model_header_class(*args, **kwargs)
         header = Block(
             Block(
                 LabelBlock(
-                    f'Filter {self.widget.item_label}s', 
+                    f'Filter {self.widget.item_label}s',
                     css_class="d-none",
                     attributes={
                         'for': self.filter_id,
@@ -568,15 +726,14 @@ class ListModelCardWidget(CardWidget):
                     attributes={
                         'type': 'text',
                         'placeholder': f'Filter {self.widget.item_label}s',
-                    },                    
+                    },
                     css_id=f'{self.id_base}_filter',
-                    css_class='form-control',  
+                    css_class='form-control',
                 ),
-                css_class='w-25',  
+                css_class='w-25',
             ),
             Block(""),
             css_class="d-flex flex-row-reverse w-100"
         )
         return header
-        
 

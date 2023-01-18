@@ -1,0 +1,63 @@
+.menu .menu-title {
+    // make the menu titles be fancy
+    padding: .5rem .75rem;
+    justify-content: flex-start;
+    color: #FFFF;
+}
+
+$navbar-expand-breakpoints: ["sm", "md", "lg", "xl", "xxl"] !default;
+
+.navbar {
+    &.navbar-vertical {
+        // TODO: we'll need to work some of the below out for a horizontal navbar
+        &.navbar-dark {
+            .menu {
+                .menu-title {
+                    background-color: lighten(#1d273b, 10%) !important;
+                    border-bottom: 2px solid lighten(#1d273b, 20%) !important;
+                }
+                .nav-subtitle {
+                    font-size: 0.75rem;
+                    background-color: lighten(#1d273b, 2%) !important;
+                    border-bottom: 2px solid lighten(#1d273b, 10%) !important;
+                    border-top: 2px solid lighten(#1d273b, 10%) !important;
+                }
+            }
+        }
+
+        @each $bp in $navbar-expand-breakpoints {
+            &.navbar-wide.navbar-expand-#{"" + $bp} {width: 18rem;}
+            &.navbar-wide.navbar-expand-#{"" + $bp} ~ .page {
+                padding-left: 18rem;
+            }
+
+            .navbar-expand-#{"" + $bp} .navbar-collapse {
+                // .navbar-collapse is the menu area of the .navbar, as
+                // opposed to the brand area at the top
+                .nav-item.active,
+                .nav-item--clickable.active {
+                    // highlight the active .nav-items with a lighter background
+                    background: var(--tblr-navbar-active-bg);
+                }
+                .dropdown-menu .dropdown-item {
+                    // make the dropdown-menu blocks be indented a bit
+                    padding-left: 1.5rem;
+                }
+
+                .menu .nav-link.dropdown-toggle {
+                    &.active {
+                        background: var(--tblr-navbar-active-bg);
+                    }
+                    .nav-link {
+                        font-size: smaller;
+                        &.active {
+                            // highlight active items in a DropdownMenu
+                            background: var(--tblr-navbar-active-bg);
+                        }
+                    }
+
+                }
+            }
+        }
+    }
+}
