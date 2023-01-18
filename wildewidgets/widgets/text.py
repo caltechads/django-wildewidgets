@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import warnings
+from typing import Optional
 
 try:
     from pygments import highlight
@@ -15,37 +17,43 @@ from django.core.exceptions import ImproperlyConfigured
 from .base import TemplateWidget, Block
 
 
-class CodeWidget(TemplateWidget):
-    """Extends TemplateWidget.
-
-    A widget to display code with context-sensitive if a language is supplied.
-
-    Args:
-        code (str): the code to be displayed
-        language (str): the language of the code
+class CodeWidget(Block):
     """
-    template_name = 'wildewidgets/code_widget.html'
-    language = None
-    code = ""
-    Line_numbers = False
-    css_class = None
+    Extends :py:class:`wildewidgets.widgets.base.Block`.
 
-    def __init__(self, *args, **kwargs):
-        if 'code' in kwargs:
-            self.code = kwargs['code']
-        if 'language' in kwargs:
-            self.language = kwargs['language']
-        self.css_class = kwargs.get("css_class", self.css_class)
+    A widget to display code with syntax highlighting if a language is supplied.
 
-    def get_context_data(self, **kwargs):
-        kwargs = super().get_context_data(**kwargs)
+    Keyword Args:
+        code: the code to be displayed
+        language: the language of the code
+    """
+    block: str = 'wildewidgets_highlight_container'
+
+    language: Optional[str] = None
+    code: str = ""
+    line_numbers: bool = False
+
+    def __init__(
+        self,
+        code: str = None,
+        language: str = None,
+        line_numbers: bool = False,
+        **kwargs
+    ):
+        self.code = code if code else self.code
+        self.language = language if language else self.language
         if not self.language:
-            raise ImproperlyConfigured("You must define a language.")
-        lexer = get_lexer_by_name(self.language)
-        formatter = HtmlFormatter(linenos=self.Line_numbers, cssclass="wildewidgets_highlight")
-        kwargs['code'] = highlight(self.code, lexer, formatter)
-        kwargs['css_class'] = self.css_class
-        return kwargs
+            raise ValueError(
+                f'{self.__class__.__name__}: "language" must be defined either as a class attribute or a keyword arg'
+            )
+        self.line_numbers = line_numbers if line_numbers else self.line_numbers
+        super().__init__(**kwargs)
+        self.add_code(self.code, language=self.language, line_numbers=self.line_numbers)
+
+    def add_code(self, code: str, language: str, line_numbers: bool = False) -> None:
+        lexer = get_lexer_by_name(language)
+        formatter = HtmlFormatter(linenos=line_numbers, cssclass="wildewidgets_highlight")
+        self.add_block(highlight(code, lexer, formatter))
 
 
 class MarkdownWidget(TemplateWidget):
