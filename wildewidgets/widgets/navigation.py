@@ -213,18 +213,17 @@ class BreadrumbBlock(Block):
 
     def get_context_data(self, **kwargs) -> Dict[str, Any]:
         for item in self.items:
-            li = Block(tag='li', name='breadcrumb-item')
             if self.title_class:
                 title = Block(item.title, tag='span', css_class=self.title_class)
             else:
                 title = item.title
             if item.url:
-                li.add_block(Link(title, url=item.url))
+                block = Link(title, url=item.url)
             else:
-                li.add_block(title)
-            self.breadcrumbs.add_block(li)
+                block = title
+            self.breadcrumbs.add_block(block, name='breadcrumb-item')
         # Make the last li be active
-        li.add_class('active')
+        self.breadcrumbs.blocks[-1].add_class('active')
         return super().get_context_data(**kwargs)
 
     def flatten(self) -> str:

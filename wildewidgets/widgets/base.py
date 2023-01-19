@@ -506,11 +506,18 @@ class UnorderedList(Block):
 
     tag: str = 'ul'
 
-    def add_block(self, block: TemplateWidget) -> None:
+    def add_block(self, block: Union[str, Block], **kwargs) -> None:
         """
-        Wrap ``block``  in an ``<li>`` and append it to :py:attr:`blocks`.
+        Wrap ``block``  in an ``<li>``
+        :py:class:`wildewidgets.widgets.base.Block` append it to
+        :py:attr:`blocks`, using ``**kwargs`` as the keyword arguments for ``Block``.
+
+        If ``block`` is already an ``<li>``, just append it to :py:attr:`blocks`.
         """
-        self.blocks.append(Block(block, tag='li'))
+        if isinstance(block, Block) and block.tag == 'li':
+            self.blocks.append(block)
+
+        self.blocks.append(Block(block, tag='li', **kwargs))
 
 
 class OrderedList(UnorderedList):
