@@ -302,8 +302,8 @@ class PagedModelWidget(MultipleModelWidget):
 
     Example::
 
-        PagedModelWidget(
-            queryset=project.myobject_set.all(),
+        >>> widget = PagedModelWidget(
+            queryset=mymodel.myobject_set.all(),
             paginate_by=3,
             page_kwarg='myobject_page',
             model_widget=MyObjectWidget,
@@ -674,18 +674,24 @@ class ListModelCardWidget(CardWidget):
         list_model_widget_class: The class to use for the list model widget.
             The default is :py:class:`ListModelWidget`.
         list_model_header_class: The class to use for the header.
-
-
     """
 
     list_model_widget_class: Type[Widget] = ListModelWidget
     list_model_header_class: Type[Widget] = None
 
-    def __init__(self, *args, **kwargs):
+    def __init__(
+        self,
+        *args,
+        list_model_widget_class: Type[Widget] = None,
+        list_model_header_class: Type[Widget] = None,
+        **kwargs
+    ):
         self.id_base = f"list_modal_card_{random.randrange(0, 1000)}"
         self.list_model_widget_id = f"{self.id_base}_list_model_widget"
         self.filter_id = f"{self.id_base}_filter"
-        self.list_model_widget_class = kwargs.pop("list_model_widget_class", self.list_model_widget_class)
+        self.list_model_widget_class = (
+            list_model_widget_class if list_model_widget_class else self.list_model_widget_class
+        )
         widget_kwargs = {
             'remove_url': kwargs.pop("remove_url", None),
             'model': kwargs.pop("model", None),

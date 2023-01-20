@@ -1,15 +1,16 @@
-from copy import copy
+from copy import copy, deepcopy
 import datetime
 from functools import lru_cache
+import logging
 import random
 import re
-from typing import Any, Dict, List, Optional, Type
+from typing import Any, Dict, List, Optional, Tuple, Type, Union
 
 from django import template
 from django.conf import settings
 from django.core.exceptions import FieldDoesNotExist
 from django.db import models
-from django.urls import reverse_lazy
+from django.urls import reverse
 from django.db.models import Q
 from django.utils.html import escape
 
@@ -17,13 +18,12 @@ from wildewidgets.views import (JSONResponseView, WidgetInitKwargsMixin)
 
 from .base import Widget
 
-import logging
 logger = logging.getLogger(__name__)
 
 
 class DatatableMixin:
 
-    model: Type[models.Model] = None
+    model: Optional[Type[models.Model]] = None
 
     columns = []
     #: internal cache for columns definition
@@ -632,9 +632,9 @@ class DataTableFilter:
 
     def __init__(self, header=None):
         self.header = header
-        self.choices = [('Any', '')]
+        self.choices: List[Tuple[str, str]] = [('Any', '')]
 
-    def add_choice(self, label, value):
+    def add_choice(self, label: str, value: str) -> None:
         self.choices.append((label, value))
 
 
@@ -654,209 +654,112 @@ class DataTableForm:
 
     def __init__(self, table):
         if table.has_form_actions():
-            self.is_visible = True
+            self.is_visible: bool = True
         else:
             self.is_visible = False
         self.actions = table.get_form_actions()
         self.url = table.form_url
 
 
-class DataTable(Widget, WidgetInitKwargsMixin, DatatableAJAXView):
+class ActionsButtonsBySpecMixin:
     """
-    Extends :py:class:`DatatableAJAXView`.
+    This is a mixin class for :py:class:`DataTable` classes that allows you to specify
+    buttons that will appear per row in an "Actions" column, rightmost of all columns.
 
-    A widget that renders a `DataTables.js table <https://datatables.net/>`_.
+    If :py:attr:`actions` is ``True``, and a row object has an attribute or
+    method named ``get_absolute_url``,  render a single button named
+    :py:attr:`default_action_button_label` that when clicked takes the user
+    to that URL.
 
-    Keyword Args:
-        width: The table width. Defaults to '100%'.
-        height: The table height. Defaults to None.
-        title: The table title. Defaults to None.
-        searchable: Whether the table is searchable. Defaults to True.
-        paging: Whether the table is paged. Defaults to True.
-        page_length: The number of rows per page. Defaults to None.
-        small: Whether the row height is small. Defaults to False.
-        buttons: Whether the table has export buttons. Defaults to False.
-        striped: Whether the table is striped. Defaults to False.
-        table_id: The table CSS id. Defaults to None.
-        async: Whether the table is asynchronous. Defaults to True.
-        data: The table data. Defaults to None.
-        sort_ascending: Whether the table is sorted in ascending order. Defaults to True.
-        action_button_size: The size of the action button. Defaults to 'normal'.
-            Valid values are 'normal', 'sm', 'lg'.
+    Otherwise, :py:attr:`actions` should be a iterable of tuples or lists of
+    the following structures::
+
+        (label, Django URL name)
+        (label, Django URL name, 'get' or 'post')
+        (label, Django URL name, 'get' or 'post', color)
+        (label, Django URL name, 'get' or 'post', color)
+        (label, Django URL name, 'get' or 'post', color, pk_field_name)
+        (label, Django URL name, 'get' or 'post', color, pk_field_name, javascript function name)
+
+    Note:
+        The magic is all done in :py:meth:`render_actions_column`, so if you want
+        to see what's really going on, read that code.
+
+    Examples:
+
+        To make a button named "Edit" that goes to the django URL named
+        ``core:model--edit``::
+
+            ('Edit', 'core:model--edit')
+
+        This renders a "button" something like this::
+
+            <a href="/core/model/edit/?id=1" class="btn btn-secondary normal me-2">Edit</a>
+
+        Make a button named "Delete" that goes to the django URL named
+        ``core:model--delete`` as a ``POST``::
+
+            ('Delete', 'core:model--delete', 'post')
+
+        This renders a "button" something like this::
+
+            <form class"form form-inline" action="/core/model/delete/" method="post">
+                <input type="hidden" name="csrfmiddlewaretoken" value="__THE_TOKEN__">
+                <input type="hidden" name="id" value="1">
+                <input type="submit" value="Delete" class="btn btn-secondary normal me-2">
+            </form>
     """
 
-    template_file: str = 'wildewidgets/table.html'
-    actions = False
-    form_actions = None
-    form_url: str = ''
-    hide_controls: bool = False
-    table_id: Optional[str] = None
-    default_action_button_label: str = 'View'
-    default_action_button_color_class: str = 'secondary'
-    sort_ascending: bool = True
+    #: Per row action buttons.  If not ``False``, this will simply add a
+    #: rightmost column  named ``Actions`` with a button named
+    #: :py:attr:`default_action_button_label` which when clicked will take the
+    #: user to the
+    actions: Any = False
+    #: How big should each action button be? One of ``normal``, ``btn-lg``, or ``btn-sm``.
     action_button_size: str = 'normal'
+    #: The label to use for the default action button
+    default_action_button_label: str = 'View'
+    #: The Bootstrap color class to use for the default action buttons
+    default_action_button_color_class: str = 'secondary'
 
     def __init__(
         self,
         *args,
-        width: str = '100%',
-        height: str = None,
-        title: str = None,
-        searchable: str = True,
-        paging: str = True,
-        page_length: int = None,
-        small: bool = False,
-        buttons: bool = False,
-        striped: bool = False,
-        table_id: str = None,
-        sort_ascending: bool = None,
+        actions: Any = None,
         action_button_size: str = None,
-        data: List[Any] = None,
+        default_action_button_label: str = None,
+        default_action_button_color_class: str = None,
         **kwargs
     ):
-        super().__init__(*args, **kwargs)
-        self.options = {
-            'width': width,
-            'height': height,
-            "title": title,
-            "searchable": searchable,
-            "paging": paging,
-            "page_length": page_length,
-            "small": small,
-            "buttons": buttons,
-            "striped": striped,
-            "hide_controls": self.hide_controls
-        }
-        self.table_id = table_id if table_id else self.table_id
-        # We have to do this this way because ``async`` is a reserved keyword
-        self.async_if_empty = kwargs.get('async', True)
-        self.column_fields = {}
-        self.column_filters = {}
-        self.column_styles = []
-        self.data = data if data else []
-        self._form_actions = copy(self.form_actions)
-        if self.form_actions:
-            self.column_fields['checkbox'] = DataTableColumn(
-                field='checkbox',
-                verbose_name=' ',
-                searchable=False,
-                sortable=False
-            )
-        self.sort_ascending = sort_ascending if sort_ascending is not None else self.sort_ascending
+        self.actions = actions if actions is not None else self.actions
         self.action_button_size = action_button_size if action_button_size else self.action_button_size
+        self.default_action_button_label = (
+            default_action_button_label
+            if default_action_button_label else self.default_action_button_label
+        )
+        self.default_action_button_color_class = (
+            default_action_button_color_class
+            if default_action_button_color_class else self.default_action_button_color_class
+        )
         if not self.action_button_size == 'normal':
             self.action_button_size_class = f"btn-{self.action_button_size}"
         else:
             self.action_button_size_class = ''
+        super().__init__(*args, **kwargs)
 
-    def has_form_actions(self) -> bool:
-        return self._form_actions is not None
-
-    def get_form_actions(self):
-        return self._form_actions
-
-    def add_form_action(self, action):
-        self._form_actions.append(action)
-
-    def get_order_columnsx(self):
-        cols = []
-        for field, col in self.column_fields.items():
-            if col.sortable:
-                cols.append(field)
-        return cols
-
-    def add_column(
-        self,
-        field: str,
-        verbose_name: str = None,
-        searchable: bool = True,
-        sortable: bool = True,
-        align: str = 'left',
-        head_align: str = 'left',
-        visible: bool = True,
-        wrap: bool = True
-    ) -> None:
-        self.column_fields[field] = DataTableColumn(
-            field=field,
-            verbose_name=verbose_name,
-            searchable=searchable,
-            sortable=sortable,
-            align=align,
-            head_align=head_align,
-            visible=visible,
-            wrap=wrap
-        )
-
-    def add_filter(self, field: str, dt_filter: DataTableFilter) -> None:
-        self.column_filters[field] = dt_filter
-
-    def remove_filter(self, field: str):
-        del self.column_filters[field]
-
-    def add_styler(self, styler: DataTableStyler) -> None:
-        styler.test_index = list(self.column_fields.keys()).index(styler.test_cell)
-        if styler.target_cell:
-            styler.target_index = list(self.column_fields.keys()).index(styler.target_cell)
-        self.column_styles.append(styler)
-
-    def build_context(self) -> Dict[str, Any]:
-        return {'rows': self.data}
+    def get_template_context_data(self, **kwargs) -> Dict[str, Any]:
+        if self.actions:
+            self.add_column(field='actions', searchable=False, sortable=False)
+            kwargs['has_actions'] = True
+            kwargs['action_column'] = len(self.column_fields) - 1
+        else:
+            kwargs['has_actions'] = False
+        return super().get_template_context_data(**kwargs)
 
     def get_content(self, **kwargs) -> str:
         if self.actions:
             self.add_column(field='actions', searchable=False, sortable=False)
-        has_filters = False
-        filters = []
-        for key, item in self.column_fields.items():
-            if key in self.column_filters:
-                filters.append((item, self.column_filters[key]))
-                has_filters = True
-            else:
-                filters.append(None)
-        if self.table_id:
-            table_id = self.table_id
-        else:
-            table_id = random.randrange(0, 1000)
-        template_file = self.template_file
-        if self.data or not self.async_if_empty:
-            context = self.build_context()
-            context['async'] = False
-        else:
-            context = {"async": True}
-        html_template = template.loader.get_template(template_file)
-        context['header'] = self.column_fields
-        context['has_form_actions'] = self.has_form_actions()
-        if self.actions:
-            context['has_actions'] = True
-            context['action_column'] = len(self.column_fields) - 1
-        else:
-            context['has_actions'] = False
-        context['filters'] = filters
-        context['stylers'] = self.column_styles
-        context['has_filters'] = has_filters
-        context['options'] = self.options
-        context['name'] = f"datatable_table_{table_id}"
-        context['sort_ascending'] = self.sort_ascending
-        context["tableclass"] = self.__class__.__name__
-        if not self.data:
-            context["extra_data"] = self.get_encoded_extra_data()
-        context["form"] = DataTableForm(self)
-        if 'csrf_token' in kwargs:
-            context["csrf_token"] = kwargs['csrf_token']
-        content = html_template.render(context)
-        return content
-
-    def __str__(self) -> str:
-        return self.get_content()
-
-    def add_row(self, **kwargs) -> None:
-        row = []
-        for field in self.column_fields:
-            if field in kwargs:
-                row.append(kwargs[field])
-            else:
-                row.append('')
-        self.data.append(row)
+        return super().get_content(**kwargs)
 
     def get_action_button(
         self,
@@ -869,7 +772,7 @@ class DataTable(Widget, WidgetInitKwargsMixin, DatatableAJAXView):
         js_function_name: str = None
     ) -> str:
         if url_name:
-            base = reverse_lazy(url_name)
+            base = reverse(url_name)
             # FIXME: This assumes we're using QueryStringKwargsMixin, which people
             # outside our group don't use
             if method == 'get':
@@ -912,10 +815,32 @@ class DataTable(Widget, WidgetInitKwargsMixin, DatatableAJAXView):
         return ''
 
     def render_actions_column(self, row: Any, column: str) -> str:
-        response = "<div class='d-flex flex-row justify-content-end'>"
+        """
+        Render the buttons in the "Actions" column.  This will only be called if
+        :py:attr:`actions` is not falsy.  We rely on :py:attr:`actions` to be
+        specified in a particular way in order for this to work; see
+        :py:class:`ActionButtonsBySpecMixin` for information about how to
+        specify button specs in :py:attr:`actions` is constructed.
+
+        Args:
+            row: the row data for which we are building action buttons
+            column: unused
+
+        Returns:
+            The HTML to render into the "Actions" column for ``row``.
+        """
+        response = '<div class="d-flex flex-row justify-content-end">'
         if hasattr(row, 'get_absolute_url'):
-            url = row.get_absolute_url()
-            view_button = self.get_action_button_with_url(row, self.default_action_button_label, url, color_class=self.default_action_button_color_class)
+            if callable(row.get_absolute_url):
+                url = row.get_absolute_url()
+            else:
+                url = row.get_absolute_url
+            view_button = self.get_action_button_with_url(
+                row,
+                self.default_action_button_label,
+                url,
+                color_class=self.default_action_button_color_class
+            )
             response += view_button
         if not isinstance(self.actions, bool):
             for action in self.actions:
@@ -944,21 +869,287 @@ class DataTable(Widget, WidgetInitKwargsMixin, DatatableAJAXView):
         response += "</div>"
         return response
 
-    def render_checkbox_column(self, row, column):
-        return f"<input type='checkbox' name='checkbox' value='{row.id}'>"
 
-
-class BasicModelTable(DataTable):
+class DataTable(
+    ActionsButtonsBySpecMixin,
+    Widget,
+    WidgetInitKwargsMixin,
+    DatatableAJAXView
+):
     """
-    Extends :py:class:`DataTable`.
+    Extends :py:class:`DatatableAJAXView`.
 
-    This class is used to create a table from a :py:class:`Model`.  It provides a full
-    featured table with a minimum of code. Many derived classes will only need
-    to define class variables.
+    A widget that renders a `DataTables.js table <https://datatables.net/>`_.
+
+    Keyword Args:
+        width: The table width. Defaults to '100%'.
+        height: The table height.
+        title: The table title.
+        searchable: Whether the table is searchable.
+        paging: Whether the table is paged.
+        page_length: The number of rows per page.
+        small: Whether the row height is small.
+        buttons: Whether the table has export buttons.
+        striped: Whether the table is striped. Defaults to False.
+        table_id: The table CSS id. Defaults to None.
+        async: Whether the table is asynchronous. Defaults to True.
+        data: The table data. Defaults to None.
+        sort_ascending: Whether the table is sorted in ascending order. Defaults to True.
+        action_button_size: The size of the action button. Defaults to 'normal'.
+            Valid values are 'normal', 'sm', 'lg'.
+    """
+
+    template_file: str = 'wildewidgets/table.html'
+
+    # dataTable specific configs
+
+    #: How wide should we make the table?  Any CSS width string is valid.
+    width: str = '100%'
+    #: Use smaller font and row size?
+    small: bool = False
+    #: Stripe our rows so that different colors are used for even and odd
+    #: rows?
+    striped: bool = False
+    #: How many rows should we show on each page
+    page_length: int = 25
+    #: If ``True``, sort rows ascending; otherwise descending.
+    sort_ascending: bool = True
+    #: Hide our paging, page length and search controls
+    hide_controls: bool = False
+
+    #: The CSS id to assign to the table.  The id will be ``datatable_table_{table_id}``
+    table_id: Optional[str] = None
+
+    #: Add the dataTable "Copy", "CSV", "Export" and "Print" buttons
+    buttons: bool = False
+
+    #: Whole table form actions.  If this is not ``None``, add a first column with
+    #: checkboxes to each row, and a form that allows you to choose bulk actions
+    #: to perform on all checked rows.
+    form_actions = None
+    #: THe URL to which to POST our form actions
+    form_url: str = ''
+
+    def __init__(
+        self,
+        *args,
+        width: str = None,
+        height: str = None,
+        title: str = None,
+        searchable: str = True,
+        paging: str = True,
+        page_length: int = None,
+        small: bool = False,
+        buttons: bool = False,
+        striped: bool = False,
+        table_id: str = None,
+        sort_ascending: bool = None,
+        data: List[Any] = None,
+        **kwargs
+    ):
+        #: These are options for dataTable itself and get set in the JavaScript
+        #: constructor for the table.
+        self.options = {
+            'width': width,
+            'height': height,
+            "title": title,
+            "searchable": searchable,
+            "paging": paging,
+            "page_length": page_length,
+            "small": small,
+            "buttons": buttons,
+            "striped": striped,
+            "hide_controls": self.hide_controls
+        }
+        self.table_id = table_id if table_id else self.table_id
+        # We have to do this this way instead of naming it above in the kwargs
+        # because ``async`` is a reserved keyword
+        self.async_if_empty: bool = kwargs.get('async', True)
+        #: A mapping of field name to column definition
+        self.column_fields: Dict[str, DataTableColumn] = {}
+        #: A mapping of field name to column filter definition
+        self.column_filters: Dict[str, DataTableFilter] = {}
+        #: A list of column styles to apply
+        self.column_styles: List[DataTableStyler] = []
+        self.data = data if data else []
+        self.sort_ascending = sort_ascending if sort_ascending is not None else self.sort_ascending
+
+        self._form_actions = copy(self.form_actions)
+        if self.has_form_actions():
+            self.column_fields['checkbox'] = DataTableColumn(
+                field='checkbox',
+                verbose_name=' ',
+                searchable=False,
+                sortable=False
+            )
+        super().__init__(*args, **kwargs)
+
+    def has_form_actions(self) -> bool:
+        return self._form_actions is not None
+
+    def get_form_actions(self):
+        return self._form_actions
+
+    def add_form_action(self, action):
+        self._form_actions.append(action)
+
+    def get_order_columnsx(self):
+        cols = []
+        for field, col in self.column_fields.items():
+            if col.sortable:
+                cols.append(field)
+        return cols
+
+    def add_column(
+        self,
+        field: str,
+        verbose_name: str = None,
+        searchable: bool = True,
+        sortable: bool = True,
+        align: str = 'left',
+        head_align: str = 'left',
+        visible: bool = True,
+        wrap: bool = True
+    ) -> None:
+        """
+        Add a column to our table.  This updates :py:attr:`column_fields`.
+
+        Args:
+            field: the name of the field that to render in this column
+
+        Keyword Args:
+            verbose_name: the label to use for the heading of this column
+            searchable: if ``True``, include this column in global searches
+            sortable: if ``True``, the table can be sorted by this column
+            align: horizontal alignment for this column: ``left``, ``right``, ``center``
+            visible: if ``False``, the column will be present in the table, but hidden
+                from the user
+            head_align: horizontal alignment for the header for this column: ``left``, ``right``, ``center`
+            wrap: if ``True``, wrap contents in this column
+        """
+        self.column_fields[field] = DataTableColumn(
+            field=field,
+            verbose_name=verbose_name,
+            searchable=searchable,
+            sortable=sortable,
+            align=align,
+            head_align=head_align,
+            visible=visible,
+            wrap=wrap
+        )
+
+    def add_filter(self, field: str, dt_filter: DataTableFilter) -> None:
+        """
+        Add a column filter.  This updates :py:attr:`column_filters`.
+
+        Args:
+            field: the name of the field to filter
+            dt_filter: a filter definition
+        """
+        self.column_filters[field] = dt_filter
+
+    def remove_filter(self, field: str):
+        """
+        Remove a column filter.  This updates :py:attr:`column_filters`.
+
+        Args:
+            field: the name of the field for which to remove the filter
+        """
+        del self.column_filters[field]
+
+    def add_styler(self, styler: DataTableStyler) -> None:
+        styler.test_index = list(self.column_fields.keys()).index(styler.test_cell)
+        if styler.target_cell:
+            styler.target_index = list(self.column_fields.keys()).index(styler.target_cell)
+        self.column_styles.append(styler)
+
+    def build_context(self, **kwargs) -> Dict[str, Any]:
+        kwargs['rows'] = self.data
+        return kwargs
+
+    def get_template_context_data(self, **kwargs) -> Dict[str, Any]:
+        kwargs = super().get_template_context_data(**kwargs)
+        has_filters = False
+        filters = []
+        for key, item in self.column_fields.items():
+            if key in self.column_filters:
+                filters.append((item, self.column_filters[key]))
+                has_filters = True
+            else:
+                filters.append(None)
+        if self.data or not self.async_if_empty:
+            kwargs = self.build_context(**kwargs)
+            kwargs['async'] = False
+        else:
+            kwargs['async'] = True
+        kwargs['header'] = self.column_fields
+        kwargs['has_form_actions'] = self.has_form_actions()
+        kwargs['filters'] = filters
+        kwargs['stylers'] = self.column_styles
+        kwargs['has_filters'] = has_filters
+        kwargs['options'] = self.options
+        table_id = self.table_id if self.table_id else random.randrange(0, 1000)
+        kwargs['name'] = f"datatable_table_{table_id}"
+        kwargs['sort_ascending'] = self.sort_ascending
+        kwargs["tableclass"] = self.__class__.__name__
+        if not self.data:
+            kwargs["extra_data"] = self.get_encoded_extra_data()
+        kwargs["form"] = DataTableForm(self)
+        if 'csrf_token' in kwargs:
+            kwargs["csrf_token"] = kwargs['csrf_token']
+        return kwargs
+
+    def get_content(self, **kwargs) -> str:
+        """
+        Return the rendered dataTable HTML.
+
+        Keyword Args:
+            **kwargs: the template context
+
+        Returns:
+            The rendered datatable HTML
+        """
+        context = self.get_template_context_data(**kwargs)
+        html_template = template.loader.get_template(self.template_file)
+        return html_template.render(context)
+
+    def __str__(self) -> str:
+        return self.get_content()
+
+    def add_row(self, **kwargs) -> None:
+        row = []
+        for field in self.column_fields:
+            if field in kwargs:
+                row.append(kwargs[field])
+            else:
+                row.append('')
+        self.data.append(row)
+
+    def render_checkbox_column(self, row: Any, column: str) -> str:
+        return f'<input type="checkbox" name="checkbox" value="{row.id}">'
+
+
+class ModelTableMixin:
+    """
+    This mixin is used to create a table from a :py:class:`Model`.  It provides methods
+    to create and configure columns based on model fields and configuration.
 
     Example::
 
-        class BookModelTable(BasicModelTable):
+        from django.db import models
+        from wildewidgets import DataTable, ModelTableMixin
+
+        class Author(models.Model):
+
+            full_name = models.CharField(...)
+
+        class Book(models.Model):
+
+            title = models.CharField(...)
+            isbn = models.CharField(...)
+            authors = models.ManyToManyField(Author)
+
+        class BookModelTable(ModelTableMixin, DataTable):
             fields = ['title', 'authors__full_name', 'isbn']
             model = Book
             alignment = {'authors': 'left'}
@@ -973,35 +1164,70 @@ class BasicModelTable(DataTable):
                 return authors[0].full_name
     """
 
-    fields: List[str] = []
+    #: The Django model class for this table
+    model: Optional[Type[models.Model]]
+
+    #: This is either ``None``, the string ``__all__`` or a list of column names
+    #: to use in our table.  For the list, entries can either be field names
+    #: from our :py:attr:`model`, or names of computed fields that will be
+    #: rendered with a ``render_FIELD_column`` method.  If ``None``, empty list
+    #: or ``__all__``, display all fields on the :py:attr:`model`.
+    fields: Optional[Union[str, List[str]]] = []
+    #: The list of field names to hide by default
     hidden: List[str] = []
+    #: A mapping of field name to table column heading
     verbose_names: Dict[str, str] = {}
-    page_length: int = None
-    small: bool = None
-    buttons = None
-    striped: bool = None
+    #: A list of field names that will not be sortable
     unsortable: List[str] = []
+    #: A list of field names that will not be searched when doing a global table search
     unsearchable: List[str] = []
+    #: A mapping of field name to data type.  This is used to do some automatic formatting
+    #: of table values.
     field_types: Dict[str, str] = {}
+    #: A mapping of field name to field alignment.  Valid values are ``left``, ``right``, and
+    #: ``center``
     alignment: Dict[str, str] = {}
     bool_icons = {}
 
-    def __init__(self, *args, **kwargs):
-        for field in ['page_length', 'small', 'buttons', 'striped']:
-            value = getattr(self, field, None)
-            if value:
-                kwargs[field] = value
+    def __init__(
+        self,
+        *args,
+        fields: Optional[Union[str, List[str]]] = None,
+        hidden: List[str] = None,
+        verbose_names: List[str] = None,
+        unsortable: List[str] = None,
+        unsearchable: List[str] = None,
+        field_types: Dict[str, str] = None,
+        alignment: Dict[str, str] = None,
+        bool_icons: Dict[str, str] = None,
+        **kwargs
+    ):
+        self.fields = fields if fields else deepcopy(self.fields)
+        self.hidden = hidden if hidden else deepcopy(self.hidden)
+        self.verbose_names = verbose_names if verbose_names else deepcopy(self.verbose_names)
+        self.unsortable = unsortable if unsortable else deepcopy(self.unsortable)
+        self.unsearchable = unsearchable if unsearchable else deepcopy(self.unsearchable)
+        self.field_types = field_types if field_types else deepcopy(self.field_types)
+        self.alignment = alignment if alignment else deepcopy(self.alignment)
+        self.bool_icons = bool_icons if bool_icons else deepcopy(self.bool_icons)
         super().__init__(*args, **kwargs)
 
+        #: A mapping of field name to Django field class
         self.model_fields: Dict[str, models.Field] = {}
+        #: A mapping of field name to Django related field class
         self.related_fields: Dict[str, models.Field] = {}
+        #: A list of names of our model fields
         self.field_names: List[str] = []
+
+        # Build our mapping of all known fields on :py:attr:`model`
         for field in self.model._meta.get_fields():
             if field.name == 'id':
                 continue
             self.model_fields[field.name] = field
             self.field_names.append(field.name)
 
+        # Find our related fields -- these are in Django QuerySet format, e.g.
+        # parent__child or parent__child__grandchild
         for field_name in self.fields:
             if field_name not in self.model_fields:
                 field = self.get_related_field(self.model, field_name)
@@ -1014,14 +1240,36 @@ class BasicModelTable(DataTable):
             for field_name in self.fields:
                 self.load_field(field_name)
 
-    def get_related_model(self, current_model, field_name):
-        field = current_model._meta.get_field(field_name)
-        return field.related_model
+    def get_related_model(
+        self,
+        current_model: Type[models.Model],
+        field_name: str
+    ) -> models.Model:
+        return current_model._meta.get_field(field_name).related_model
 
-    def get_related_field(self, current_model, name):
-        name_fields = name.split('__')
+    def get_related_field(
+        self,
+        current_model: models.Model,
+        name: str
+    ) -> Optional[models.Field]:
+        """
+        Given ``name``, a field specifier in Django QuerySet format, e.g.
+        ``parent__child`` or ``parent__child__grandchild``, return the field
+        instance that represents that field on the appropriate related model.
+
+        Args:
+            current_model:  the model for the leftmost field in ``name``
+            name: the field specfier
+
+        Returns:
+            the :py:class:`Field` instance, or ``None`` if we couldn't find one.
+        """
+        name_fields: List[str] = name.split('__')
         if len(name_fields) == 1:
+            # This is not a related field specifier
             return None
+        # Walk through the fields and find the Django model for the last
+        # field in the spec
         for field in name_fields[:-1]:
             current_model = self.get_related_model(current_model, field)
         if current_model:
@@ -1033,7 +1281,7 @@ class BasicModelTable(DataTable):
             final_field = None
         return final_field
 
-    def get_field(self, field_name: str) -> models.Field:
+    def get_field(self, field_name: str) -> Optional[models.Field]:
         if field_name in self.model_fields:
             field = self.model_fields[field_name]
         elif field_name in self.related_fields:
@@ -1091,10 +1339,10 @@ class BasicModelTable(DataTable):
 
     def render_bool_type_column(self, value: Any) -> str:
         if value == "True":
-            return "<i class='bi-check-lg text-success'><span style='display:none'>True</span></i>"
+            return '<i class="bi-check-lg text-success"><span style="display:none">True</span></i>'
         return ""
 
-    def render_bool_icon_column(self, value: Any, icon_data):
+    def render_bool_icon_column(self, value: Any, icon_data: Tuple[str, str]) -> str:
         if len(icon_data) == 0:
             return value
         if value == "True":
@@ -1141,3 +1389,28 @@ class BasicModelTable(DataTable):
         elif column in self.bool_icons:
             return self.render_bool_icon_column(value, self.bool_icons[column])
         return value
+
+
+class BasicModelTable(ModelTableMixin, DataTable):
+    """
+    This class is used to create a table from a :py:class:`Model`.  It provides a full
+    featured table with a minimum of code. Many derived classes will only need
+    to define class variables.
+
+    Example::
+
+        class BookModelTable(BasicModelTable):
+            fields = ['title', 'authors__full_name', 'isbn']
+            model = Book
+            alignment = {'authors': 'left'}
+            verbose_names = {'authors__full_name': 'Authors'}
+            buttons = True
+            striped = True
+
+            def render_authors__full_name_column(self, row, column):
+                authors = row.authors.all()
+                if authors.count() > 1:
+                    return f"{authors[0].full_name} ... "
+                return authors[0].full_name
+    """
+    pass

@@ -33,6 +33,9 @@ class Widget:
     def is_visible(self) -> bool:
         return True
 
+    def get_template_context_data(self, **kwargs) -> Dict[str, Any]:
+        return kwargs
+
     def get_content(self) -> "Widget":
         raise NotImplementedError
 
@@ -70,7 +73,7 @@ class TemplateWidget(Widget):
         """
         return self.template_name
 
-    def get_context_data(self, **kwargs) -> Dict[str, Any]:
+    def get_context_data(self, *args, **kwargs) -> Dict[str, Any]:
         return kwargs
 
     def __str__(self) -> str:
