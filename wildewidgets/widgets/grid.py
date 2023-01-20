@@ -352,7 +352,7 @@ class Row(Block):
         self.columns_map[identifier].add_block(block)
 
 
-class TwoColumnLayoutWidget(Row):
+class TwoColumnLayout(Row):
     """
     Extends :py:class:`Row`.
 
