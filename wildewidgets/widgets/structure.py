@@ -203,7 +203,7 @@ class MultipleModelWidget(Block):
 
     #: The label to use for each instance.  This is used in the confirmation
     #: dialog when deleting instances.
-    item_label: str = ""
+    item_label: str = "item"
 
     def __init__(
         self,
@@ -219,7 +219,7 @@ class MultipleModelWidget(Block):
         self.model = model if model else self.model
         self.model_widget = model_widget if model_widget else deepcopy(self.model_widget)
         self.model_kwargs = model_kwargs if model_kwargs else deepcopy(self.model_kwargs)
-        self.queryset = queryset if queryset else self.queryset
+        self.queryset = queryset if not queryset == None else self.queryset
         self.ordering = ordering if ordering else self.ordering
         self.item_label = item_label if item_label else self.item_label
         super().__init__(*blocks, **kwargs)
