@@ -1504,7 +1504,7 @@ class NavbarMixin:
             The class of the :py:class:`Navbar` subclass to use for our
             main menu.
         """
-        return self.menu_class
+        return self.navbar_class
 
     def get_menu_item(self) -> Optional[str]:
         """
