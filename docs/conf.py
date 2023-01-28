@@ -37,7 +37,7 @@ from typing import List, Dict, Tuple, Optional
 
 
 # The full version, including alpha/beta/rc tags
-release = '0.14.5'
+release = '0.14.7'
 
 
 # -- General configuration ---------------------------------------------------
