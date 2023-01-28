@@ -166,9 +166,9 @@
               // $("#" + oSettings.sTableId + "_length").show();
           }
       },
-      
+
       order: [[{{form.is_visible|yesno:'1,0,0'}}, "{{sort_ascending|yesno:'asc,desc,asc'}}"]],
-      
+
       columns: [
         {% for key,item in header.items %}
           {
@@ -194,7 +194,7 @@
       {% if async %}
         processing: true,
         serverSide: true,
-        ajax: '{% url "wildewidgets_json" %}?wildewidgetclass={{tableclass}}{% if extra_data %}&extra_data={{extra_data}}{% endif %}&csrf_token={{csrf_token}}'
+        ajax: '{% url ajax_url_name %}?wildewidgetclass={{tableclass}}{% if extra_data %}&extra_data={{extra_data}}{% endif %}&csrf_token={{csrf_token}}'
       {% endif %}
     });
 

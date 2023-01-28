@@ -13,6 +13,10 @@ setup(
                 'consistent design, based on Bootstrap.',
     long_description=long_description,
     long_description_content_type="text/markdown",
+    install_requires=[
+        'django-crispy-forms',
+        'crispy-bootstrap5',
+    ],
     author="Caltech IMSS ADS",
     author_email="imss-ads-staff@caltech.edu",
     url='https://github.com/caltechads/django-wildewidgets',

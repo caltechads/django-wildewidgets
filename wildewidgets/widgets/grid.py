@@ -8,8 +8,6 @@ from .base import Block
 
 class Column(Block):
     """
-    Extends :py:class:`wildewidgets.widgets.base.Block`.
-
     This widget implements a ``col`` from the `Bootstrap Grid system
     <https://getbootstrap.com/docs/5.2/layout/grid/>`_.
 
@@ -170,8 +168,6 @@ class Column(Block):
 
 class Row(Block):
     """
-    Extends :py:class:`wildewidgets.widgets.base.Block`.
-
     This widget implements a ``row`` from the `Bootstrap Grid system
     <https://getbootstrap.com/docs/5.2/layout/grid/>`_.
 
@@ -354,8 +350,6 @@ class Row(Block):
 
 class TwoColumnLayout(Row):
     """
-    Extends :py:class:`Row`.
-
     This widget is a convenience widget that implements a two column ``row``
     from the `Bootstrap Grid system
     <https://getbootstrap.com/docs/5.2/layout/grid/>`_ with two named columns:

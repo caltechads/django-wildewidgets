@@ -17,8 +17,6 @@ from .base import TemplateWidget, Block
 
 class CodeWidget(Block):
     """
-    Extends :py:class:`wildewidgets.widgets.base.Block`.
-
     A widget to display code with syntax highlighting if a language is supplied.
 
     Keyword Args:
@@ -56,8 +54,6 @@ class CodeWidget(Block):
 
 class MarkdownWidget(TemplateWidget):
     """
-    Extends :py:class:`wildewidgets.widgets.base.TemplateWidget`.
-
     A widget to display markdown as HTML.
 
     Args:
@@ -82,8 +78,6 @@ class MarkdownWidget(TemplateWidget):
 
 class HTMLWidget(TemplateWidget):
     """
-    Extends :py:class:`wildewidgets.widgets.base.TemplateWidget`.
-
     A widget to display raw HTML.
 
     Args:
@@ -107,8 +101,6 @@ class HTMLWidget(TemplateWidget):
 
 class StringBlock(Block):
     """
-    Extends :py:class:`wildewidgets.widgets.base.Block`.
-
     A basic widget that displays a string.
 
     .. deprecated:: 0.14.0
@@ -131,8 +123,6 @@ class StringBlock(Block):
 
 class TimeStamp(Block):
     """
-    Extends :py:class:`wildewidgets.widgets.base.Block`.
-
     A basic widget that displays a timestamp.
 
     Args:
@@ -144,8 +134,6 @@ class TimeStamp(Block):
 
 class LabelBlock(Block):
     """
-    Extends :py:class:`wildewidgets.widgets.base.Block`.
-
     A ``<label>``.
 
     Args:
@@ -161,8 +149,6 @@ class LabelBlock(Block):
 
 class TagBlock(Block):
     """
-    Extends :py:class:`wildewidgets.widgets.base.Block`.
-
     A basic widget that displays a colored tag.
 
     Args:

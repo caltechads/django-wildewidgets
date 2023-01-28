@@ -11,8 +11,6 @@ DatagridItemDef = Union["DatagridItem", Tuple[str, str], Tuple[str, str, Dict[st
 
 class DatagridItem(Block):
     """
-    Extends :py:class:`wildewidgets.widgets.base.Block`.
-
     This widget implements a `Tabler datagrid-item
     <https://preview.tabler.io/docs/datagrid.html>`_ It should be used with
     :py:class:`Datagrid`.
@@ -92,8 +90,6 @@ class DatagridItem(Block):
 
 class Datagrid(Block):
     """
-    Extends :py:class:`wildewidgets.widgets.base.Block`.
-
     This widget implements a `Tabler Data grid <https://preview.tabler.io/docs/datagrid.html>`_
     It contains :py:class:`DatagridItem` objects.
 

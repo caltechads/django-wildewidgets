@@ -19,8 +19,6 @@ from .headers import BasicHeader, CardHeader
 
 class TabbedWidget(Block):
     """
-    Extends :py:class:`wildewidgets.widgets.base.Block`.
-
     This class implements a `Tabler Tabbed Card <https://preview.tabler.io/docs/cards.html>`_.
 
     Example:
@@ -73,8 +71,6 @@ class TabbedWidget(Block):
 
 class CardWidget(Block):
     """
-    Extends :py:class:`wildewidgets.widgets.base.Block`.
-
     Renders a `Bootstrap 5 Card <https://getbootstrap.com/docs/5.2/components/card/>`_.
 
     Keyword Args:
@@ -167,8 +163,6 @@ class CardWidget(Block):
 
 class MultipleModelWidget(Block):
     """
-    Extends :py:class:`wildewidgets.widgets.base.Block`.
-
     Base class for :py:class:`PagedModelWidget` and :py:class:`ListModelWidget`.
 
     Keyword Args:
@@ -219,7 +213,7 @@ class MultipleModelWidget(Block):
         self.model = model if model else self.model
         self.model_widget = model_widget if model_widget else deepcopy(self.model_widget)
         self.model_kwargs = model_kwargs if model_kwargs else deepcopy(self.model_kwargs)
-        self.queryset = queryset if not queryset == None else self.queryset
+        self.queryset = queryset if queryset is not None else self.queryset
         self.ordering = ordering if ordering else self.ordering
         self.item_label = item_label if item_label else self.item_label
         super().__init__(*blocks, **kwargs)
@@ -289,8 +283,6 @@ class MultipleModelWidget(Block):
 
 class PagedModelWidget(MultipleModelWidget):
     """
-    Extends :py:class:`MultipleModelWidget`.
-
     A widget that displays a pageable list of widgets
     defined by a queryset. A model or queryset must be provided, and either a model_widget
     or the funtion `get_model_widget` must be provided.
@@ -382,8 +374,6 @@ class PagedModelWidget(MultipleModelWidget):
 
 class CrispyFormWidget(Block):
     """
-    Extends :py:class:`wildewidgets.widgets.base.Block`.
-
     A widget that displays a Crispy Form widget.
 
     Note:
@@ -413,8 +403,6 @@ class CrispyFormWidget(Block):
 
 class CollapseWidget(Block):
     """
-    Extends :py:class:`wildewidgets.widgets.base.Block`.
-
     A `Boostrap Collapse widget <https://getbootstrap.com/docs/5.2/components/collapse/>`_.
 
     It is typically used in conjunction with a :py:class:`CollapseButton`. Pressing the
@@ -444,8 +432,6 @@ class CollapseWidget(Block):
 
 class HorizontalLayoutBlock(Block):
     """
-    Extends :py:class:`wildewidgets.widgets.base.Block`.
-
     A container widget intended to display several other widgets aligned horizontally.
 
     Example:
@@ -541,8 +527,6 @@ class HorizontalLayoutBlock(Block):
 
 class ListModelWidget(MultipleModelWidget):
     """
-    Extends :py:class:`MultipleModelWidget`.
-
     This class provides a list of objects defined by a :py:class:`QuerySet`,
     displayed in a "``list-group``" ``<ul>`` block. By default, a widget will be
     provided that simply displays whatever returns from the conversion of the
@@ -657,8 +641,6 @@ filter_input.onkeyup = function(e) {{
 
 class ListModelCardWidget(CardWidget):
     """
-    Extends :py:class:`CardWidget`.
-
     This class provides a :py:class:`CardWidget` with a header and a list of
     objects defined by a :py:class:`QuerySet`, displayed in a
     :py:class:`ListModelWidget`. A filter input is provided to filter the list

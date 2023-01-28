@@ -53,14 +53,16 @@ class WidgetIndex(Block):
             item.icon = icon
         self._entries.append(item)
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
+    def get_context_data(self, *args, **kwargs):
+        context = super().get_context_data(*args, **kwargs)
         context['entries'] = self._entries
         return context
 
 
 class WidgetListSidebarWidget(Block):
+
     template_name: str = 'wildewidgets/widget-list--sidebar.html'
+
     block: str = "widget-list__sidebar"
     css_class: Optional[str] = None
     actions: List[Widget] = []
@@ -164,8 +166,8 @@ class WidgetListSidebarWidget(Block):
         """
         self.widget_index.add_widget(widget, title=title, icon=icon)
 
-    def get_context_data(self, **kwargs) -> Dict[str, Any]:
-        context = super().get_context_data(**kwargs)
+    def get_context_data(self, *args, **kwargs) -> Dict[str, Any]:
+        context = super().get_context_data(*args, **kwargs)
         context['title'] = self.title
         if not self._widgets.is_empty:
             context['widgets'] = self._widgets
@@ -181,6 +183,7 @@ class WidgetListSidebarWidget(Block):
 class WidgetListMainWidget(Block):
     template_name: str = 'wildewidgets/widget-list--main.html'
     block: str = "widget-list__main"
+
     css_class: Optional[str] = 'col'
     entry_css_class: Optional[str] = 'shadow bg-white'
     entry_title_css_class: Optional[str] = 'font-weight-bold'
@@ -202,8 +205,8 @@ class WidgetListMainWidget(Block):
             widget.title = header
         self._entries.append(widget)
 
-    def get_context_data(self, **kwargs) -> Dict[str, Any]:
-        context = super().get_context_data(**kwargs)
+    def get_context_data(self, *args, **kwargs) -> Dict[str, Any]:
+        context = super().get_context_data(*args, **kwargs)
         context['entries'] = self._entries
         context['entry_title_css_class'] = self._entry_title_css_class
         context['entry_css_class'] = self._entry_css_class
@@ -212,18 +215,23 @@ class WidgetListMainWidget(Block):
 
 class WidgetListLayout(Block):
     """
-    Extend `Block`. This class provides a two column layout. The first column
-    is the sidebar containing links to the various widgets in the right column,
-    and the second column is the main content, consisting of the contained
-    widgets vertically stacked.
+    This class provides a two column layout. The first column is the sidebar
+    containing links to the various widgets in the right column, and the second
+    column is the main content, consisting of the contained widgets vertically
+    stacked.
 
-    Example 1:
+    Example:
 
-        layout = WidgetListLayout('My Page')
-        layout.add_sidebar_form_button('Update', reverse('core:thing--update'))
-        layout.add_widget(Widget1(), title='another title')
-        layout.add_widget(Widget2(), title='the title', icon='stuff')
-        layout.add_widget(Widget3())
+        >>> layout = WidgetListLayout('My Page')
+        >>> layout.add_sidebar_form_button('Update', reverse('core:thing--update'))
+        >>> layout.add_widget(Widget1(), title='another title')
+        >>> layout.add_widget(Widget2(), title='the title', icon='stuff')
+        >>> layout.add_widget(Widget3())
+
+    Keyword Args:
+        title: The title of the widget.
+        sidebar_title: the title of the sidebar column
+        sidebar_width: the width in columns of the sidebar column
 
     """
     template_name: str = 'wildewidgets/widget-list.html'
@@ -232,18 +240,15 @@ class WidgetListLayout(Block):
     sidebar_width: int = 3
     sidebar_breakpoint: str = 'xl'
 
-    def __init__(self, title: str, sidebar_title: str = None, sidebar_width: int = None, sidebar_breakpoint: str = None, **kwargs) -> None:
+    def __init__(
+        self,
+        title: str,
+        sidebar_title: str = None,
+        sidebar_width: int = None,
+        sidebar_breakpoint: str = None,
+        **kwargs
+    ) -> None:
         """
-        Extend `Block.__init__()`.
-
-        Parameters
-        ----------
-        title : str
-            The title of the widget.
-        sidebar_title: str
-            Use this for the title of the sidebar column, otherwise use cls.sidebar_title
-        sidebar_width: int
-            Use this for the width in columns of the sidebar column, otherwise use cls.sidebar_width
         """
         super().__init__(**kwargs)
         self.title = title
@@ -275,8 +280,8 @@ class WidgetListLayout(Block):
     def add_sidebar_bare_widget(self, widget: Widget) -> None:
         self.sidebar.add_widget(widget)
 
-    def get_context_data(self, **kwargs) -> Dict[str, Any]:
-        context = super().get_context_data(**kwargs)
+    def get_context_data(self, *args, **kwargs) -> Dict[str, Any]:
+        context = super().get_context_data(*args, **kwargs)
         context['title'] = self.title
         context['sidebar'] = self.sidebar
         context['sidebar_width'] = self.sidebar_width

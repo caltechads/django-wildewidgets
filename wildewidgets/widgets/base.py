@@ -82,8 +82,6 @@ class TemplateWidget(Widget):
 
 class Block(TemplateWidget):
     """
-    Extends :py:class:`TemplateWidget`.
-
     Render a single HTML element.
 
     All the constructor parameters can be set in a subclass of this class as
@@ -128,6 +126,14 @@ class Block(TemplateWidget):
     Raises:
         ValueError: empty is ``True``, but contents were added to this block
     """
+
+    class RequiredAttrOrKwarg(ValueError):
+
+        def __init__(self, name: str):
+            super().__init__(
+                f'"{name}" must be provided as either a keyword argument or as a class attribute'
+            )
+
     template_name: str = "wildewidgets/block.html"
 
     #: block is the official wildewidgets name of the block; it can't be changed
@@ -319,7 +325,7 @@ class Block(TemplateWidget):
         """
         return self.script
 
-    def get_context_data(self, **kwargs) -> Dict[str, Any]:
+    def get_context_data(self, *args, **kwargs) -> Dict[str, Any]:
         """
         Update the template context dictionary used when rendering this block.
 
@@ -329,7 +335,7 @@ class Block(TemplateWidget):
         Returns:
             The updated context dictionary
         """
-        context = super().get_context_data(**kwargs)
+        context = super().get_context_data(*args, **kwargs)
         css_class = ' '.join(self.css_classes)
         name = self._name if self._name is not None else ''
         block = self.block if self.block is not None else ''
@@ -352,8 +358,6 @@ class Block(TemplateWidget):
 
 class Container(Block):
     """
-    Extends :py:class:`Block`.
-
     A `Bootstrap container <https://getbootstrap.com/docs/5.2/layout/containers/>`_
 
     Example::
@@ -412,8 +416,6 @@ class Container(Block):
 
 class Link(Block):
     """
-    Extends :py:class:`Block`.
-
     This is a simple ``<a>`` tag.  We made it into its own block because we need `<a>`
     tags so often.
 
@@ -485,8 +487,6 @@ class Link(Block):
 
 class UnorderedList(Block):
     """
-    Extends :py:class:`Block`.
-
     An HTML unordered list, aka a ``<ul>`` tag.
 
     This wraps each item in :py:attr:`contents` with ``<li>``.
@@ -525,8 +525,6 @@ class UnorderedList(Block):
 
 class OrderedList(UnorderedList):
     """
-    Extends :py:class:`UnorderedList`.
-
     An HTML ordered list, aka a ``<ol>`` tag.
 
     This wraps each item in :py:attr:`contents` with ``<li>``.
@@ -641,8 +639,6 @@ class Image(Block):
 
 class LinkedImage(Link):
     """
-    Extends :py:class:`Link`.
-
     An ``<img>`` wrapped in an ``<a>``::
 
         <a href="#">
@@ -719,17 +715,49 @@ class WidgetStream(Block):
         wrapper.block = f"{self.block}__widget"
         self._widgets.append(wrapper)
 
-    def get_context_data(self, **kwargs) -> Dict[str, Any]:
-        context = super().get_context_data(**kwargs)
+    def get_context_data(self, *args, **kwargs) -> Dict[str, Any]:
+        context = super().get_context_data(*args, **kwargs)
         context['widgets'] = self._widgets
         return context
 
 
 class InputBlock(Block):
     """
-    Extends :py:class:`Block`.
-
     A block for rendering a ``<input>`` element.
     """
     empty: bool = True
     tag: str = 'input'
+
+    input_type: Optional[str] = None
+
+    def __init__(
+        self,
+        input_type: str = None,
+        **kwargs
+    ):
+        self.input_type = input_type if input_type else self.input_type
+        super().__init__(**kwargs)
+        self._attributes['type'] = self.input_type
+
+
+class HiddenInputBlock(InputBlock):
+
+    input_type: str = 'hidden'
+    input_name: str = None
+    value: str = None
+
+    def __init__(
+        self,
+        input_name: str = None,
+        value: str = None,
+        **kwargs
+    ):
+        self.input_name = input_name if input_name else self.input_name
+        self.value = value if value else self.value
+        if not self.input_name:
+            raise self.RequiredAttrOrKwarg('input_name')
+        if not self.value:
+            raise self.RequiredAttrOrKwarg('value')
+        super().__init__(**kwargs)
+        self._attributes['name'] = self.input_name
+        self._attributes['value'] = self.value

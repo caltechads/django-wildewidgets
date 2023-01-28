@@ -9,261 +9,211 @@ from .base import Block
 
 class Button(Block):
     """
-    Render a ``<button>`` with Bootstrap styling.  Example::
+    Render a ``<button>`` with Bootstrap styling.
 
-        from wildwidgets import Button
+    Example:
 
-        Button(text="My Button")
+        >>> button = Button(text="My Button")
 
-    When rendered in the template with the ``wildewdigets`` template tag, this will produce::
+        When rendered in the template with the ``wildewdigets`` template tag, this
+        will produce::
 
-        <button type="button" class="button btn btn-secondary">My Button</button>
+            <button type="button" class="button btn btn-secondary">My Button</button>
 
-    All the constructor parameters can be set in a subclass of this class as class attributes.  Parameters
-    to the constructor override any defined class attributes.
-
-    :param text: The text to use for the button, defaults to 'Button'
-    :type text: str
-    :param color: The Boostrap color class to use for the button, defaults to 'secondary'
-    :type color: str
-    :param close: The Boostrap close icon will be used for the button, defaults to False.
-    :type close: bool
-    :param name: This CSS class will be added to the classes to identify this button, defaults to 'block'
-    :type tag: str
-    :param modifier: If specified, also add a class named ``{name}--{modifier}`` to the CSS classes, defaults
-        to no modifier
-    :type modifier: str
-    :param css_class: a string of classes to apply to the button, defaults to no classes.
-    :type css_class: str
-    :param css_id: Use this as the ``id`` attribute for the button, defaults to no ``id``
-    :type css_id: str
-    :param attributes: Set any additional attributes for the button as key, value pairs, defaults to no additional
-        attributes.
-    :type attributes: dict(str, str)
-    :param data_attributes: Set ``data-`` attributes for the button, defaults to no data attributes
-    :type data_attributes: dict(str, str)
+    Keyword Args:
+        text: The text to use for the button
+        color: The Boostrap color class to use for the button
+        close: The Boostrap close icon will be used for the button
     """
-    tag: str = 'button'
     block: str = 'button'
-    color: str = 'secondary'
-    text: str = 'Button'
+    tag: str = 'button'
 
-    def __init__(self, **kwargs):
-        color = kwargs.pop('color', self.color)
-        text = kwargs.pop('text', self.text)
-        close = kwargs.pop('close', False)
-        if close:
-            text = ""
-            kwargs["css_class"] = "btn-close"
-            kwargs["aria_attributes"] = {"label": "Close"}
-        super().__init__(text, **kwargs)
-        self._content = text
+    #: The Boostrap color class to use for the button
+    color: str = 'secondary'
+    #: The text to use for the button
+    text: str = 'Button'
+    #: If ``True``, ignore :py:attr:`text` and make this into a Bootstrap
+    #: "close" button with a close icon.
+    close: bool = False
+    #: If ``True``, ignore :py:attr:`text` and make this into a Bootstrap
+    #: "close" button with a close icon.
+    size: str = None
+
+    def __init__(
+        self,
+        text: str = None,
+        color: str = None,
+        close: bool = None,
+        size: str = None,
+        **kwargs
+    ):
+        self.color = color if color else self.color
+        self.text = text if text else self.text
+        self.close = close if close else self.close
+        self.size = size if size else self.size
+        if self.close:
+            self.text = ""
+        super().__init__(self.text, **kwargs)
         self._attributes['type'] = 'button'
-        if not close:
-            if self._css_class:
-                self._css_class = f'{self._css_class} btn btn-{color}'
-            else:
-                self._css_class = f'btn btn-{color}'
+        if self.close:
+            self.add_class('btn-close')
+            self._aria_attributes['label'] = "Close"
+        else:
+            self.add_class('btn')
+            self.add_class(f'btn-{self.color}')
+            if self.size:
+                self.add_class(f'btn-{self.size}')
 
 
 class ModalButton(Button):
     """
-    Render a ``<button>`` with Bootstrap styling which toggles a Bootstrap modal.  Example::
+    Render a ``<button>`` with Bootstrap styling which toggles a Bootstrap modal.
 
-        from wildwidgets import ModalButton
+    Example:
 
-        ModalButton(text="My Button", target='#mymodal')
+        >>> button = ModalButton(text="My Button", target='#mymodal')
 
-    When rendered in the template with the ``wildewdigets`` template tag, this will produce::
+        When rendered in the template with the ``wildewdigets`` template tag, this
+        will produce::
 
-        <button type="button" class="button button--modal btn btn-secondary" data-toggle="modal"
-          data-target="#mymodal">My Button</button>
+            <button type="button" class="button button--modal btn btn-secondary" data-toggle="modal"
+            data-target="#mymodal">My Button</button>
 
-    All the constructor parameters can be set in a subclass of this class as class attributes.  Parameters
-    to the constructor override any defined class attributes.
-
-    :param text: The text to use for the button, defaults to 'Button'
-    :type text: str
-    :param color: The Boostrap color class to use for the button, defaults to 'secondary'
-    :type color: str
-    :param target: The CSS target for the Bootstrap modal, defaults to no target.
-    :type target: str
-    :param name: This CSS class will be added to the classes to identify this button, defaults to 'block'
-    :type tag: str
-    :param modifier: If specified, also add a class named ``{name}--{modifier}`` to the CSS classes, defaults
-        to no modifier
-    :type modifier: str
-    :param css_class: a string of classes to apply to the button, defaults to no classes.
-    :type css_class: str
-    :param css_id: Use this as the ``id`` attribute for the button, defaults to no ``id``
-    :type css_id: str
-    :param attributes: Set any additional attributes for the button as key, value pairs, defaults to no additional
-        attributes.
-    :type attributes: dict(str, str)
-    :param data_attributes: Set ``data-`` attributes for the button, defaults to no data attributes
-    :type data_attributes: dict(str, str)
+    Keyword Args:
+        target: The CSS target for the Bootstrap modal
     """
     block: str = 'button button--modal'
+
+    #: The CSS target for the Bootstrap modal
     target: Optional[str] = None
 
-    def __init__(self, **kwargs):
-        target = kwargs.pop('target', self.target)
+    def __init__(
+        self,
+        target: str = None,
+        **kwargs
+    ):
+        self.target = target if target else self.target
         super().__init__(**kwargs)
         self._data_attributes['toggle'] = 'modal'
-        self._data_attributes['target'] = target if target is not None else self.target
+        self._data_attributes['target'] = self.target
 
 
 class CollapseButton(Button):
     """
-    Render a ``<button>`` with Bootstrap styling which toggles a Bootstrap modal.  Example::
+    Render a ``<button>`` with Bootstrap styling which toggles a ``collapse``.
 
-        from wildwidgets import ModalButton
+    Example:
 
-        ModalButton(text="My Button", target='#mymodal')
+        >>> button = CollapseButton(text="My Button", target='#mymodal')
 
-    When rendered in the template with the ``wildewdigets`` template tag, this will produce::
+        When rendered in the template with the ``wildewdigets`` template tag, this
+        will produce::
 
-        <button type="button" class="button button--modal btn btn-secondary" data-toggle="modal"
-          data-target="#mymodal">My Button</button>
+            <button type="button" class="button button--collapse btn btn-secondary"
+                data-toggle="collapse" data-target="#mymodal"
+                aria-expanded="false aria-controls="mymodal">My Button</button>
 
-    All the constructor parameters can be set in a subclass of this class as class attributes.  Parameters
-    to the constructor override any defined class attributes.
-
-    :param text: The text to use for the button, defaults to 'Button'
-    :type text: str
-    :param color: The Boostrap color class to use for the button, defaults to 'secondary'
-    :type color: str
-    :param target: The CSS target for the Bootstrap modal, defaults to no target.
-    :type target: str
-    :param name: This CSS class will be added to the classes to identify this button, defaults to 'block'
-    :type tag: str
-    :param modifier: If specified, also add a class named ``{name}--{modifier}`` to the CSS classes, defaults
-        to no modifier
-    :type modifier: str
-    :param css_class: a string of classes to apply to the button, defaults to no classes.
-    :type css_class: str
-    :param css_id: Use this as the ``id`` attribute for the button, defaults to no ``id``
-    :type css_id: str
-    :param attributes: Set any additional attributes for the button as key, value pairs, defaults to no additional
-        attributes.
-    :type attributes: dict(str, str)
-    :param data_attributes: Set ``data-`` attributes for the button, defaults to no data attributes
-    :type data_attributes: dict(str, str)
+    Keyword Args:
+        target: The CSS target for the Bootstrap collapse
     """
     block: str = 'button button--collapse'
+
+    #: The CSS target for the Bootstrap collapse
     target: Optional[str] = None
 
-    def __init__(self, **kwargs):
-        target = kwargs.pop('target', self.target)
+    def __init__(
+        self,
+        target: str = None,
+        **kwargs
+    ):
+        self.target = target if target else self.target
         super().__init__(**kwargs)
         self._data_attributes['toggle'] = 'collapse'
-        self._data_attributes['target'] = target
+        self._data_attributes['target'] = self.target
         self._aria_attributes['expanded'] = 'false'
-        self._aria_attributes['controls'] = target.lstrip("#")
+        self._aria_attributes['controls'] = self.target.lstrip("#")
 
 
 class LinkButton(Button):
     """
-    Render an ``<a>`` with Bootstrap button styling which toggles a Bootstrap modal.  Example::
+    Render an ``<a>`` with Bootstrap button styling which toggles a Bootstrap
+    modal.
 
-        from wildwidgets import LinkButton
+    Example:
 
-        LinkButton(text="My Button", url='https://myexample.com')
+        >>> button = LinkButton(text="My Button", url='https://myexample.com')
 
-    When rendered in the template with the ``wildewdigets`` template tag, this will produce::
+        When rendered in the template with the ``wildewdigets`` template tag, this
+        will produce::
 
-        <a href="https://myexample.com" class="button button--link btn btn-secondary">My Button</a>
+            <a href="https://myexample.com" class="button button--link btn btn-secondary">My Button</a>
 
-    All the constructor parameters can be set in a subclass of this class as class attributes.  Parameters
-    to the constructor override any defined class attributes.
 
-    :param text: The text to use for the button, defaults to 'Button'
-    :type text: str
-    :param color: The Boostrap color class to use for the button, defaults to 'secondary'
-    :type color: str
-    :param url: The URL for the ``href`` attribute of the <a> record, defaults to no URL.
-    :type target: str
-    :param name: This CSS class will be added to the classes to identify this button, defaults to 'block'
-    :type tag: str
-    :param modifier: If specified, also add a class named ``{name}--{modifier}`` to the CSS classes, defaults
-        to no modifier
-    :type modifier: str
-    :param css_class: a string of classes to apply to the button, defaults to no classes.
-    :type css_class: str
-    :param css_id: Use this as the ``id`` attribute for the button, defaults to no ``id``
-    :type css_id: str
-    :param attributes: Set any additional attributes for the button as key, value pairs, defaults to no additional
-        attributes.
-    :type attributes: dict(str, str)
-    :param data_attributes: Set ``data-`` attributes for the button, defaults to no data attributes
-    :type data_attributes: dict(str, str)
+    Keyword Args:
+        url: The URL for the ``href`` attribute of the <a> record, defaults to no URL.
     """
-    tag: str = 'a'
     block: str = 'button button--link'
+    tag: str = 'a'
+
     url: Optional[str] = None
 
-    def __init__(self, **kwargs):
-        url = kwargs.pop('url', self.url)
+    def __init__(self, url: str = None, **kwargs):
+        self.url = url if url else self.url
         super().__init__(**kwargs)
         del self._attributes['type']
         if url:
-            self._attributes['href'] = url
+            self._attributes['href'] = self.url
 
 
 class InputButton(Button):
     """
-    Render an ``<input type="submit">`` with Bootstrap button styling.  Example::
+    Render an ``<input type="submit">`` with Bootstrap button styling.
 
-        InputButton(text="Save")
+    Example::
 
-    When rendered in the template with the ``wildewdigets`` template tag, this will produce::
+        >>> button = InputButton(text="Save")
+
+    When rendered in the template with the ``wildewdigets`` template tag, this
+    will produce::
 
         <input type="submit" class="button button--submit btn btn-secondary" value="Save">
 
-    All the constructor parameters can be set in a subclass of this class as class attributes.  Parameters
-    to the constructor override any defined class attributes.
-
-    :param text: The text to use for the button, defaults to 'Button'
-    :type text: str
-    :param color: The Boostrap color class to use for the button, defaults to 'secondary'
-    :type color: str
-    :param url: The URL for the ``href`` attribute of the <a> record, defaults to no URL.
-    :type target: str
-    :param name: This CSS class will be added to the classes to identify this button, defaults to 'block'
-    :type tag: str
-    :param modifier: If specified, also add a class named ``{name}--{modifier}`` to the CSS classes, defaults
-        to no modifier
-    :type modifier: str
-    :param css_class: a string of classes to apply to the button, defaults to no classes.
-    :type css_class: str
-    :param css_id: Use this as the ``id`` attribute for the button, defaults to no ``id``
-    :type css_id: str
-    :param attributes: Set any additional attributes for the button as key, value pairs, defaults to no additional
-        attributes.
-    :type attributes: dict(str, str)
-    :param data_attributes: Set ``data-`` attributes for the button, defaults to no data attributes
-    :type data_attributes: dict(str, str)
     """
     template_name: str = 'wildewidgets/block--simple.html'
-    tag: str = 'input'
-    block: str = 'button--submit'
 
-    def __init__(self, **kwargs):
+    block: str = 'button--submit'
+    tag: str = 'input'
+
+    confirm_text: str = None
+
+    def __init__(
+        self,
+        confirm_text: str = None,
+        **kwargs
+    ):
+        self.confirm_text = confirm_text if confirm_text else self.confirm_text
         super().__init__(**kwargs)
         self._attributes['type'] = 'submit'
-        self._attributes['value'] = self._content
-        self._content = None
+        self._attributes['value'] = self.text
+        if self.confirm_text:
+            self._attributes['onclick'] = f"return confirm('{self.confirm_text}');"
+        self.text = None
 
 
 class FormButton(Block):
     """
     Render a ``<form>`` with optional hidden inputs and a submit button.
 
-        from wildwidgets import FormButton
+    Example::
 
-        FormButton(text="Save", action='/my/form/action', data={'field1': 'value1'})
+        >>> button = FormButton(
+            text="Save",
+            action='/my/form/action',
+            data={'field1': 'value1'}
+        )
 
-    When rendered in the template with the ``wildewdigets`` template tag, this will produce::
+    When rendered in the template with the ``wildewdigets`` template tag, this
+    will produce::
 
         <form action="/my/form/action" method="post" class="button-form">
             <input type="hidden" name="csrfmiddlewaretoken" value="__THE_CSRF_TOKEN__">
@@ -274,37 +224,19 @@ class FormButton(Block):
     All the constructor parameters can be set in a subclass of this class as class attributes.  Parameters
     to the constructor override any defined class attributes.
 
-    :param text: The text to use for the button, defaults to 'Button'
-    :type text: str
-    :param color: The Boostrap color class to use for the button, defaults to 'secondary'
-    :type color: str
-    :param url: The URL for the ``href`` attribute of the <a> record, defaults to no URL.
-    :type target: str
-    :param name: This CSS class will be added to the classes to identify this form, defaults to 'button-form'
-    :type tag: str
-    :param modifier: If specified, also add a class named ``{name}--{modifier}`` to the form CSS classes, defaults
-        to no modifier
-    :type modifier: str
-    :param css_class: a string of classes to apply to the form, defaults to no classes.
-    :type css_class: str
-    :param button_css_class: a string of classes to apply to the button, defaults to no classes.
-    :type button_css_class: str
-    :param css_id: Use this as the ``id`` attribute for the form, defaults to no ``id``
-    :type css_id: str
-    :param attributes: Set any additional attributes for the form as key, value pairs, defaults to no additional
-        attributes.
-    :type attributes: dict(str, str)
-    :param button_attributes: Set any additional attributes for the button as key, value pairs, defaults to no
-        additional attributes.
-    :type attributes: dict(str, str)
-    :param data_attributes: Set ``data-`` attributes for the form, defaults to no data attributes
-    :type data_attributes: dict(str, str)
-    :param button_data_attributes: Set ``data-`` attributes for the button, defaults to no data attributes
-    :type button_data_attributes: dict(str, str)
+    Keyword Args:
+        text: The text to use for the button, defaults to 'Button'
+        color: The Boostrap color class to use for the button, defaults to 'secondary'
+        button_css_class: a string of classes to apply to the button, defaults to no classes.
+        button_attributes: Set any additional attributes for the button as key, value pairs,
+             defaults to no additional attributes.
+        button_data_attributes: Set ``data-`` attributes for the button, defaults to no
+            data attributes
     """
-    template_name = 'wildewidgets/button--form.html'
+    template_name: str = 'wildewidgets/button--form.html'
     tag: str = 'form'
     block: str = 'button-form'
+
     action: Optional[str] = None
     method: str = 'post'
     text: Optional[str] = None
@@ -336,13 +268,11 @@ class FormButton(Block):
         if self.close:
             button_kwargs['close'] = True
             button_kwargs['aria_attributes'] = {"label": "Close"}
-        confirm_text = kwargs.pop('confirm_text', self.confirm_text)
-        if confirm_text is not None:
-            button_kwargs['attributes']['onclick'] = f"return confirm('{confirm_text}');"
+        button_kwargs['confirm_text'] = kwargs.pop('confirm_text', self.confirm_text)
         return InputButton(**button_kwargs)
 
-    def get_context_data(self, **kwargs) -> Dict[str, Any]:
-        context = super().get_context_data(**kwargs)
+    def get_context_data(self, *args, **kwargs) -> Dict[str, Any]:
+        context = super().get_context_data(*args, **kwargs)
         context['button'] = self.button
         context['data'] = self.data
         return context

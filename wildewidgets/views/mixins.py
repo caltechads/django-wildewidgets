@@ -1,39 +1,29 @@
+from typing import Any, Dict, Optional, TYPE_CHECKING
 import base64
-import importlib
 import json
-import os
-from typing import Any, Dict, List, Optional, TYPE_CHECKING
 
-from django.apps import apps
-from django.core.exceptions import ImproperlyConfigured
 from django.core.serializers.json import DjangoJSONEncoder
-from django.http import HttpResponseRedirect, HttpResponse, JsonResponse
+from django.http import HttpResponse
 from django.utils.cache import add_never_cache_headers
 try:
     from django.utils.encoding import force_text
 except ImportError:
     from django.utils.encoding import force_str as force_text  # type: ignore
 from django.utils.functional import Promise
-from django.views.generic import View
-from django.views.generic.base import TemplateView
 
 if TYPE_CHECKING:
-    from .widgets import BreadcrumbBlock
+    from ..widgets import BreadcrumbBlock
 
 
 class LazyEncoder(DjangoJSONEncoder):
     """
-    Encodes django's lazy i18n strings
+    Encodes django's lazy i18n strings.
     """
     def default(self, o):
         if isinstance(o, Promise):
             return force_text(o)
         return super(LazyEncoder, self).default(o)
 
-
-# =================================
-# Mixins
-# =================================
 
 class WidgetInitKwargsMixin:
 
@@ -74,19 +64,24 @@ class WidgetInitKwargsMixin:
 
 
 class JSONResponseMixin:
-    is_clean = False
 
-    def render_to_response(self, context):
-        """ Returns a JSON response containing 'context' as payload
+    is_clean: bool = False
+
+    def render_to_response(self, context: Dict[str, Any]) -> str:
+        """
+        Returns a JSON response containing 'context' as payload
         """
         return self.get_json_response(context)
 
-    def get_json_response(self, content, **httpresponse_kwargs):
-        """ Construct an `HttpResponse` object.
+    def get_json_response(self, content: Any, **httpresponse_kwargs) -> HttpResponse:
         """
-        response = HttpResponse(content,
-                                content_type='application/json',
-                                **httpresponse_kwargs)
+        Construct an `HttpResponse` object.
+        """
+        response = HttpResponse(
+            content,
+            content_type='application/json',
+            **httpresponse_kwargs
+        )
         add_never_cache_headers(response)
         return response
 
@@ -115,90 +110,9 @@ class JSONResponseMixin:
         return self.render_to_response(dump)
 
 
-# =================================
-# Views
-# =================================
-
-
-class JSONResponseView(JSONResponseMixin, TemplateView):
-    pass
-
-
-class JSONDataView(View):
-
-    def get(self, request, *args, **kwargs):
-        context = self.get_context_data()
-        return self.render_to_response(context)
-
-    def get_context_data(self, **kwargs):
-        return {}
-
-    def render_to_response(self, context, **response_kwargs):
-        return JsonResponse(context)
-
-
-class WildewidgetDispatch(WidgetInitKwargsMixin, View):
-
-    def dispatch(self, request, *args, **kwargs):
-        # initkwargs = {}
-
-        wildewidgetclass = request.GET.get('wildewidgetclass', None)
-        csrf_token = request.GET.get('csrf_token', '')
-        if wildewidgetclass:
-            configs = apps.get_app_configs()
-            for config in configs:
-                check_file = os.path.join(config.path, "wildewidgets.py")
-                check_dir = os.path.join(config.path, "wildewidgets")
-                if os.path.isfile(check_file) or os.path.isdir(check_dir):
-                    module = importlib.import_module(f"{config.name}.wildewidgets")
-                    if hasattr(module, wildewidgetclass):
-                        class_ = getattr(module, wildewidgetclass)
-                        extra_data = self.get_decoded_extra_data(request)
-                        initargs = extra_data.get('args', [])
-                        initkwargs = extra_data.get('kwargs', {})
-                        instance = class_(*initargs, **initkwargs)
-                        instance.request = request
-                        instance.csrf_token = csrf_token
-                        instance.args = initargs
-                        instance.kwargs = initkwargs
-                        return instance.dispatch(request, *args, **kwargs)
-
-
-class TableActionFormView(View):
-    """
-    Extends :py:class:`django.views.generic.View`.
-
-    A view that handles a form action on a table. You just need to define the :py:meth:`process_form_action` method.
-    """
-
-    http_method_names: List[str] = ['post']
-    url: Optional[str] = None
-
-    def process_form_action(self, action, items):
-        pass
-
-    def post(self, request, *args, **kwargs):
-        checkboxes = request.POST.getlist('checkbox')
-        action = request.POST.get('action')
-        self.process_form_action(action, checkboxes)
-        return HttpResponseRedirect(self.url)
-
-
-class TableView(TemplateView):
-    table_class = None
-
-    def get_context_data(self, **kwargs):
-        if not self.table_class:
-            raise ImproperlyConfigured(
-                "You must set a table_class attribute on {}".format(self.__class__.__name__)
-            )
-        kwargs['table'] = self.table_class()  # pylint: disable=not-callable
-        return super().get_context_data(**kwargs)
-
-
 class StandardWidgetMixin:
     """
-    A class based view mixin for views that use the standard widget template.
+    A class based view mixin for views that use a standard widget template.
     This is used with a template-less design.
 
     The template used by your derived class should include at least the following::
@@ -243,15 +157,15 @@ class StandardWidgetMixin:
 
     def get_context_data(self, **kwargs):
         kwargs['content'] = self.get_content()
-        breadcrumbs = self.get_breadcrumbs()
-        kwargs['breadcrumbs'] = breadcrumbs
+        breadcrumbs: Optional[BreadcrumbBlock] = self.get_breadcrumbs()
         if breadcrumbs:
+            kwargs['breadcrumbs'] = breadcrumbs
             kwargs['page_title'] = breadcrumbs.flatten()
         return super().get_context_data(**kwargs)
 
     def get_content(self):
         raise NotImplementedError(
-            "You must override get_content in {}".format(self.__class__.__name__)
+            f"You must override get_content in {self.__class__.__name__}"
         )
 
     def get_breadcrumbs(self) -> "Optional[BreadcrumbBlock]":

@@ -9,7 +9,7 @@ import pandas as pd
 import altair as alt
 
 from wildewidgets import (
-    BreadrumbBlock,
+    BreadcrumbBlock,
     MenuMixin,
     StandardWidgetMixin,
     VerticalDarkMenu,
@@ -71,7 +71,7 @@ class DemoMenu(VerticalDarkMenu):
     ]
 
 
-class DemoBaseBreadcrumbs(BreadrumbBlock):
+class DemoBaseBreadcrumbs(BreadcrumbBlock):
     title_class = "fw-bold"
 
     def __init__(self, *args, **kwargs):

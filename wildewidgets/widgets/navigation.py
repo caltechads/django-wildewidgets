@@ -133,7 +133,7 @@ class BreadcrumbItem:
 # Blocks
 # ==============================
 
-class BreadrumbBlock(Block):
+class BreadcrumbBlock(Block):
     """
     A block that renders a `Bootstrap Breadcrumb
     <https://getbootstrap.com/docs/5.2/components/breadcrumb/>`_ component.
@@ -211,7 +211,7 @@ class BreadrumbBlock(Block):
         """
         self.items.append(BreadcrumbItem(title=title, url=url))
 
-    def get_context_data(self, **kwargs) -> Dict[str, Any]:
+    def get_context_data(self, *args, **kwargs) -> Dict[str, Any]:
         for item in self.items:
             if self.title_class:
                 title = Block(item.title, tag='span', css_class=self.title_class)
@@ -224,7 +224,7 @@ class BreadrumbBlock(Block):
             self.breadcrumbs.add_block(block, name='breadcrumb-item')
         # Make the last li be active
         self.breadcrumbs.blocks[-1].add_class('active')
-        return super().get_context_data(**kwargs)
+        return super().get_context_data(*args, **kwargs)
 
     def flatten(self) -> str:
         """
@@ -235,8 +235,6 @@ class BreadrumbBlock(Block):
 
 class NavigationTogglerButton(Block):
     """
-    Extends :py:class:`wildewidgets.widgets.base.Block`.
-
     The ``navbar-toggler`` button for hiding and showing menus in responsive
     `Bootstrap Navbar containers
     <https://getbootstrap.com/docs/5.2/components/navbar/#responsive-behaviors>`_
@@ -283,8 +281,6 @@ class NavigationTogglerButton(Block):
 
 class Navbar(Block):
     """
-    Extends :py:class:`wildewidgets.widgets.base.Block`.
-
     A horizontal `Bootstrap Navbar <https://getbootstrap.com/docs/5.2/components/navbar>`_.
 
     Examples:
@@ -508,8 +504,6 @@ class Navbar(Block):
 
 class TablerVerticalNavbar(Navbar):
     """
-    Extends :py:class:`Nabvar`.
-
     Make this a Tabler vertical dark navbar.
 
     * Make the navbar vertical instead of horizontal
@@ -562,8 +556,6 @@ class TablerVerticalNavbar(Navbar):
 
 class MenuHeading(Block):
     """
-    Extends :py:class:`wildewidgets.widgets.base.Block`.
-
     A Tabler menu specific heading.  This is a heading within a :py:class:`Menu`
     that sepearates the actual menu items into groups.
 
@@ -593,8 +585,6 @@ class MenuHeading(Block):
 
 class NavItem(Block):
     """
-    Extends :py:class:`wildewidgets.widgets.base.Block`.
-
     An entry in a :py:class:`Menu`, the top level menu class used in a
     :py:class:`Navbar` in the menu section.  This is a label with a link to a
     URL, with an optional icon preceding the label.
@@ -690,8 +680,6 @@ class NavItem(Block):
 
 class ClickableNavDropdownControl(Block):
     """
-    Extends :py:class:`wildewidgets.widgets.base.Block`.
-
     This is a variation on :py:class:`NavDropdownControl` for the cases when the
     text that controls the open and close of the related
     :py:class:`DropdownMenu` is also a link that should be able to be clicked
@@ -817,8 +805,6 @@ class ClickableNavDropdownControl(Block):
 
 class NavDropdownControl(Link):
     """
-    Extends :py:class:`wildewidgets.Link`.
-
     This is a dropdown control that opens a submenu from within either a
     :py:class:`Menu` or a :py:class`DropdownMenu` within a :py:class:`Menu`.  It
     consists of a label with optional icon in front, plus a arrow that toggles
@@ -911,8 +897,6 @@ class NavDropdownControl(Link):
 
 class DropdownItem(Link):
     """
-    Extends :py:class:`wildewidgets.Link`.
-
     An entry in a :py:class:`DropdownMenu`, a submenu class used in a
     :py:class:`NavDropdownItem` of a :py:class:`Menu`.  This is a
     label with a link to a URL, with an optional icon preceding the label.
@@ -986,8 +970,6 @@ class DropdownItem(Link):
 
 class DropdownMenu(Block):
     """
-    Extends :py:class:`wildewidgets.widgets.base.Block`.
-
     A `Tabler dropdown menu <https://preview.tabler.io/docs/dropdowns.html>`_.
 
     Typically, you won't use this directly, but instead it will be created for
@@ -1097,8 +1079,6 @@ class DropdownMenu(Block):
 
 class NavDropdownItem(Block):
     """
-    Extends :py:class:`wildewidgets.widgets.base.Block`.
-
     An item in a :py:class:`Menu` that opens a dropdown submenu.
 
     Typically, you won't use this directly, but instead it will be created for
@@ -1232,8 +1212,6 @@ class NavDropdownItem(Block):
 
 class Menu(Block):
     """
-    Extends :py:class:`wildewidgets.widgets.base.Block`.
-
     A ``<div>`` with an optional title and a  `Bootstrap ``ul.navbar-nav``
     <https://getbootstrap.com/docs/5.2/components/navbar/>`_ for use in a
     :py:class:`Navbar`.

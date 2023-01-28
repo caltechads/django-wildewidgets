@@ -10,8 +10,6 @@ from .buttons import ModalButton, CollapseButton, LinkButton, FormButton
 
 class BasicHeader(TemplateWidget):
     """
-    Extends :py:class:`wildewidgets.widgets.base.TemplateWidget`.
-
     The base header class, which contains the bulk of the functionality.
 
     Keyword Args:
@@ -72,8 +70,6 @@ class BasicHeader(TemplateWidget):
 
 class HeaderWithLinkButton(BasicHeader):
     """
-    Extends :py:class:`BasicHeader`.
-
     Header with button that links to something.
 
     .. deprecated:: 0.13.45
@@ -108,8 +104,6 @@ class HeaderWithLinkButton(BasicHeader):
 
 class HeaderWithFormButton(BasicHeader):
     """
-    Extends :py:class:`BasicHeader`.
-
     Header with a button that submits a form.
 
     .. deprecated:: 0.13.45
@@ -140,8 +134,6 @@ class HeaderWithFormButton(BasicHeader):
 
 class HeaderWithCollapseButton(BasicHeader):
     """
-    Extends :py:class:`BasicHeader`.
-
     .. deprecated:: 0.13.45
         Use :py:class:`HeaderWithWidget` instead.
     """
@@ -174,8 +166,6 @@ class HeaderWithCollapseButton(BasicHeader):
 
 class HeaderWithModalButton(BasicHeader):
     """
-    Extends :py:class:`BasicHeader`.
-
     .. deprecated:: 0.13.45
         Use :py:class:`HeaderWithWidget` instead.
     """
@@ -200,8 +190,6 @@ class HeaderWithModalButton(BasicHeader):
 
 class HeaderWithWidget(BasicHeader):
     """
-    Extends :py:class:`BasicHeader`.
-
     The base class for more complex headers with buttons or other widgets
     attached. It can be used stand-alone.
 
@@ -254,8 +242,6 @@ class HeaderWithWidget(BasicHeader):
 
 class PageHeader(HeaderWithWidget):
     """
-    Extends :py:class:`HeaderWithWidget`.
-
     Provides a standard page header.
     """
     css_class: str = "my-4"
@@ -263,8 +249,6 @@ class PageHeader(HeaderWithWidget):
 
 class CardHeader(HeaderWithWidget):
     """
-    Extends :py:class:`HeaderWithWidget`.
-
     Provides a standard card header.
     """
     css_class: str = "my-3"
@@ -273,8 +257,6 @@ class CardHeader(HeaderWithWidget):
 
 class WidgetListLayoutHeader(HeaderWithWidget):
     """
-    Extends :py:class:`HeaderWithWidget`.
-
     Provides a standard :py:class:`wildewidgets.WidgetListLayout` header.
     """
     css_class: str = "mb-4"

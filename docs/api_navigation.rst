@@ -2,8 +2,9 @@ Navigation
 ==========
 
 .. automodule:: wildewidgets.menus
-    :members:
-    :show-inheritance:
+   :members:
+   :show-inheritance:
 
 .. automodule:: wildewidgets.widgets.navigation
    :members:
+   :show-inheritance:

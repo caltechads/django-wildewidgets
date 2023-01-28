@@ -31,7 +31,7 @@ $navbar-expand-breakpoints: ["sm", "md", "lg", "xl", "xxl"] !default;
                 padding-left: 18rem;
             }
 
-            .navbar-expand-#{"" + $bp} .navbar-collapse {
+            &.navbar-expand-#{"" + $bp} .navbar-collapse {
                 // .navbar-collapse is the menu area of the .navbar, as
                 // opposed to the brand area at the top
                 .nav-item.active,

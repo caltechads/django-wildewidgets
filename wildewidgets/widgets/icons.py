@@ -5,8 +5,6 @@ from .base import Block
 
 class FontIcon(Block):
     """
-    Extends :py:class:`wildewidgets.widgets.base.Block`.
-
     Render a font-based Bootstrap icon, for example::
 
         <i class="bi-star"></i>
@@ -73,8 +71,6 @@ class FontIcon(Block):
 
 class TablerFontIcon(FontIcon):
     """
-    Extends :py:class:`FontIcon`.
-
     :py:class:`FontIcon` for Tabler Icons.
 
     Requires::
@@ -86,8 +82,6 @@ class TablerFontIcon(FontIcon):
 
 class TablerMenuIcon(FontIcon):
     """
-    Extends :py:class:`FontIcon`.
-
     A Tabler menu specific icon.  This just adds some menu specific classes and
     uses a ``<span>`` instead of a ``<i>``.  It is used by
     :py:class:`wildewidgets.NavItem`, :py:class:`wildewidgets.NavDropdownItem`

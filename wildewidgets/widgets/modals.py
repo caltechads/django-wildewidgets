@@ -1,14 +1,15 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from wildewidgets.widgets.structure import CrispyFormWidget
-from .base import TemplateWidget
-
 from django.core.exceptions import ImproperlyConfigured
 
 
+from .base import TemplateWidget
+from .structure import CrispyFormWidget
+
+
 class ModalWidget(TemplateWidget):
-    """Extends TemplateWidget.
+    """
     Renders a Bootstrap 5 Modal.
 
     Args:
@@ -16,7 +17,7 @@ class ModalWidget(TemplateWidget):
         modal_title: The title of the modal.
         modal_body: The body of the modal, any Block.
         modal_size (optional): The size of the modal. One of 'sm', 'lg', or 'xl'.
-    """    
+    """
     template_name = 'wildewidgets/modal.html'
     modal_id = None
     modal_title = None
@@ -30,8 +31,8 @@ class ModalWidget(TemplateWidget):
         self.modal_size = modal_size if modal_size else self.modal_size
         super().__init__(**kwargs)
 
-    def get_context_data(self, **kwargs):
-        kwargs = super().get_context_data(**kwargs)
+    def get_context_data(self, *args, **kwargs):
+        kwargs = super().get_context_data(*args, **kwargs)
         kwargs['modal_id'] = self.modal_id
         kwargs['modal_title'] = self.modal_title
         kwargs['modal_body'] = self.modal_body
@@ -40,7 +41,7 @@ class ModalWidget(TemplateWidget):
 
 
 class CrispyFormModalWidget(ModalWidget):
-    """Extends ModalWidget.
+    """
     Renders a Bootstrap 5 Modal with a CrispyFormWidget as the body.
 
     Args:
@@ -55,7 +56,7 @@ class CrispyFormModalWidget(ModalWidget):
             form = self.form
         if not form_class:
             form_class = self.form_class
-        
+
         if form_class:
             modal_form = form_class()
         elif form:
