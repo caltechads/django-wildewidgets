@@ -488,10 +488,12 @@ class CreateView(
         return f'Created {self.model_verbose_name} "{str(self.object)}"!'
 
     def get_form_class(self) -> Type[BaseModelForm]:
-        form_class = super().get_form_class()
-        if not form_class:
-            return self.object.get_create_form_class()
-        return form_class
+        # FIXME: this is probably not the right way to do this.  I'd like it
+        # that if there is a form_class defined on us, use that otherwise ask
+        # the model
+        if hasattr(self.model, 'get_create_form_class'):
+            return self.model.get_create_form_class()
+        return super().get_form_class()
 
     def get_title(self) -> str:
         """
@@ -535,10 +537,12 @@ class UpdateView(
         return f'Updated {self.model_verbose_name} "{str(self.object)}"!'
 
     def get_form_class(self) -> Type[BaseModelForm]:
-        form_class = super().get_form_class()
-        if not form_class:
+        # FIXME: this is probably not the right way to do this.  I'd like it
+        # that if there is a form_class defined on us, use that otherwise ask
+        # the model
+        if hasattr(self.object, 'get_update_form_class'):
             return self.object.get_update_form_class()
-        return form_class
+        return super().get_form_class()
 
     def get_title(self) -> str:
         """
@@ -580,10 +584,12 @@ class DeleteView(
         return redirect(self.get_success_url())
 
     def get_form_class(self) -> Type[BaseModelForm]:
-        form_class = super().get_form_class()
-        if not form_class:
+        # FIXME: this is probably not the right way to do this.  I'd like it
+        # that if there is a form_class defined on us, use that otherwise ask
+        # the model
+        if hasattr(self.object, 'get_delete_form_class'):
             return self.object.get_delete_form_class()
-        return form_class
+        return super().get_form_class()
 
 
 class ManyToManyRelatedFieldView(
