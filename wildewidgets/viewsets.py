@@ -36,13 +36,14 @@ class ModelViewSet:
     url_prefix: Optional[str] = None
     #: The URL namespace to use for our view names.  This should be set to
     #: the ``app_name`` set in the ``urls.py`` where this viewset's patterns
-    #: will be added to ``url_patterns``
+    #: will be added to ``urlpatterns``
     url_namespace: Optional[str] = None
     #: Set this to your :py:class:`wildewidgets.widgets.navigation.BreadcrumbBlock`
     #: class to manage breadcrumbs automatically.
     breadcrumbs_class: Optional[Type[BreadcrumbBlock]] = None
-    #: The navbar to use for our navigation
-    navbar_class: Optional[Navbar] = None
+    #: The navbar to use.  We'll highlight our verbose name in any of the
+    #: menus within the navbar
+    navbar_class: Optional[Type[Navbar]] = None
     #: The template name to use for all views
     template_name: Optional[str] = None
 
@@ -114,7 +115,7 @@ class ModelViewSet:
     def get_breadcrumbs(self, view_name: str) -> Optional[BreadcrumbBlock]:
         breadcrumbs: Optional[BreadcrumbBlock] = None
         if self.breadcrumbs_class:
-            breadcrumbs = self.breadcrumbs_class()
+            breadcrumbs = self.breadcrumbs_class()  # pylint: disable=not-callable
             if view_name != 'index':
                 breadcrumbs.add_breadcrumb(
                     title=self.model.model_verbose_name_plural(),
@@ -167,7 +168,7 @@ class ModelViewSet:
             template_name=self.template_name,
             breadcrumbs=self.get_breadcrumbs('create'),
             navbar_class=self.navbar_class,
-            index_url_name=self.get_url_name('index')
+            success_url=self.get_url_name('index')
         )
 
     @property
@@ -177,14 +178,14 @@ class ModelViewSet:
             template_name=self.template_name,
             breadcrumbs=self.get_breadcrumbs('update'),
             navbar_class=self.navbar_class,
-            index_url_name=self.get_url_name('index')
+            success_url=self.get_url_name('index')
         )
 
     @property
     def delete_view(self):
         return self.delete_view_class.as_view(
             model=self.model,
-            index_url_name=self.get_url_name('index')
+            success_url=self.get_url_name('index')
         )
 
     def get_urlpatterns(self):

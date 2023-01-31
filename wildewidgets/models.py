@@ -13,7 +13,45 @@ if TYPE_CHECKING:
     from wildewidgets.viewsets import ModelViewSet
 
 
+def model_verbose_name(model_class: Type[models.Model]) -> str:
+    name = model_class._meta.verbose_name
+    if not name[0].isupper():
+        name = name.capitalize()
+    return name
+
+
+def model_verbose_name_plural(model_class: Type[models.Model]) -> str:
+    name = model_class._meta.verbose_name_plural
+    if not name[0].isupper():
+        name = name.capitalize()
+    return name
+
+
+def model_name(model_class: Type[models.Model]) -> str:
+    return model_class._meta.object_name
+
+
+def model_logger_name(model_class: Type[models.Model]) -> str:
+    return model_name(model_class).lower()
+
 class ViewSetMixin(models.Model):
+    """
+    This mixin should be used on your :py:class:`django.db.models.Model` when you have
+    assigned a :py:class:`wildewidgets.viewsets.ModelViewSet` to it.  It adds attributes
+    and methods that ``ModelViewSet`` needs in order to function properly.
+
+    Note:
+        You can actually use this mixin even if you don't assign a viewset to
+        your model.  The helper methods for autogenerating model forms,
+        registering CRUD URLs, and generating properly capitalized model names and
+        verbose names can be useful even outside the viewset context.
+
+        In that case, you should consider setting the :py:attr:`create_url`
+        attribute and overriding the :py:meth:`get_update_url`,
+        :py:meth:`get_delete_url` methods.
+    """
+    # TODO: document customizing form classes
+    # TODO: document adding methods to excludes
 
     #: If this model is served by a :py:class:`wildewidgets.viewsets.model.ModelViewSet`,
     #: that viewset will set this variable to itself, and we'll ask the viewset
@@ -36,25 +74,37 @@ class ViewSetMixin(models.Model):
 
     @classmethod
     def model_name(cls) -> str:
-        return cls._meta.object_name
+        """
+        Return the name of our model class as a string.
+        """
+        return model_name(cls)
 
     @classmethod
     def model_logger_name(cls) -> str:
-        return cls.model_name().lower()
+        """
+        Return the name of our model class as a lowercased string that would be
+        suitable for using in log messages, for instance.
+        """
+        return model_logger_name(cls)
 
     @classmethod
     def model_verbose_name(cls) -> str:
-        name = cls._meta.verbose_name.capitalize()
-        if not name[0].isupper():
-            name = name.capitalize()
-        return name
+        """
+        Return a properly capitalized ``verbose_name`` for our model.  If the first
+        character of our ``verbose_name`` is already capitalized, return it verbatim,
+        otherwise capitalize the first letter and return the result.
+        """
+        return model_verbose_name(cls)
 
     @classmethod
     def model_verbose_name_plural(cls) -> str:
-        name = cls._meta.verbose_name_plural.capitalize()
-        if not name[0].isupper():
-            name = name.capitalize()
-        return name
+        """
+        Return a properly capitalized ``verbose_name_plural`` for our model.  If
+        the first character of our ``verbose_name_plural`` is already
+        capitalized, return it verbatim, otherwise capitalize the first letter
+        and return the result.
+        """
+        return model_verbose_name_plural(cls)
 
     @classmethod
     def get_create_form_class(cls) -> Type[Form]:

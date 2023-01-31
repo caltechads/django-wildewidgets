@@ -8,19 +8,28 @@ from braces.views import (
     LoginRequiredMixin,
     MessageMixin
 )
-from django.forms import BaseModelForm
+from django.forms import BaseModelForm, Form
 from django.http.response import HttpResponse
 from django.shortcuts import redirect
-from django.urls import reverse, reverse_lazy
 from django.views.generic import (
     CreateView as DjangoCreateView,
     TemplateView,
     UpdateView as DjangoUpdateView,
     View
 )
-from django.views.generic.edit import BaseDeleteView
+from django.views.generic.edit import (
+    BaseDeleteView,
+    BaseUpdateView,
+)
 
-from ..models import ViewSetMixin
+from ..forms import AbstractRelatedFieldForm, ToggleableManyToManyFieldForm
+from ..models import (
+    ViewSetMixin,
+    model_logger_name,
+    model_name,
+    model_verbose_name,
+    model_verbose_name_plural,
+)
 from ..views import WidgetInitKwargsMixin, TableActionFormView
 from ..widgets import (
     BaseDataTable,
@@ -49,10 +58,39 @@ logger = logging.getLogger(__name__)
 # --------------------------------------------
 
 class AbstractFormPageLayout(Block):
+    """
+    This is a abstact class for making whole page layouts for a form page:
+    creating or updating a model.
+
+    It defines a page title, a page subtitle and a block to contain our
+    main page content (typically just our model form).
+
+    Subclass this and override :py:meth:`get_form` to render your main
+    page content.
+
+    Note:
+        This class will try to supply a reasonable :py:attr:`title` and
+        :py:attr:`subtitle`, by inferring reasonable values based on what base
+        classes are in the ``view`` class hierarchy.  So you only need to set
+        those if you don't get a title/subtitle that you like.
+
+    Args:
+        view: the view instance that will render this layout
+
+    Keyword Args:
+        title: use this as our page title
+        subitle: Use this as our page subtitle.  This will appear directly
+            below the page title.  Typically set this to a string naming the
+            object we're updating
+    """
 
     block: str = 'form-layout'
 
+    #: Use this as our page ittle
     title: Optional[str] = None
+    #: Use this as our page subtitle.  This will appear directly below
+    #: the page title.  Typically set this to a string naming the object
+    #: we're updating
     subtitle: Optional[str] = None
 
     def __init__(
@@ -70,6 +108,8 @@ class AbstractFormPageLayout(Block):
                 self.title = f'Create {self.view.model_verbose_name}'
             elif isinstance(self.view, DjangoUpdateView):
                 self.title = f'Update {self.view.model_verbose_name}'
+            else:
+                self.title = f'Manage {self.view.model_verbose_name}'
         if not self.subtitle and view.object is not None:
             self.subtitle = str(view.object)
         super().__init__(**kwargs)
@@ -104,6 +144,10 @@ class AbstractFormPageLayout(Block):
 # --------------------------------------------
 
 class IndexTableWidget(Block):
+    """
+    This is the block that we use to render the listing table on the
+    :py:class:`IndexView`.  It adds a header above the table.
+    """
 
     def __init__(
         self,
@@ -174,31 +218,34 @@ class GenericViewMixin:
     def model_name(self) -> str:
         """
         Return our model name.
-
-        Returns:
-            The name of our model.
         """
-        return self.model.model_name()
+        if hasattr(self.model, 'model_name'):
+            return self.model.model_name()
+        return model_name(self.model)
 
     @property
     def model_logger_name(self) -> str:
         """
         Return a string we can use to identify this model in a log message.
-
-        Returns:
-            The logging name of our model.
         """
-        return self.model.model_logger_name()
+        if hasattr(self.model, 'model_logger_name'):
+            return self.model.model_logger_name()
+        return model_logger_name(self.model)
 
     @property
     def model_verbose_name(self) -> str:
         """
         Return a string we can use to identify this model in a log message.
-
-        Returns:
-            The logging name of our model.
         """
-        return self.model.model_verbose_name()
+        if hasattr(self.model, 'model_verbose_name'):
+            return self.model.model_verbose_name()
+        return model_verbose_name(self.model)
+
+    @property
+    def model_verbose_name_plural(self) -> str:
+        if hasattr(self.model, 'model_verbose_name_plural'):
+            return self.model.model_verbose_name_plural()
+        return model_verbose_name_plural(self.model)
 
     def get_client_ip(self) -> str:
         """
@@ -217,7 +264,7 @@ class GenericViewMixin:
     @property
     def logging_extra(self) -> str:
         """
-        Build some extra kwargs for our logging statements:
+        Build some extra stuff to append to our logging statements:
 
         * add the user's remote_ip
         * add the user's username
@@ -232,10 +279,6 @@ class GenericViewMixin:
         if hasattr(self, 'object'):
             data['pk'] = self.object.pk
         return ' '.join([f'{key}={value}' for key, value in data.items()])
-
-    @property
-    def model_verbose_name_plural(self) -> str:
-        return self.model.model_verbose_name_plural()
 
     def get_menu_item(self) -> Optional[str]:
         """
@@ -326,7 +369,6 @@ class GenericDatatableMixin:
 # --------------------------------------------
 # Views
 # --------------------------------------------
-
 
 class IndexView(
     LoginRequiredMixin,
@@ -428,8 +470,6 @@ class CreateView(
     DjangoCreateView
 ):
 
-    index_url_name: Optional[str] = None
-
     required_model_permissions: List[str] = ['add']
 
     #: Use this :py:class:`AbstractFormPageLayout` subclass to render our page
@@ -448,10 +488,10 @@ class CreateView(
         return f'Created {self.model_verbose_name} "{str(self.object)}"!'
 
     def get_form_class(self) -> Type[BaseModelForm]:
-        return self.model.get_create_form_class()
-
-    def get_success_url(self) -> str:
-        return reverse(self.index_url_name)
+        form_class = super().get_form_class()
+        if not form_class:
+            return self.object.get_create_form_class()
+        return form_class
 
     def get_title(self) -> str:
         """
@@ -477,8 +517,6 @@ class UpdateView(
     DjangoUpdateView
 ):
 
-    index_url_name: Optional[str] = None
-
     required_model_permissions: List[str] = ['change']
 
     #: Use this :py:class:`AbstractFormPageLayout` subclass to render our page
@@ -497,10 +535,10 @@ class UpdateView(
         return f'Updated {self.model_verbose_name} "{str(self.object)}"!'
 
     def get_form_class(self) -> Type[BaseModelForm]:
-        return self.object.get_update_form_class()
-
-    def get_success_url(self) -> str:
-        return reverse(self.index_url_name)
+        form_class = super().get_form_class()
+        if not form_class:
+            return self.object.get_update_form_class()
+        return form_class
 
     def get_title(self) -> str:
         """
@@ -527,7 +565,6 @@ class DeleteView(
     model: Optional[Type[ViewSetMixin]] = None
 
     http_method_names: List[str] = ['post']
-    index_url_name: Optional[str] = None
 
     required_model_permissions: List[str] = ['delete']
 
@@ -542,8 +579,62 @@ class DeleteView(
     def form_invalid(self, form: BaseModelForm) -> HttpResponse:
         return redirect(self.get_success_url())
 
-    def get_success_url(self, *args, **kwargs) -> str:
-        return reverse(self.index_url_name)
-
     def get_form_class(self) -> Type[BaseModelForm]:
-        return self.object.get_delete_form_class()
+        form_class = super().get_form_class()
+        if not form_class:
+            return self.object.get_delete_form_class()
+        return form_class
+
+
+class ManyToManyRelatedFieldView(
+    LoginRequiredMixin,
+    PermissionRequiredMixin,
+    FormValidMessageMixin,
+    MessageMixin,
+    GenericViewMixin,
+    BaseUpdateView
+):
+
+    field_name: Optional[str] = None
+    form_class: Type[AbstractRelatedFieldForm] = ToggleableManyToManyFieldForm
+
+    required_model_permissions: List[str] = ['change']
+
+    @property
+    def model_logger_name(self) -> str:
+        return f'{super().model_logger_name}.{self.field_name}'
+
+    @property
+    def field_verbose_name(self) -> str:
+        return self.model._meta.get_field(self.field_name).verbose_name.capitalize()
+
+    def get_form_kwargs(self) -> Dict[str, Any]:
+        kwargs = super().get_form_kwargs()
+        kwargs['field_name'] = self.field_name
+        return kwargs
+
+    def form_invalid(self, form: Form) -> HttpResponse:
+        self.logger.warning(
+            '%s.update.failed.validation %s',
+            self.model_logger_name,
+            self.logging.extra
+        )
+        self.messages.error(
+            f'Couldn\'t update {self.field_verbose_name} on {self.model_verbose_name} "{str(self.object)}"'
+        )
+        for k, errors in form.errors.as_data().items():
+            for error in errors:
+                self.messages.error(f"{k}: {error.message}")
+        return redirect(self.get_success_url())
+
+    def get_form_valid_message(self):
+        self.logger.info('%s.update.success %s', self.model_logger_name, self.logging_extra)
+        return f'Updated {self.field_verbose_name} on {self.model_verbose_name} "{str(self.object)}"!'
+
+    def get_success_url(self) -> str:
+        success_url = super().get_success_url()
+        if not success_url:
+            if hasattr(object, 'get_update_url'):
+                return self.object.get_update_url()
+            return self.object.get_absolute_url()
+        return success_url

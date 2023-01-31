@@ -10,6 +10,9 @@ from django.core.paginator import InvalidPage, Paginator
 from django.forms import Form
 from django.db.models import QuerySet, Model
 from django.http import Http404
+from django.urls import path, URLPattern, reverse
+
+from ..forms import ToggleableManyToManyFieldForm
 
 from .base import Block, InputBlock, Widget
 from .text import HTMLWidget, LabelBlock
@@ -60,13 +63,13 @@ class TabbedWidget(Block):
         """
         self.tabs.append((name, widget))
 
-    def get_context_data(self, **kwargs):
+    def get_context_data(self, *args, **kwargs):
         kwargs['tabs'] = self.tabs
         if not self.slug_suffix:
             self.slug_suffix = random.randrange(0, 10000)
         kwargs['identifier'] = self.slug_suffix
         # kwargs['overflow'] = self.overflow
-        return super().get_context_data(**kwargs)
+        return super().get_context_data(*args, **kwargs)
 
 
 class CardWidget(Block):
@@ -125,8 +128,8 @@ class CardWidget(Block):
         else:
             self._attributes['style'] = f"overflow: {self.overflow};"
 
-    def get_context_data(self, **kwargs):
-        kwargs = super().get_context_data(**kwargs)
+    def get_context_data(self, *args, **kwargs):
+        kwargs = super().get_context_data(*args, **kwargs)
         kwargs['header'] = self.header
         kwargs['header_text'] = self.header_text
         kwargs['header_css'] = self.header_css
@@ -327,8 +330,8 @@ class PagedModelWidget(MultipleModelWidget):
         self.extra_url = extra_url if extra_url else {}
         super().__init__(*blocks, **kwargs)
 
-    def get_context_data(self, **kwargs):
-        kwargs = super().get_context_data(**kwargs)
+    def get_context_data(self, *args, **kwargs):
+        kwargs = super().get_context_data(*args, **kwargs)
         self.request = kwargs.get('request')
         if self.paginate_by:
             paginator = Paginator(self.get_queryset(), self.paginate_by)
@@ -357,7 +360,7 @@ class PagedModelWidget(MultipleModelWidget):
                         'page_number': page_number,
                         'message': str(e)
                     }
-                )
+                ) from e
         else:
             kwargs['widget_list'] = self.get_model_widgets(self.get_queryset().all())
         kwargs['item_label'] = self.item_label
@@ -374,7 +377,9 @@ class PagedModelWidget(MultipleModelWidget):
 
 class CrispyFormWidget(Block):
     """
-    A widget that displays a Crispy Form widget.
+    A widget that displays a Crispy Form widget.  This is specifically a Crispy
+    Form widget because it uses the ``{% crispy %}`` template tag to render the
+    form.
 
     Note:
 
@@ -384,8 +389,8 @@ class CrispyFormWidget(Block):
         automatically.
 
     Keyword Args:
-        form: A crispy form to display. If none is specified,
-            it will be assumed that `form` is specified elsewhere in the context.
+        form: A crispy form to display. If none is specified, it will be assumed
+            that ``form`` is specified elsewhere in the context.
     """
     template_name: str = 'wildewidgets/crispy_form_widget.html'
     block: str = "wildewidgets-crispy-form-widget"
@@ -394,8 +399,8 @@ class CrispyFormWidget(Block):
         super().__init__(*blocks, **kwargs)
         self.form = form
 
-    def get_context_data(self, **kwargs):
-        kwargs = super().get_context_data(**kwargs)
+    def get_context_data(self, *args, **kwargs):
+        kwargs = super().get_context_data(*args, **kwargs)
         if self.form:
             kwargs['form'] = self.form
         return kwargs
@@ -607,7 +612,25 @@ class ListModelWidget(MultipleModelWidget):
         return widget
 
 
-list_model_card_filter_script = """
+class ListModelCardWidget(CardWidget):
+    """
+    This class provides a :py:class:`CardWidget` with a header and a list of
+    objects defined by a :py:class:`QuerySet`, displayed in a
+    :py:class:`ListModelWidget`. A filter input is provided to filter the list
+    of objects.
+
+    Example:
+
+        >>> widget = ListModelCardWidget(
+            queryset = Author.objects.all()[:10]
+        )
+
+    Keyword Args:
+        list_model_widget_class: The class to use for the list model widget.
+            The default is :py:class:`ListModelWidget`.
+        list_model_header_class: The class to use for the header.
+    """
+    SCRIPT: str = """
 var filter_input = document.getElementById("{filter_id}");
 filter_input.onkeyup = function(e) {{
     var filter = filter_input.value.toLowerCase();
@@ -637,26 +660,6 @@ filter_input.onkeyup = function(e) {{
 }};
 
 """
-
-
-class ListModelCardWidget(CardWidget):
-    """
-    This class provides a :py:class:`CardWidget` with a header and a list of
-    objects defined by a :py:class:`QuerySet`, displayed in a
-    :py:class:`ListModelWidget`. A filter input is provided to filter the list
-    of objects.
-
-    Example:
-
-        >>> widget = ListModelCardWidget(
-            queryset = Author.objects.all()[:10]
-        )
-
-    Keyword Args:
-        list_model_widget_class: The class to use for the list model widget.
-            The default is :py:class:`ListModelWidget`.
-        list_model_header_class: The class to use for the header.
-    """
 
     list_model_widget_class: Type[Widget] = ListModelWidget
     list_model_header_class: Type[Widget] = None
@@ -692,7 +695,7 @@ class ListModelCardWidget(CardWidget):
         kwargs['header'] = self.get_list_model_header(**header_kwargs)
         kwargs['header_css'] = "bg-light"
         filter_label_query = f"#{self.list_model_widget_id}"
-        kwargs['script'] = list_model_card_filter_script.format(
+        kwargs['script'] = self.SCRIPT.format(
             query=filter_label_query,
             filter_id=self.filter_id
         )
@@ -727,3 +730,221 @@ class ListModelCardWidget(CardWidget):
             css_class="d-flex flex-row-reverse w-100"
         )
         return header
+
+
+class ToggleableManyToManyFieldBlock(CardWidget):
+    """
+    This is a block that allows you to manage a many to many relationship
+    between a model and a related model as a list of toggleable items.
+
+    This is mostly appropriate for relationships between a model and a
+    list-of-values type lookup table (e.g. categories, tags, classifiers, etc.).
+    """
+
+    name: str = 'toggle-form-block'
+
+    SCRIPT: str = """
+document.querySelectorAll("{target} input.form-check-input").forEach(input => {{
+    if (!input.checked) {{
+        input.parentElement.classList.add('d-none');
+    }};
+}});
+var show_input = document.getElementById("{show_unselected_id}");
+show_input.onchange = function(e) {{
+    document.querySelectorAll("{target} input.form-check-input").forEach(input => {{
+        if (show_input.checked && !input.checked) {{
+            input.parentElement.classList.add('d-none');
+        }} else {{
+            input.parentElement.classList.remove('d-none');
+        }};
+    }});
+}};
+var filter_input = document.getElementById("{filter_id}");
+filter_input.onkeyup = function(e) {{
+    var filter = filter_input.value.toLowerCase();
+    show_input.checked = false
+    document.querySelectorAll("{target} label").forEach(label => {{
+        var test_string = label.innerText.toLowerCase();
+        if (test_string.includes(filter)) {{
+            label.parentElement.classList.remove('d-none');
+        }} else {{
+            label.parentElement.classList.add('d-none');
+        }}
+    }});
+}};
+"""
+
+    model: Optional[Type[Model]] = None
+    #: The name of the related field on our model instance for which we want to
+    #: build this widget
+    field_name: Optional[str] = None
+    #: The form class to instantiate to handle our multiple select
+    form_class: Type[Form] = ToggleableManyToManyFieldForm
+    #: The URL to which to POST this form
+    form_action: Optional[str] = None
+    #: The path prefix to use to root view.
+    url_prefix: str = ''
+    #: The URL namespace to use for our view name.  This should be set to
+    #: the ``app_name`` set in the ``urls.py`` where this viewset's patterns
+    #: will be added to ``urlpatterns``.
+    url_namespace: Optional[str] = None
+
+    def __init__(
+        self,
+        instance: Model,
+        field_name: str = None,
+        form_class: Type[Form] = None,
+        form_action: str = None,
+        **kwargs
+    ):
+        self.instance = instance
+        self.model = instance.__class__
+        if hasattr(self.model, 'model_verbose_name_plural'):
+            self.verbose_name_plural = self.model.model_verbose_name_plural()
+        else:
+            self.verbose_name_plural = self.model._meta.verbose_name_plural
+            if not self.verbose_name_plural[0].isupper():
+                self.verbose_name_plural = self.verbose_name_plural.capitalize()
+        self.field_name = field_name if field_name else self.field_name
+        self.field = self.instance._meta.get_field(self.field_name)
+        self.related_model = self.field.related_model
+        self.form_class = form_class if form_class else self.form_class
+        self.form_action = form_action if form_action is not None else self.form_action
+        if not self.form_action:
+            url_name = self.get_url_name()
+            if self.url_namespace:
+                url_name = f'{self.url_namespace}:{url_name}'
+            self.form_action = reverse(url_name, kwargs={'pk': self.instance.id})
+        kwargs['script'] = self.SCRIPT.format(
+            target=f'#{self.form_id}',
+            filter_id=self.filter_id,
+            show_unselected_id=self.show_all_switch_id
+        )
+        super().__init__(self, **kwargs)
+        self.set_header(self.get_header)
+        self.set_widget(
+            CrispyFormWidget(
+                form=self.get_form(self.instance, self.field_name, self.form_action),
+                css_id=self.form_id
+            )
+        )
+
+    @property
+    def form_id(self) -> str:
+        return f'{self.model._meta.object_name.lower()}_{self.field_name}'
+
+    @property
+    def filter_id(self) -> str:
+        return f'{self.form_id}_filter'
+
+    @property
+    def show_all_switch_id(self) -> str:
+        return f'{self.form_id}_show_all'
+
+    def get_form(
+        self,
+        instance: Model,
+        field_name: str,
+        form_action: str
+    ) -> Form:
+        return self.form_class(instance, field_name=field_name, form_action=form_action)
+
+    def get_header(self) -> Block:
+        """
+        Get our controls header.
+        """
+        # We have to do this import here due to circular dependencies
+        from ..models import model_verbose_name_plural
+        return HorizontalLayoutBlock(
+            Block(
+                InputBlock(
+                    attributes={
+                        'checked': '',
+                        'name': 'hide-unchecked',
+                        'value': 'hide'
+                    },
+                    input_type='checkbox',
+                    css_id=self.show_all_switch_id,
+                    css_class='form-check-input',
+                ),
+                LabelBlock(
+                    'Hide unselected',
+                    css_class='form-check-label',
+                    attributes={
+                        'for': self.show_all_switch_id,
+                    },
+                ),
+                name='form-check',
+                css_class='form-switch pt-3',
+            ),
+            Block(
+                LabelBlock(
+                    f'Filter {model_verbose_name_plural(self.related_model)}',
+                    css_class="d-none",
+                    attributes={
+                        'for': self.filter_id,
+                    },
+                ),
+                InputBlock(
+                    attributes={
+                        'type': 'text',
+                        'placeholder': f'Filter {model_verbose_name_plural(self.related_model)}',
+                    },
+                    css_id=self.filter_id,
+                    css_class='form-control',
+                ),
+                css_class='w-25',
+            ),
+            justify='between',
+            align='center',
+            css_class='w-100'
+        )
+
+    @classmethod
+    def get_url_name(cls) -> str:
+        from ..models import model_logger_name
+        model_name = model_logger_name(cls.model)
+        related_model = cls.model._meta.get_field(cls.field_name).related_model
+        related_model_name = model_logger_name(related_model)
+        return f'{model_name}--{related_model_name}--update'
+
+    @classmethod
+    def get_urlpattern(cls, url_prefix: str = None, url_namespace: str = None) -> URLPattern:
+        """
+        Build a view that will service this block and return a
+        :py:class:`django.urls.URLPattern` for that view that you can add to
+        your ``urlpatterns``.
+
+        Important:
+            In order for this to work, you must have subclassed
+            :py:class:`ToggleableManyToManyFieldBlock` and defined both the
+            :py:attr:`model` and :py:attr:`field_name` attributes.
+
+        Keyword Args:
+            url_prefix: a prefix to the path we will build for our view
+            url_namespace: the namespace for our url pattern.  We'll set our
+                :py:attr:`url_namespace` from this
+
+        Returns:
+            A urlpattern for a view suitable for this block
+        """
+        from ..views.generic import ManyToManyRelatedFieldView
+        from ..models import model_logger_name
+        if cls.model is None:
+            raise ValueError('Define the "model" class attribute before calling "get_urlpattern"')
+        if cls.field_name is None:
+            raise ValueError('Define the "field_name" class attribute before calling "get_urlpattern"')
+        model_name = model_logger_name(cls.model)
+        related_model = cls.model._meta.get_field(cls.field_name).related_model
+        related_model_name = model_logger_name(related_model)
+        if url_namespace:
+            cls.url_namespace = url_namespace
+        if not url_prefix:
+            url_prefix = cls.url_prefix
+        elif not url_prefix.endswith('/'):
+            url_prefix = f'{url_prefix}/'
+        return path(
+            f'{url_prefix}{model_name}/<int:pk>/{related_model_name}/',
+            ManyToManyRelatedFieldView.as_view(model=cls.model, field_name=cls.field_name),
+            name=cls.get_url_name()
+        )

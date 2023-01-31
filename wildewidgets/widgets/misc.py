@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from typing import Dict, Any
+from typing import Dict, Any, Optional, Union
 
-from .base import Block, TemplateWidget
+from .base import Block, TemplateWidget, Image
 from .structure import HorizontalLayoutBlock
 from .text import CodeWidget
 
@@ -37,36 +37,59 @@ class KeyValueListBlock(Block):
         )
 
 
-class GravatarWidget(TemplateWidget):
+class GravatarWidget(Image):
 
-    template_name: str = 'wildewidgets/gravatar.html'
-    css_class: str = "rounded-circle"
-    size: str = "28"
+    block: str = 'rounded-circle'
 
-    def __init__(self, *args, gravatar_url=None, size=None, fullname=None, **kwargs):
-        self.gravatar_url = gravatar_url
-        self.css_class = kwargs.pop('css_class', self.css_class)
-        self.size = size or self.size
-        self.fullname = fullname
-        super().__init__(*args, **kwargs)
+    #: The gravatar URL
+    gravatar_url: Optional[str] = None
+    #: The length in pixels that will used as the height and width of the image
+    size: Union[int, str] = 28
+    #: The person's name.  This will be used as the ``alt`` tag on the image
+    fullname: Optional[str] = None
 
-    def get_context_data(self, **kwargs) -> Dict[str, Any]:
-        kwargs = super().get_context_data(**kwargs)
-        kwargs['gravatar_url'] = self.gravatar_url
-        kwargs['css_class'] = self.css_class
-        kwargs['size'] = self.size
-        kwargs['fullname'] = self.fullname
-        return kwargs
+    def __init__(
+        self,
+        gravatar_url: str = None,
+        size: Union[int, str] = None,
+        fullname: str = None,
+        **kwargs
+    ):
+        self.gravatar_url = gravatar_url if gravatar_url is not None else self.gravatar_url
+        self.size = size if size is not None else self.size
+        self.fullname = fullname if fullname is not None else self.fullname
+        try:
+            int(self.size)
+        except ValueError as e:
+            raise ValueError(f'size should be an integer; got "{self.size}" instead') from e
+        kwargs['src'] = self.gravatar_url
+        if self.fullname:
+            kwargs['alt'] = self.fullname
+        super().__init__(**kwargs)
+        self._attributes['style'] = f'width: {self.size}px; height: {self.size}px'
 
 
 class InitialsAvatarWidget(TemplateWidget):
 
     template_name: str = 'wildewidgets/initials_avatar.html'
+
+    #: The length in pixels that will used as the height and width of the gravatar
     size: int = 28
+    #: The foreground color for the gravatar
     color: str = "white"
+    #: The background color for the gravatar
     background_color: str = "#626976"
 
-    def __init__(self, *args, initials=None, size=None, color=None, background_color=None, fullname=None, **kwargs):
+    def __init__(
+        self,
+        *args,
+        initials: str = None,
+        size: int = None,
+        color: str = None,
+        background_color: str = None,
+        fullname: str = None,
+        **kwargs
+    ):
         self.initials = initials
         self.size = size or self.size
         self.color = color or self.color

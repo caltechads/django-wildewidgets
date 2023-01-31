@@ -1,8 +1,17 @@
-from typing import List, Type
+from typing import Any, Dict, List, Optional, Type
 
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit, Layout, Field, Fieldset, ButtonHolder
-from django.forms import ModelForm, Textarea, CheckboxInput, modelform_factory
+from django.forms import (
+    CheckboxInput,
+    CheckboxSelectMultiple,
+    Form,
+    HiddenInput,
+    ModelForm,
+    MultipleChoiceField,
+    Textarea,
+    modelform_factory
+)
 from django.db.models import Model
 from django.db.models.fields import (
     AutoFieldMixin,
@@ -11,7 +20,12 @@ from django.db.models.fields import (
     DateTimeField,
     TextField,
 )
-from django.db.models.fields.related import RelatedField
+from django.db.models.fields.related import (
+    RelatedField,
+    ManyToManyField,
+    ManyToManyRel,
+    ManyToOneRel
+)
 try:
     from django_extensions.db.fields import (
         CreationDateTimeField,
@@ -37,6 +51,40 @@ class AbstractModelFormBuilder:
         form_action: str,
         fields: List[str] = None,
         excludes: List[str] = None,
+    ) -> "Type[ModelForm]":
+        """
+        Construct a form class for the :py:class:`Model` subclass ``model_class``
+        and return it.
+
+
+        Args:
+            model_class: the model class for which to build a form
+            form_class_name: the name to use for the form class
+            form_action: the URL to which to post our form
+
+        Keyword Args:
+            excludes: exclude fields named in this list in addition
+
+        Returns:
+            A configured form class.
+        """
+
+
+class AbstractRelatedModelFormBuilder:
+    """
+    A base class for a formbuilder for building a form which allows users to
+    manage multi-select ManyToManycontains only a
+    :py:class:`django.forms.CheckboxSelectMultiple` widget that allows the user
+    to manage a :py:class:`django.db.models.ManyToManyField` from a model to a
+    lookup table and vice-versa.
+    """
+
+    @classmethod
+    def factory(
+        cls,
+        model_class: Type[Model],
+        field_name: str,
+        form_action: str
     ) -> "Type[ModelForm]":
         """
         Construct a form class for the :py:class:`Model` subclass ``model_class``
@@ -197,3 +245,117 @@ class AutoCrispyModelForm(AbstractModelFormBuilder, ModelForm):
             else:
                 fields.append(Field(name, css_class=self.vertical_spacing))
         return Fieldset(*fields)
+
+
+class AbstractRelatedFieldForm(Form):
+    """
+    This abstract class is the basis for creating forms that manage a single
+    related field on a model.
+    """
+
+    #: The name of the  :py:class:`django.db.models.ManyToManyField` we want to manage
+    field_name: Optional[str] = None
+    form_action: Optional[str] = None
+
+    def __init__(
+        self,
+        instance: Model,
+        *args,
+        field_name: str = None,
+        form_action: str = None,
+        **kwargs
+    ):
+        #: The instance whose :py:class:`django.db.models.ManyToManyField` we want to manage
+        self.instance = instance
+        self.field_name = field_name if field_name else self.field_name
+        self.form_action = form_action if form_action else self.form_action
+        if self.field_name is None:
+            raise ValueError(
+                'You must provide "field_name" as either a constructor keyword argument '
+                'or as a class attribute'
+            )
+        super().__init__(*args, **kwargs)
+        #: The field instance for our related field
+        self.field = instance._meta.get_field(self.field_name)
+        if not isinstance(self.field, RelatedField):
+            raise ValueError(
+                f'{instance._meta.object_name}.{self.field_name} is not a related field. '
+                f'It is instead a {self.field.__class__.__name__}.'
+            )
+        #: The related model for the related field
+        self.related_model = self.field.related_model
+        self.pk_field_name = instance._meta.pk.name
+        self.fields = self.get_fields()
+
+        self.helper = FormHelper()
+        self.helper.form_class = 'form'
+        self.helper.form_method = 'post'
+        self.helper.form_show_labels = False
+        self.helper.form_action = self.form_action
+        self.helper.layout = self.get_fieldset()
+
+    def get_fields(self) -> Dict[str, Any]:
+        return {}
+
+    def get_fieldset(self) -> Fieldset:
+        return Layout(
+            Fieldset(
+                '',
+                Field(self.field_name, id=self.field_name)
+            ),
+            ButtonHolder(
+                Submit('submit', 'Update', css_class='btn btn-primary'),
+                css_class='d-flex flex-row justify-content-end button-holder'
+            )
+        )
+
+    def save(self) -> Model:
+        setattr(self.instance, self.cleaned_data[self.field_name])
+        return self.instance
+
+
+class ToggleableManyToManyFieldForm(AbstractRelatedFieldForm):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if not isinstance(self.field, (ManyToManyField, ManyToManyRel)):
+            raise ValueError(
+                f'{self.instance._meta.object_name}.{self.field_name} is not a ManyToManyField or many-to-many reverse '
+                f'relation.  Instead, it is a {self.field.__class__.__name__}'
+            )
+
+    def get_fields(self) -> Dict[str, Any]:
+        fields = super().get_fields()
+        choices = [(r.pk, str(r)) for r in self.related_model.objects.all()]
+        related_pk_name = self.related_model._meta.pk.name
+        initial = list(
+            getattr(self.instance, self.field_name)
+            .values_list(related_pk_name, flat=True)
+        )
+        fields[self.field_name] = MultipleChoiceField(
+            choices=choices,
+            initial=initial,
+            required=False,
+            widget=CheckboxSelectMultiple(attrs={"class": "form-control"})
+        )
+        return fields
+
+    def get_fieldset(self) -> Fieldset:
+        return Layout(
+            Fieldset(
+                '',
+                Field(
+                    self.field_name,
+                    id=self.field_name,
+                    wrapper_class='form-check form-switch form-check-reverse',
+                ),
+            ),
+            ButtonHolder(
+                Submit('submit', 'Update', css_class='btn btn-primary'),
+                css_class='d-flex flex-row justify-content-end button-holder'
+            )
+        )
+
+    def save(self) -> Model:
+        getattr(self.instance, self.field_name).set(self.cleaned_data[self.field_name])
+        return self.instance

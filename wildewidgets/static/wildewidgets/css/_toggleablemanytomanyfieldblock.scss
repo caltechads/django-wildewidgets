@@ -1,0 +1,32 @@
+.toggle-form-block {
+    .card-body {
+        padding-left: 0;
+        padding-right: 0;
+    }
+    .button-holder {
+        padding-left: var(--tblr-card-spacer-x);
+        padding-right: var(--tblr-card-spacer-x);
+
+    }
+    .form-switch.form-check-reverse {
+        padding-right: 0;
+    }
+    .form-check .form-check{
+        padding-left: 2.5rem;
+        padding-right: var(--tblr-card-spacer-x);
+        padding-top: 0.75rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 1px solid #f0f0f0;
+        margin-bottom: 0;
+        .form-check-input {
+            margin-right: 0.5rem;
+        }
+        label {
+            text-align: left;
+            width: 100%;
+        }
+        &:hover {
+            background-color: #f6f6f6;
+        }
+    }
+}

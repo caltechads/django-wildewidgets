@@ -1,17 +1,3 @@
-.widget-index__item {
-  font-size: 1.13rem;
-}
-.widget-index__item a, .widget-index__item a:visited {
-  color: black !important;
-}
-.widget-index__item a:hover {
-  text-decoration: underline;
-}
-
-.widget-list__sidebar {
-  font-size: 1.2rem;
-}
-
 .menu .menu-title {
   padding: 0.5rem 0.75rem;
   justify-content: flex-start;
@@ -137,4 +123,48 @@
 }
 .navbar.navbar-vertical.navbar-expand-xxl .navbar-collapse .menu .nav-link.dropdown-toggle .nav-link.active {
   background: var(--tblr-navbar-active-bg);
+}
+
+.toggle-form-block .card-body {
+  padding-left: 0;
+  padding-right: 0;
+}
+.toggle-form-block .button-holder {
+  padding-left: var(--tblr-card-spacer-x);
+  padding-right: var(--tblr-card-spacer-x);
+}
+.toggle-form-block .form-switch.form-check-reverse {
+  padding-right: 0;
+}
+.toggle-form-block .form-check .form-check {
+  padding-left: 2.5rem;
+  padding-right: var(--tblr-card-spacer-x);
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid #f0f0f0;
+  margin-bottom: 0;
+}
+.toggle-form-block .form-check .form-check .form-check-input {
+  margin-right: 0.5rem;
+}
+.toggle-form-block .form-check .form-check label {
+  text-align: left;
+  width: 100%;
+}
+.toggle-form-block .form-check .form-check:hover {
+  background-color: #f6f6f6;
+}
+
+.widget-index__item {
+  font-size: 1.13rem;
+}
+.widget-index__item a, .widget-index__item a:visited {
+  color: black !important;
+}
+.widget-index__item a:hover {
+  text-decoration: underline;
+}
+
+.widget-list__sidebar {
+  font-size: 1.2rem;
 }
