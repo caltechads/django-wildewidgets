@@ -855,7 +855,7 @@ class NavLinkToggle(Link):
         if not self.text:
             raise self.RequiredAttrOrKwarg('text')
         super().__init__(role='button', **kwargs)
-        self._data_attributes['target'] = self.collapse
+        self._data_attributes['target'] = self.collapse_id
         # these classes cause the up/down arrow to be nicely separated from the text
         self.add_class('d-flex')
         self.add_class('flex-row')
