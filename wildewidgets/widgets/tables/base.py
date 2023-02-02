@@ -112,7 +112,11 @@ class BaseDataTable(
             "striped": striped,
             "hide_controls": self.hide_controls
         }
+        #: The CSS id for this table
         self.table_id = table_id if table_id else self.table_id
+        if self.table_id is None:
+            self.table_id = random.randrange(0, 1000)
+        self.table_name = f'datatable_table_{self.table_id}'
         # We have to do this this way instead of naming it above in the kwargs
         # because ``async`` is a reserved keyword
         self.async_if_empty: bool = kwargs.get('async', True)
@@ -135,6 +139,26 @@ class BaseDataTable(
                 sortable=False
             )
         super().__init__(*args, **kwargs)
+
+    def get_column_number(self, name: str) -> int:
+        """
+        Return the dataTables column number for the column named ``name``.  You
+        might need this if you want to pass it to javascript that will work on
+        that column.
+
+        Args:
+            name: the name of the column
+
+        Raises:
+            IndexError: no column named ``name`` exists in this table
+
+        Returns:
+            The 0-offset column number
+        """
+        columns = list(self.column_fields.keys())
+        if name in columns:
+            return columns.index(name)
+        raise IndexError(f'No column with name "{name}" is registered with this table')
 
     def has_form_actions(self) -> bool:
         return self.form_actions is not None
