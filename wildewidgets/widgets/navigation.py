@@ -803,6 +803,86 @@ class ClickableNavDropdownControl(Block):
         self.control._aria_attributes['expanded'] = 'false'
 
 
+class NavLinkToggle(Link):
+    """
+    This is a control for a
+    :py:class:`wildewidgets.widgets.structure.CollapseWidget` that is some text
+    with an open/closed indicator.  Clicking on the text opens or closes the
+    ``CollapseWidget``.
+
+    This differs from :py:class:`wildewidgets.widgets.buttons.CollapseButton` in that
+    it doesn't have button styling, and has the open/closed indicator.
+
+    Keyword Args:
+        icon: Either the name of a Bootstrap icon, or a :py:class:`TablerMenuIcon` object
+        text: The text for the item
+        active: ``True`` if this represents the page we're currently on
+        collapse_id: the CSS id of the :py:class:`wildewidgets.widgets.structure.CollapseWidget`
+    """
+
+    block: str = 'nav-link'
+    name: str = 'nav-link-toggle'
+    data_attributes: Dict[str, str] = {
+        'toggle': 'collapse',
+    }
+    aria_attributes: Dict[str, str] = {
+        'expanded': 'false'
+    }
+
+    #: Either the name of a Bootstrap icon, or a :py:class:`TablerMenuIcon`
+    #: class or subclass
+    icon: Optional[Union[str, TablerMenuIcon]] = None
+    #: The title for the link
+    text: Optional[str] = None
+    #: The CSS id of the Collapse that we control
+    collapse_id: Optional[str] = None
+
+    def __init__(
+        self,
+        text: str = None,
+        icon: Union[str, TablerMenuIcon] = None,
+        active: bool = False,
+        collapse_id: str = None,
+        **kwargs
+    ):
+        #: This item is active, but nothing in the related :py:class:`DropdownMenu` is
+        self.active: bool = active
+        self.text = text if text else self.text
+        self.icon = icon if icon else deepcopy(self.icon)
+        self.collapse_id = collapse_id if collapse_id else self.collapse_id
+        if self.collapse_id is None:
+            raise self.RequiredAttrOrKwarg('collapse_id')
+        if not self.text:
+            raise self.RequiredAttrOrKwarg('text')
+        super().__init__(role='button', **kwargs)
+        self._data_attributes['target'] = self.collapse
+        # these classes cause the up/down arrow to be nicely separated from the text
+        self.add_class('d-flex')
+        self.add_class('flex-row')
+        self.add_class('justify-content-between')
+        if self.icon:
+            if isinstance(self.icon, TablerMenuIcon):
+                icon_block = self.icon
+            else:
+                icon_block = TablerMenuIcon(icon=self.icon)
+            self.add_block(icon_block)
+        self.add_block(self.text)
+        if self.active:
+            self.add_class('active')
+
+    def expand(self) -> None:
+        """
+        Set our ``aria-expanded`` attribute to ``true``.
+        """
+        self._aria_attributes['expanded'] = 'true'
+
+    def collapse(self) -> None:
+        """
+        Set our ``aria-expanded`` attribute to ``false``.
+        """
+        self._aria_attributes['expanded'] = 'false'
+
+
 class NavDropdownControl(Link):
     """
     This is a dropdown control that opens a submenu from within either a
@@ -868,9 +948,9 @@ class NavDropdownControl(Link):
         self.icon = icon if icon else deepcopy(self.icon)
         self.button_id = button_id if button_id else self.button_id
         if not self.text:
-            raise ValueError('"text" is required as either a class attribute of a keyword arg')
+            raise self.RequiredAttrOrKwarg('text')
         if not self.button_id:
-            raise ValueError('"button_id" is required as either a class attribute of a keyword arg')
+            raise self.RequiredAttrOrKwarg('button_id')
         super().__init__(css_id=self.button_id, role='button', **kwargs)
         if self.icon:
             if isinstance(self.icon, TablerMenuIcon):
