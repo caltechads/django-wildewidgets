@@ -5,7 +5,7 @@ from django.core.exceptions import ImproperlyConfigured
 
 
 from .base import TemplateWidget
-from .structure import CrispyFormWidget
+from .forms import CrispyFormWidget
 
 
 class ModalWidget(TemplateWidget):

@@ -4,7 +4,8 @@ from typing import Any, Dict, List, Optional
 
 from django.urls import reverse
 
-from ..base import Block, HiddenInputBlock
+from ..base import Block
+from ..forms import HiddenInputBlock
 from ..buttons import InputButton
 from ..structure import HorizontalLayoutBlock
 

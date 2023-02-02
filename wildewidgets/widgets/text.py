@@ -132,21 +132,6 @@ class TimeStamp(Block):
     css_class = "fw-light"
 
 
-class LabelBlock(Block):
-    """
-    A ``<label>``.
-
-    Args:
-        text: the text to display.
-    """
-    tag: str = "label"
-
-    def __init__(self, text: str, color: str = "secondary", **kwargs):
-        # FIXME: color is a kwarg, but it is not used
-        super().__init__(text, **kwargs)
-        self.add_class('fw-bold')
-
-
 class TagBlock(Block):
     """
     A basic widget that displays a colored tag.
