@@ -22,11 +22,15 @@ class CodeWidget(Block):
     Keyword Args:
         code: the code to be displayed
         language: the language of the code
+        line_numbers: if ``True``, show line numbers
     """
     block: str = 'wildewidgets_highlight_container'
 
-    language: Optional[str] = None
+    #: The code to be displayed
     code: str = ""
+    #: The programming language for the :py:attr:`code`
+    language: Optional[str] = None
+    #: If ``True``, show line numbers
     line_numbers: bool = False
 
     def __init__(
@@ -61,16 +65,16 @@ class MarkdownWidget(TemplateWidget):
         css_class (str, optional): any classes to add to the widget
     """
     template_name = 'wildewidgets/markdown_widget.html'
-    text = ""
-    css_class = ""
+    text: str  = ""
+    css_class: str = ""
 
     def __init__(self, *args, **kwargs):
-        super().__init__()
+        super().__init__(*args, **kwargs)
         self.text = kwargs.get("text", self.text)
         self.css_class = kwargs.get("css_class", self.css_class)
 
-    def get_context_data(self, **kwargs):
-        kwargs = super().get_context_data(**kwargs)
+    def get_context_data(self, *args, **kwargs):
+        kwargs = super().get_context_data(*args, **kwargs)
         kwargs['text'] = self.text
         kwargs['css_class'] = self.css_class
         return kwargs
@@ -89,11 +93,12 @@ class HTMLWidget(TemplateWidget):
     css_class = None
 
     def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self.html = kwargs.get('html', self.html)
         self.css_class = kwargs.get("css_class", self.css_class)
 
-    def get_context_data(self, **kwargs):
-        kwargs = super().get_context_data(**kwargs)
+    def get_context_data(self, *args, **kwargs):
+        kwargs = super().get_context_data(*args, **kwargs)
         kwargs['html'] = self.html
         kwargs['css_class'] = self.css_class
         return kwargs
