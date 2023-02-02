@@ -54,8 +54,6 @@ class InputBlock(Block):
     Example:
 
         >>> block = InputBlock(input_type='checkbox', input_name='my-checkbox', value=1)
-        >>> str(block)
-        '<input type="checkbox" value="1" name="my-checkbox" class="form-control">\n'
 
     Keyword Args:
         input_type: the value of the ``type`` attribute
@@ -95,12 +93,7 @@ class BaseCheckboxInputBlock(InputBlock):
     Example:
 
         >>> block = BaseCheckboxInputBlock(name='my-checkbox', value=1)
-        >>> str(block)
-        '<input type="checkbox" value="1" class="my-checkbox">\n'
-
         >>> block = BaseCheckboxInputBlock(name='my-checkbox', value=1, checked=true)
-        >>> str(block)
-        '<input type="checkbox" value="1" class="my-checkbox">\n'
 
     Keyword Args:
         checked: if ``True``, render the checkbox as checked
@@ -213,8 +206,6 @@ class HiddenInputBlock(InputBlock):
     Example:
 
         >>> block = HiddenInputBlock(name='my-checkbox', value=1)
-        >>> str(block)
-        '<input type="hidden" value="1" name="my-checkbox">\n'
     """
 
     input_type: str = 'hidden'

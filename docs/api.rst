@@ -1,8 +1,6 @@
 API
 ===
 
-This is some text
-
 .. toctree::
     :maxdepth: 2
 
@@ -10,6 +8,7 @@ This is some text
     api_buttons
     api_charts
     api_datagrid
+    api_forms
     api_grid
     api_headers
     api_icons

@@ -193,7 +193,8 @@ class BaseDataTable(
             align: horizontal alignment for this column: ``left``, ``right``, ``center``
             visible: if ``False``, the column will be present in the table, but hidden
                 from the user
-            head_align: horizontal alignment for the header for this column: ``left``, ``right``, ``center`
+            head_align: horizontal alignment for the header for this column:
+                ``left``, ``right``, ``center``
             wrap: if ``True``, wrap contents in this column
         """
         self.column_fields[field] = DataTableColumn(
