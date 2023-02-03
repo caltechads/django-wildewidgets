@@ -34,6 +34,7 @@ def model_name(model_class: Type[models.Model]) -> str:
 def model_logger_name(model_class: Type[models.Model]) -> str:
     return model_name(model_class).lower()
 
+
 class ViewSetMixin(models.Model):
     """
     This mixin should be used on your :py:class:`django.db.models.Model` when you have

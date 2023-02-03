@@ -279,6 +279,7 @@ class FormButton(Block):
 
 
 class ButtonRow(Block):
+    # FIXME: deprecate this in favor of HorizontalLayoutBlock
 
     def __init__(self, *blocks, **kwargs):
         css_class = kwargs.get("css_class", "")
