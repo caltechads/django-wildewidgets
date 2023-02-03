@@ -1,4 +1,4 @@
-VERSION = 0.15.0
+VERSION = 0.15.1
 
 PACKAGE = wildewidgets_demo
 
