@@ -69,9 +69,9 @@ class MarkdownWidget(TemplateWidget):
     css_class: str = ""
 
     def __init__(self, *args, **kwargs):
+        self.text = kwargs.pop("text", self.text)
+        self.css_class = kwargs.pop("css_class", self.css_class)
         super().__init__(*args, **kwargs)
-        self.text = kwargs.get("text", self.text)
-        self.css_class = kwargs.get("css_class", self.css_class)
 
     def get_context_data(self, *args, **kwargs):
         kwargs = super().get_context_data(*args, **kwargs)
@@ -93,9 +93,9 @@ class HTMLWidget(TemplateWidget):
     css_class = None
 
     def __init__(self, *args, **kwargs):
+        self.html = kwargs.pop('html', self.html)
+        self.css_class = kwargs.pop("css_class", self.css_class)
         super().__init__(*args, **kwargs)
-        self.html = kwargs.get('html', self.html)
-        self.css_class = kwargs.get("css_class", self.css_class)
 
     def get_context_data(self, *args, **kwargs):
         kwargs = super().get_context_data(*args, **kwargs)
