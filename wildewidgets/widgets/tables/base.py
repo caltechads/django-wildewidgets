@@ -51,12 +51,16 @@ class BaseDataTable(
 
     # dataTable specific configs
 
+    #: How tall should we make the table?  Any CSS width string is valid.
+    height: Optional[str] = None
     #: How wide should we make the table?  Any CSS width string is valid.
-    width: str = '100%'
+    width: Optional[str] = '100%'
     #: If ``True``, use smaller font and row height when rendering rows
     small: bool = False
     #: If ``True``, use different colors for even and odd rows
     striped: bool = False
+    #: Show the search input?
+    searchable: bool = True
     #: How many rows should we show on each page
     page_length: int = 25
     #: If ``True``, sort rows ascending; otherwise descending.
@@ -90,6 +94,7 @@ class BaseDataTable(
         small: bool = False,
         buttons: bool = False,
         striped: bool = False,
+        hide_controls: bool = False,
         table_id: str = None,
         sort_ascending: bool = None,
         data: List[Any] = None,
@@ -98,20 +103,30 @@ class BaseDataTable(
         ajax_url_name: str = None,
         **kwargs
     ):
+        self.width = width if width is not None else self.width
+        self.height = height if height is not None else self.height
+        self.title = title if title is not None else self.title
+        self.searchable = searchable if searchable is not None else self.searchable
+        self.page_length = page_length if page_length is not None else self.page_length
+        self.small = small if small is not None else self.small
+        self.buttons = buttons if buttons is not None else self.buttons
+        self.striped = striped if striped is not None else self.striped
+        self.hide_controls = hide_controls if hide_controls is not None else self.hide_controls
         #: These are options for dataTable itself and get set in the JavaScript
         #: constructor for the table.
         self.options = {
-            'width': width,
-            'height': height,
-            "title": title,
-            "searchable": searchable,
+            'width': self.width,
+            'height': self.height,
+            "title": self.title,
+            "searchable": self.searchable,
             "paging": paging,
-            "page_length": page_length,
-            "small": small,
-            "buttons": buttons,
-            "striped": striped,
+            "page_length": self.page_length,
+            "small": self.small,
+            "buttons": self.buttons,
+            "striped": self.striped,
             "hide_controls": self.hide_controls
         }
+        print(self.options)
         #: The CSS id for this table
         self.table_id = table_id if table_id else self.table_id
         if self.table_id is None:

@@ -25,7 +25,7 @@ class Widget:
     ):
         self.title = title if title else self.title
         self.icon = icon if icon else self.icon
-        super().__init__(**kwargs)
+        super().__init__()
 
     def get_title(self) -> Union[str, "Widget"]:
         return self.title

@@ -157,7 +157,7 @@ class StandardWidgetMixin:
 
     def get_context_data(self, **kwargs):
         kwargs['content'] = self.get_content()
-        breadcrumbs: Optional[BreadcrumbBlock] = self.get_breadcrumbs()
+        breadcrumbs: "Optional[BreadcrumbBlock]" = self.get_breadcrumbs()
         if breadcrumbs:
             kwargs['breadcrumbs'] = breadcrumbs
             kwargs['page_title'] = breadcrumbs.flatten()

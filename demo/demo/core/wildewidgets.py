@@ -834,7 +834,7 @@ class HomeTable(BasicModelTable):
     model = Book
     fields = ['title', 'isbn', 'binding']
     hide_controls = True
-    page_length = 5
+    page_length = 25
     striped = True
     small = True
     unsearchable = ['binding']
