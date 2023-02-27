@@ -338,25 +338,25 @@ class PagedModelWidget(MultipleModelWidget):
                 page_number = 1
             try:
                 page = paginator.page(page_number)
-                kwargs['widget_list'] = self.get_model_widgets(page.object_list)
-                kwargs['page_obj'] = page
-                kwargs['is_paginated'] = page.has_other_pages()
-                kwargs['paginator'] = paginator
-                kwargs['page_kwarg'] = self.page_kwarg
-                pages = kwargs['page_obj'].paginator.num_pages
-                if pages > self.max_page_controls:
-                    pages = self.max_page_controls
-                page_number = page.number
-                max_controls_half = int(self.max_page_controls / 2)
-                range_start = 1 if page_number - max_controls_half < 1 else page_number - max_controls_half
-                kwargs['page_range'] = range(range_start, range_start + pages)
             except InvalidPage as e:
                 raise Http404(
                     'Invalid page (%(page_number)s): %(message)s' % {
                         'page_number': page_number,
                         'message': str(e)
                     }
-                ) from e
+                )
+            kwargs['widget_list'] = self.get_model_widgets(page.object_list)
+            kwargs['page_obj'] = page
+            kwargs['is_paginated'] = page.has_other_pages()
+            kwargs['paginator'] = paginator
+            kwargs['page_kwarg'] = self.page_kwarg
+            pages = kwargs['page_obj'].paginator.num_pages
+            if pages > self.max_page_controls:
+                pages = self.max_page_controls
+            page_number = page.number
+            max_controls_half = int(self.max_page_controls / 2)
+            range_start = 1 if page_number - max_controls_half < 1 else page_number - max_controls_half
+            kwargs['page_range'] = range(range_start, range_start + pages)
         else:
             kwargs['widget_list'] = self.get_model_widgets(self.get_queryset().all())
         kwargs['item_label'] = self.item_label
