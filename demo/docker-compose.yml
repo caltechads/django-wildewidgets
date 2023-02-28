@@ -4,7 +4,7 @@ services:
   demo:
     image: "wildewidgets_demo:latest"
     container_name: "wildewidgets_demo"
-    # platform: linux/amd64
+    platform: linux/amd64
     restart: always
     hostname: "wildewidgets_demo"
     ports:
@@ -17,7 +17,7 @@ services:
       - mysql
     command: bin/wait-for-it.sh mysql:3306 --and /opt/python/bin/supervisord
     volumes:
-      - .:/demo
+      - .:/app
       - ../wildewidgets:/ve/lib/python3.10/site-packages/wildewidgets
 
   mysql:
