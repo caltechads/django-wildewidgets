@@ -45,6 +45,7 @@ from .wildewidgets import (
     StringCard,
     TabCard,
     TestTableCard,
+    WidgetCellTableCard,
 )
 
 
@@ -154,6 +155,7 @@ class TableView(DemoStandardMixin, TemplateView):
         layout.add_widget(DataTableCard(), "Basic Static Table", "table")
         layout.add_widget(TestTableCard(), "AJAX Model Table", "table")
         layout.add_widget(BookModelTableCard(), "Basic Model Table", "table")
+        layout.add_widget(WidgetCellTableCard(), "Widget Cell Table", "table")
         return layout
 
     def get_breadcrumbs(self):

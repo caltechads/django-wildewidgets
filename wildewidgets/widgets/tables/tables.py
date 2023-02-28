@@ -295,6 +295,26 @@ class ModelTableMixin:
         return value
 
 
+class WidgetCellMixin:
+    """
+    This mixin is used to display a widget in a cell based on the value of the
+    column.
+    """
+
+    # Specify the widget to use for each column. The key is the column name
+    # and the value is the widget class. The widget class must be a subclass
+    # of :py:class:`wildewidgets.widgets.base.Block`. Fields that are not specified
+    # will not have a widget, but will be displayed as text.
+    cell_widgets: Dict[str, str] = {}
+
+    def render_column(self, row: Any, column: str) -> str:
+        if column in self.cell_widgets:
+            widget_class = self.cell_widgets[column]
+            widget = widget_class(row=row, column=column)
+            return str(widget)
+        return super().render_column(row, column)
+
+
 # -------------------------------
 # Tables
 # -------------------------------

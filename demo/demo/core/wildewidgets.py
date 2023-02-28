@@ -47,6 +47,7 @@ from wildewidgets import (
     TablerFontIcon,
     TagBlock,
     TimeStamp,
+    WidgetCellMixin,
     WidgetStream,
 )
 from .models import Measurement
@@ -229,8 +230,8 @@ class TestTable(DataTable):
         super().__init__(*args, **kwargs)
         self.add_column('name')
         self.add_column('time', searchable=False)
-        self.add_column('pressure')
-        self.add_column('temperature')
+        self.add_column('pressure', align='right')
+        self.add_column('temperature', align='right')
         self.add_column('restricted', visible=False)
         self.add_column('open', sortable=False)
 
@@ -446,6 +447,46 @@ It is dynamic, using AJAX to retrieve data from the server.
         text = Block(self.INTRO, css_class="mb-4")
         tab = WidgetCodeTab(code=code, widget=BookModelTable())
         self.set_widget(Block(text, tab), "mb-5")
+
+
+class PressureCellWidget(Block):
+
+    def __init__(self, *args, row=None, column="", **kwargs):
+        value = row.pressure
+        if value > 2000:
+            icon = "thermometer-high"
+            color = "red"
+        elif value > 1000:
+            icon = "thermometer-half"
+            color = "orange"
+        else:
+            icon = "thermometer-low"
+            color = "green"
+        super().__init__(
+            HorizontalLayoutBlock(FontIcon(icon=icon, color=color), f"{value}", justify="end"), 
+            *args, 
+            **kwargs
+        )        
+
+
+class WidgetCellTable(WidgetCellMixin, BasicModelTable):
+    fields = ['name', 'pressure', 'temperature']
+    cell_widgets = {'pressure': PressureCellWidget}
+    model = Measurement
+    alignment = {'pressure': 'right', 'temperature': 'right'}
+    striped = True
+
+
+class WidgetCellTableCard(CardWidget):
+    title = "Widget Cell Table"
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        code = []
+        code.append(inspect.getsource(PressureCellWidget))
+        code.append(inspect.getsource(WidgetCellTable))
+        tab = WidgetCodeTab(code=code, widget=WidgetCellTable())
+        self.set_widget(tab, "mb-5")
 
 
 class ApexHeader(BasicHeader):

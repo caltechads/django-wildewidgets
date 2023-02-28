@@ -4,6 +4,7 @@ services:
   demo:
     image: "wildewidgets_demo:latest"
     container_name: "wildewidgets_demo"
+    # platform: linux/amd64
     restart: always
     hostname: "wildewidgets_demo"
     ports:
@@ -22,6 +23,7 @@ services:
   mysql:
     image: mysql:8.0.23
     container_name: "db"
+    platform: linux/amd64
     environment:
       MYSQL_ROOT_PASSWORD: root_password
     # Apply the MySQL 5.6.40+ default sql_modes, which are not enabled in Docker's MySQL containers, even in 5.6.49.
