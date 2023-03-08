@@ -19,13 +19,14 @@ class Widget:
 
     def __init__(
         self,
+        *args,
         title: Union[str, "Widget"] = None,
         icon: str = None,
         **kwargs
     ):
         self.title = title if title else self.title
         self.icon = icon if icon else self.icon
-        super().__init__()
+        super().__init__(*args, **kwargs)
 
     def get_title(self) -> Union[str, "Widget"]:
         return self.title

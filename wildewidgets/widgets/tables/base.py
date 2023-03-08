@@ -126,7 +126,6 @@ class BaseDataTable(
             "striped": self.striped,
             "hide_controls": self.hide_controls
         }
-        print(self.options)
         #: The CSS id for this table
         self.table_id = table_id if table_id else self.table_id
         if self.table_id is None:
