@@ -602,10 +602,10 @@ filter_input.onkeyup = function(e) {{
     document.querySelectorAll("{query} label").forEach(label => {{
         var test_string = label.innerText.toLowerCase();
         if (test_string.includes(filter)) {{
-            label.parentElement.classList.remove('d-none');
+            label.closest('li').classList.remove('d-none');
         }}
         else {{
-            label.parentElement.classList.add('d-none');
+            label.closest('li').classList.add('d-none');
         }}
     }});
     let children = document.querySelectorAll("{query} li");
@@ -673,6 +673,28 @@ filter_input.onkeyup = function(e) {{
         from .forms import InputBlock, LabelBlock
         if self.list_model_header_class:
             return self.list_model_header_class(*args, **kwargs)  # pylint: disable=not-callable
+        
+        # should we just be using a CardHeader here?
+        # header = CardHeader(
+        #     Block(
+        #         LabelBlock(
+        #             f'Filter {self.widget.item_label}s',
+        #             css_class="d-none",
+        #             for_input=self.filter_id
+        #         ),
+        #         InputBlock(
+        #             attributes={
+        #                 'type': 'text',
+        #                 'placeholder': f'Filter {self.widget.item_label}s',
+        #             },
+        #             css_id=f'{self.id_base}_filter',
+        #             css_class='form-control',
+        #         ),
+        #         css_class='w-25',
+        #     ),
+        #     header_text=kwargs.get('title', ""),
+        #     css_class="my-1"
+        # )
         header = Block(
             Block(
                 LabelBlock(
