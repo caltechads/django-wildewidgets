@@ -563,7 +563,7 @@ class ListModelWidget(MultipleModelWidget):
     def get_model_widget(self, object: Model = None, **kwargs):
         if self.model_widget:
             return super().get_model_widget(object=object, **kwargs)
-        widget = HorizontalLayoutBlock(tag='li', name='list-group-item')
+        widget = HorizontalLayoutBlock(tag='li', name='list-group-item listmodelwidget__item')
         widget.add_block(self.get_model_subblock(object))
         remove_url = self.get_remove_url(object)
         if remove_url:
@@ -602,10 +602,10 @@ filter_input.onkeyup = function(e) {{
     document.querySelectorAll("{query} label").forEach(label => {{
         var test_string = label.innerText.toLowerCase();
         if (test_string.includes(filter)) {{
-            label.closest('li').classList.remove('d-none');
+            label.closest('.listmodelwidget__item').classList.remove('d-none');
         }}
         else {{
-            label.closest('li').classList.add('d-none');
+            label.closest('.listmodelwidget__item').classList.add('d-none');
         }}
     }});
     let children = document.querySelectorAll("{query} li");
