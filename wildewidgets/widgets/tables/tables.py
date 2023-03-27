@@ -94,7 +94,7 @@ class ModelTableMixin:
         bool_icons: Dict[str, str] = None,
         **kwargs
     ):
-        self.model = model if model else self.model
+        self.model = model if model is not None else self.model
         self.fields = fields if fields else deepcopy(self.fields)
         self.hidden = hidden if hidden else deepcopy(self.hidden)
         self.verbose_names = verbose_names if verbose_names else deepcopy(self.verbose_names)
@@ -112,7 +112,7 @@ class ModelTableMixin:
         #: A list of names of our model fields
         self.field_names: List[str] = []
 
-        # Build our mapping of all known fields on :py:attr:`mVjjodel`
+        # Build our mapping of all known fields on :py:attr:`model`
         for field in self.model._meta.get_fields():
             if field.name == 'id':
                 continue
