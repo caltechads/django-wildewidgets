@@ -12,7 +12,7 @@ For the same reason, don't import this file in ``wildewidgets.views.__init.py``,
 because anyone importing any widget that is also a JSON view will cause
 ``AppRegistryNotReady`` exceptions.
 """
-from typing import Optional, List
+from typing import Optional, List, Type
 
 from braces.views._access import AccessMixin
 from django.contrib.auth.models import Group
@@ -29,9 +29,12 @@ class PermissionRequiredMixin(AccessMixin):
     * Django superusers are always authorized
     * Anonymous users are never authorized
     * If ``request.user`` is in one of the groups returned by
-        :py:meth:`get_groups_required`, they are authorized.
+      :py:meth:`get_groups_required`, they are authorized.
     * Failing that, if ``request.user`` has one of the permissions returned by
-        :py:meth:`get_permissions_required`, they are authorized.
+      :py:meth:`get_permissions_required`, they are authorized.
+    * Additionally, if :py:attr:`model` and :py:attr:`required_model_permissions`
+      are both set, extend what we got from :py:meth:`get_permissions_required`
+      with what we get from :py:meth:`get_model_permissions`
     """
 
     #: Users who are members of the named Django auth groups will be permitted
@@ -41,6 +44,16 @@ class PermissionRequiredMixin(AccessMixin):
     #: Users who have any of the listed Django model permissions
     #: will be permitted access to the view.
     permissions_required: Optional[List[str]] = None
+
+    #: Used in conjunction with :py:attr:`required_model_permissions`,
+    #: this is the model we want to act on.  This should be set by our
+    #: our subclass, which is why it is just a type declaration here.
+    #: This is used by :py:meth:`get_model_permissions`
+    model: Optional[Type[Model]]
+    #: A list of simple strings like ``view``, ``add``, ``change``, ``delete`` that
+    #: represent actions that can be done on a model.  This is used by
+    #: py:meth:`get_model_permissions`
+    required_model_permissions: Optional[List[str]] = None
 
     def user_can_view(self) -> bool:
         required_perms = self.get_model_permissions(self.model, ['view'])
@@ -117,6 +130,9 @@ class PermissionRequiredMixin(AccessMixin):
           :py:meth:`get_groups_required`, they are authorized.
         * Failing that, if ``request.user`` has one of the permissions returned by
           :py:meth:`get_permissions_required`, they are authorized.
+        * Additionally, if :py:attr:`model` and :py:attr:`required_model_permissions`
+          are both set, extend what we got from :py:meth:`get_permissions_required`
+          with what we get from :py:meth:`get_model_permissions`
 
         Args:
             request: the current request
@@ -134,6 +150,12 @@ class PermissionRequiredMixin(AccessMixin):
             groups_required = self.get_groups_required()
         if permissions_required is None:
             permissions_required = self.get_permissions_required()
+        if self.required_model_permissions:
+            model_permissions = self.get_model_permissions(
+                self.model,
+                self.required_model_permissions
+            )
+            permissions_required.extend(model_permissions)
         if self.request.user.is_superuser:
             # Superusers users are always authorized
             return True
