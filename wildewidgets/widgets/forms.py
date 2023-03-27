@@ -502,8 +502,9 @@ filter_input.onkeyup = function(e) {{
             url_prefix = cls.url_prefix
         elif not url_prefix.endswith('/'):
             url_prefix = f'{url_prefix}/'
-        return [path(
-            f'{url_prefix}{model_name}/<int:pk>/{related_model_name}/',
+        view_path = path(
+            f'{url_prefix}wildewidgets/{model_name}/<int:pk>/{related_model_name}/',
             ManyToManyRelatedFieldView.as_view(model=cls.model, field_name=cls.field_name),
             name=cls.get_url_name()
-        )]
+        )
+        return [view_path]
