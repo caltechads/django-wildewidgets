@@ -1,6 +1,6 @@
 from copy import copy, deepcopy
 
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, TYPE_CHECKING
 
 from django.urls import reverse
 
@@ -8,6 +8,9 @@ from ..base import Block
 from ..forms import HiddenInputBlock
 from ..buttons import InputButton
 from ..structure import HorizontalLayoutBlock
+
+if TYPE_CHECKING:
+    from django.contrib.auth.models import AbstractUser
 
 
 # -------------------------------
@@ -22,6 +25,7 @@ class RowActionButton(Block):
     url: Optional[str] = None
     color: str = 'secondary'
     size: str = None
+    permission: Optional[str] = None
 
     def __init__(
         self,
@@ -29,18 +33,24 @@ class RowActionButton(Block):
         url: str = None,
         color: str = None,
         size: str = None,
+        permission: str = None,
         **kwargs
     ):
         self.text = text if text else self.text
         self.url = url if url else self.url
         self.color = color if color else self.color
         self.size = size if size else self.size
+        self.permission = permission if permission else self.permission
         super().__init__(self.text, **kwargs)
 
         #: The table will set this
         self.row: Any = None
 
-    def is_visible(self) -> bool:
+    def is_visible(self, row: Any, user: "Optional[AbstractUser]") -> bool:  # pylint: disable=arguments-differ
+        if self.permission is not None and user is not None:
+            if user.has_perm(self.permission):
+                return True
+            return False
         return True
 
     def get_url(self, row: Any) -> str:
@@ -471,9 +481,13 @@ class ActionButtonBlockMixin:
         container = HorizontalLayoutBlock(justify=self.justify)
         for action in self.get_actions():
             button = action.bind(row, self, size=self.button_size)
+            user = None
+            if hasattr(self, 'request') and self.request is not None:
+                user = self.request.user
+            if not button.is_visible(row, user):
+                continue
             button.add_class('me-2')
-            if button.is_visible():
-                container.add_block(button)
+            container.add_block(button)
         button.remove_class('me-2')
         return str(container)
 
