@@ -644,3 +644,31 @@ class ManyToManyRelatedFieldView(
                 return self.object.get_update_url()
             return self.object.get_absolute_url()
         return success_url
+
+
+class HTMXView(TemplateView):
+    """Simple view to display only a widget as a response."""
+    template_name = 'wildewidgets/htmx_base.html'
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.data = None
+
+    def get_value(self, key, default=None):
+        return self.data.get(key, default)
+
+    def get_content(self):
+        raise NotImplementedError
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['content'] = self.get_content()
+        return context
+
+    def get(self, request, *args, **kwargs):
+        self.data = request.GET
+        return super().get(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        self.data = request.POST
+        return self.get(request, *args, **kwargs)
