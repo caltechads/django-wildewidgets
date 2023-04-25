@@ -647,28 +647,45 @@ class ManyToManyRelatedFieldView(
 
 
 class HTMXView(TemplateView):
-    """Simple view to display only a widget as a response."""
+    """
+    Simple view to display only a widget as a response. This is useful for
+    HTMX requests. The widget is rendered with the context data from the
+    request, such that anything sent via GET or POST is passed as kwargs to
+    the widget's constructor.
+
+    Example:
+
+        class MyWidgetHTMXView(HTMXView):
+            widget_class = MyWidget
+    """
     template_name = 'wildewidgets/htmx_base.html'
+    widget_class = None
+    include_request = False
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.data = None
 
-    def get_value(self, key, default=None):
-        return self.data.get(key, default)
-
-    def get_content(self):
+    def get_content(self, **kwargs):
+        if self.widget_class:
+            if self.include_request:
+                self.data['request'] = self.request
+            return self.widget_class(**self.data)
         raise NotImplementedError
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['content'] = self.get_content()
+        context['content'] = self.get_content(**self.data)
         return context
 
+    def set_data(self, request_data):
+        self.data = request_data.dict()
+        del self.data['submit']
+
     def get(self, request, *args, **kwargs):
-        self.data = request.GET
+        self.set_data(request.GET)
         return super().get(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
-        self.data = request.POST
+        self.set_data(request.POST)
         return self.get(request, *args, **kwargs)
