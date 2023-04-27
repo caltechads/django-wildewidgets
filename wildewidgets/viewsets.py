@@ -168,7 +168,7 @@ class ModelViewSet:
             template_name=self.template_name,
             breadcrumbs=self.get_breadcrumbs('create'),
             navbar_class=self.navbar_class,
-            success_url=self.get_url_name('index')
+            success_url=reverse_lazy(self.get_url_name('index'))
         )
 
     @property
@@ -178,14 +178,14 @@ class ModelViewSet:
             template_name=self.template_name,
             breadcrumbs=self.get_breadcrumbs('update'),
             navbar_class=self.navbar_class,
-            success_url=self.get_url_name('index')
+            success_url=reverse_lazy(self.get_url_name('index'))
         )
 
     @property
     def delete_view(self):
         return self.delete_view_class.as_view(
             model=self.model,
-            success_url=self.get_url_name('index')
+            success_url=reverse_lazy(self.get_url_name('index'))
         )
 
     def get_urlpatterns(self):
