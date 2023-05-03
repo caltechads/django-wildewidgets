@@ -5,7 +5,7 @@ with open("README.md", "r", encoding='utf-8') as fh:
 
 setup(
     name='django-wildewidgets',
-    version="0.16.7",
+    version="0.16.8",
     packages=find_packages(exclude=['bin']),
     include_package_data=True,
     description='django-wildewidgets is a Django design library providing several tools for '
