@@ -5,7 +5,14 @@
     color: #FFFF;
 }
 
-$navbar-expand-breakpoints: ["sm", "md", "lg", "xl", "xxl"] !default;
+$navbar-expand-breakpoints: (
+    xs: 0,
+    sm: 576px,
+    md: 768px,
+    lg: 992px,
+    xl: 1200px,
+    xxl: 1400px
+) !default;
 
 .navbar {
     &.navbar-vertical {
@@ -25,13 +32,26 @@ $navbar-expand-breakpoints: ["sm", "md", "lg", "xl", "xxl"] !default;
             }
         }
 
-        @each $bp in $navbar-expand-breakpoints {
-            &.navbar-wide.navbar-expand-#{"" + $bp} {width: 18rem;}
-            &.navbar-wide.navbar-expand-#{"" + $bp} ~ .page {
+        @each $bp_label, $bp_width in $navbar-expand-breakpoints {
+            &.navbar-wide.navbar-expand-#{"" + $bp_label} {
+                width: 18rem;
+                @media screen and (max-width: #{"" + $bp_width}) {
+                    width: auto;
+                    img {
+                        width: auto !important;
+                        height: 5rem;
+                    }
+                }
+            }
+            &.navbar-wide.navbar-expand-#{"" + $bp_label} ~ .page {
                 padding-left: 18rem;
+
+                @media screen and (max-width: #{"" + $bp_width}) {
+                    padding-left: 0;
+                }
             }
 
-            &.navbar-expand-#{"" + $bp} .navbar-collapse {
+            &.navbar-expand-#{"" + $bp_label} .navbar-collapse {
                 // .navbar-collapse is the menu area of the .navbar, as
                 // opposed to the brand area at the top
                 .nav-item.active,

@@ -550,7 +550,11 @@ class TablerVerticalNavbar(Navbar):
         Wrap our branding in an ``<h1>`` and give that ``<h1>`` the
         ``navbar-brand`` class because that's how Tabler does it.
         """
-        brand_container = Block(self.branding, tag='h1', css_class='navbar-brand navbar-brand-autodark')
+        brand_container = Block(
+            self.branding,
+            tag='h1',
+            css_class=f'navbar-brand navbar-brand-autodark flex-grow-1 flex-{self.hide_below_viewport}-grow-0'
+        )
         self.inner.add_block(brand_container)
 
 
