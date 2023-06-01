@@ -428,7 +428,11 @@ class Navbar(Block):
         # Set our "role" attribute to make us more accessible
         self._attributes['role'] = 'navigation'
         #: Everything inside our sidebar lives in this inner container
-        self.inner: Block = Container(size=self.container_size, css_class='ms-0')
+        if self.container_size == 'fluid':
+            margin_class = 'ms-0'
+        else:
+            margin_class = 'ms-auto'
+        self.inner: Block = Container(size=self.container_size, css_class=margin_class)
         self.add_block(self.inner)
         #: This is the branding block at the start of the navbar
         self.branding: Block = branding if branding else deepcopy(self.branding)
