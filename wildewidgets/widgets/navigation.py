@@ -367,6 +367,7 @@ class Navbar(Block):
         'green',
         'teal',
         'cyan',
+        'white',
     ]
 
     #: Set to ``True`` to use a dark background instead of light
