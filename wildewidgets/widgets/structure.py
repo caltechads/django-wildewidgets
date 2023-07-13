@@ -518,6 +518,7 @@ class ListModelWidget(MultipleModelWidget):
     block: str = 'list-group'
     name: str = 'wildewidgets-list-model-widget'
     tag: str = 'ul'
+    show_no_items: bool = True
 
     #: The url to "POST" to in order to delete or remove the object.
     remove_url: Optional[str] = None
@@ -526,7 +527,7 @@ class ListModelWidget(MultipleModelWidget):
         self.remove_url = remove_url if remove_url else self.remove_url
         super().__init__(*args, **kwargs)
         widgets = self.get_model_widgets(self.get_queryset().all())
-        if not widgets:
+        if not widgets and self.show_no_items:
             self.add_block(
                 Block(
                     f"No {self.item_label}s",

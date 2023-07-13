@@ -30,6 +30,7 @@ class BasicHeader(TemplateWidget):
     css_id: Optional[str] = None
     badge_text: Optional[str] = None
     badge_class: str = "warning"
+    badge_rounded_pill: bool = True
 
     def __init__(
         self,
@@ -40,6 +41,7 @@ class BasicHeader(TemplateWidget):
         css_id: str = None,
         badge_text: str = None,
         badge_class: str = None,
+        badge_rounded_pill: bool = None,
         **kwargs
     ):
         self.header_level = header_level if header_level else self.header_level
@@ -49,6 +51,7 @@ class BasicHeader(TemplateWidget):
         self.css_id = css_id if css_id else self.css_id
         self.badge_text = badge_text if badge_text else self.badge_text
         self.badge_class = badge_class if badge_class else self.badge_class
+        self.badge_rounded_pill = badge_rounded_pill if badge_rounded_pill else self.badge_rounded_pill
         kwargs['title'] = self.header_text
         super().__init__(**kwargs)
 
@@ -65,6 +68,7 @@ class BasicHeader(TemplateWidget):
         kwargs['css_id'] = self.css_id
         kwargs['badge_text'] = self.badge_text
         kwargs['badge_class'] = self.badge_class
+        kwargs['badge_rounded_pill'] = self.badge_rounded_pill
         return kwargs
 
 

@@ -24,6 +24,8 @@ class Button(Block):
         text: The text to use for the button
         color: The Boostrap color class to use for the button
         close: The Boostrap close icon will be used for the button
+        size: The Bootstrap button size - None, 'sm', 'lg'
+        disabled: If ``True``, the button will be disabled
     """
     block: str = 'button'
     tag: str = 'button'
@@ -38,6 +40,7 @@ class Button(Block):
     #: If ``True``, ignore :py:attr:`text` and make this into a Bootstrap
     #: "close" button with a close icon.
     size: str = None
+    disabled: bool = False
 
     def __init__(
         self,
@@ -45,12 +48,19 @@ class Button(Block):
         color: str = None,
         close: bool = None,
         size: str = None,
+        disabled: bool = None,
         **kwargs
     ):
         self.color = color if color else self.color
         self.text = text if text else self.text
         self.close = close if close else self.close
         self.size = size if size else self.size
+        self.disabled = disabled if disabled else self.disabled
+        if self.disabled:
+            if "attributes" in kwargs:
+                kwargs["attributes"]["disabled"] = True
+            else:
+                kwargs["attributes"] = {"disabled": True}
         if self.close:
             self.text = ""
         super().__init__(self.text, **kwargs)
