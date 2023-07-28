@@ -666,6 +666,7 @@ class HTMXView(TemplateView):
         super().__init__(**kwargs)
         self.data = None
 
+    # pylint: disable=not-callable
     def get_content(self, **kwargs):
         if self.widget_class:
             if self.include_request:
@@ -688,4 +689,4 @@ class HTMXView(TemplateView):
 
     def post(self, request, *args, **kwargs):
         self.set_data(request.POST)
-        return self.get(request, *args, **kwargs)
+        return super().get(request, *args, **kwargs)

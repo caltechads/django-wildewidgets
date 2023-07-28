@@ -51,7 +51,7 @@ class BasicHeader(TemplateWidget):
         self.css_id = css_id if css_id else self.css_id
         self.badge_text = badge_text if badge_text else self.badge_text
         self.badge_class = badge_class if badge_class else self.badge_class
-        self.badge_rounded_pill = badge_rounded_pill if badge_rounded_pill else self.badge_rounded_pill
+        self.badge_rounded_pill = badge_rounded_pill if badge_rounded_pill is not None else self.badge_rounded_pill
         kwargs['title'] = self.header_text
         super().__init__(**kwargs)
 
