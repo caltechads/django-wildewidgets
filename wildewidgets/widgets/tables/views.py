@@ -268,6 +268,7 @@ class DatatableMixin:
             if not sortcol:
                 continue
 
+            # pylint: disable=consider-using-f-string
             if isinstance(sortcol, list):
                 for sc in sortcol:
                     order.append('{0}{1}'.format(sdir, sc.replace('.', '__')))
@@ -558,7 +559,7 @@ class DatatableAJAXView(BaseDatatableView):
         for column in self.searchable_columns():
             attr_name = f'search_{column}_column'
             if hasattr(self, attr_name):
-                q = getattr(self, attr_name)(column, value)
+                q = getattr(self, attr_name)(qs, column, value)
             else:
                 kwarg_name = f'{column}__icontains'
                 q = Q(**{kwarg_name: value})
