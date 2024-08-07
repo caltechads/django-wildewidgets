@@ -16,6 +16,94 @@ from .buttons import FormButton
 from .headers import BasicHeader, CardHeader
 
 
+class TabConfig:
+    """
+    This class is used to configure the tabs in a :py:class:`PageTabbedWidget`.
+    """
+
+    def __init__(
+        self,
+        name: str,
+        widget: Block = None,
+        active: bool = False,
+        link: str = None,
+    ):
+        self.name = name
+        # self.widget = widget
+        self.active = active
+        self.link = link
+
+
+class PageTabbedWidget(Block):
+    """
+    This class implements a `Tabler Tabbed Card <https://preview.tabler.io/docs/cards.html>`_.
+    The active tab displays a widget, and the other tabs display a link to another page which
+    will display that tab as the active tab, with its corresponding widget. This way, the
+    only widget that is rendered is the one that is active.
+
+    Example:
+
+        >>> tab = PageTabbedWidget()
+        >>> tab.add_link_tab('My First Tab', 'my_first_page_url')
+        >>> tab.add_link_tab('My Second Tab', 'my_second_page_url')
+        >>> tab.add_active_tab('My Third Tab', widget)
+
+    """
+
+    template_name: str = 'wildewidgets/page_tab_block.html'
+    block: str = 'card'
+    slug_suffix: Optional[str] = None
+    overflow: str = "auto"
+
+    def __init__(
+        self,
+        *blocks,
+        slug_suffix: str = None,
+        overflow: str = None,
+        **kwargs
+    ):
+        self.slug_suffix = slug_suffix if slug_suffix else self.slug_suffix
+        self.overflow = overflow if overflow else self.overflow
+        super().__init__(*blocks, **kwargs)
+        if "style" in self._attributes:
+            self._attributes['style'] += f" overflow: {self.overflow};"
+        else:
+            self._attributes['style'] = f"overflow: {self.overflow};"
+        self.tabs = []
+        self.widget = None
+
+    def add_link_tab(self, name: str, url: str) -> None:
+        """
+        Add a Bootstrap 5 tab named `name` that links to `url`.
+
+        Args:
+            name: the name of the tab
+            url: the url to link to
+        """
+        tab = TabConfig(name=name, link=url)
+        self.tabs.append(tab)
+
+    def add_active_tab(self, name: str, widget: Block) -> None:
+        """
+        Add a Bootstrap 5 tab named `name` that displays `widget`.
+
+        Args:
+            name: the name of the tab
+            widget: the block to display in this tab
+        """
+        tab = TabConfig(name=name, active=True)
+        self.tabs.append(tab)
+        self.widget = widget
+
+    def get_context_data(self, *args, **kwargs):
+        kwargs['tabs'] = self.tabs
+        if not self.slug_suffix:
+            self.slug_suffix = random.randrange(0, 10000)
+        kwargs['identifier'] = self.slug_suffix
+        kwargs['widget'] = self.widget
+        return super().get_context_data(*args, **kwargs)
+
+
 class TabbedWidget(Block):
     """
     This class implements a `Tabler Tabbed Card <https://preview.tabler.io/docs/cards.html>`_.
@@ -674,7 +762,7 @@ filter_input.onkeyup = function(e) {{
         from .forms import InputBlock, LabelBlock
         if self.list_model_header_class:
             return self.list_model_header_class(*args, **kwargs)  # pylint: disable=not-callable
-        
+
         # should we just be using a CardHeader here?
         # header = CardHeader(
         #     Block(

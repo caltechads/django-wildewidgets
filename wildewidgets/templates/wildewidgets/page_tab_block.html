@@ -1,0 +1,31 @@
+{% extends 'wildewidgets/block.html' %}
+{% load wildewidgets %}
+
+{% block block_content %}
+  <ul class="nav nav-tabs">
+  {% for tab in tabs %}
+  <li class="nav-item">
+    <a 
+      class="nav-link {% if tab.active %}active{% endif %}" 
+      id="{{tab.name|slugify}}-{{identifier}}-tab" 
+      role="tab" 
+      aria-selected="{{tab.active|yesno:'true,false,false'}}"
+      {% if not tab.active %}href="{{tab.link}}"{% endif %}
+    >
+      {{tab.name}}
+    </a>
+  </li>
+  {% endfor %}
+  </ul>
+
+  <div class="card-body">
+    <div class="tab-content" id="nav-tabContent">
+      <div 
+        id="nav-{{tab.0|slugify}}-{{identifier}}" 
+        role="tabpanel" 
+      >
+        {% wildewidgets widget %}
+      </div>
+    </div>
+  </div>
+{% endblock %}
