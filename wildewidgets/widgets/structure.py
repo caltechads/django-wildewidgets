@@ -50,25 +50,21 @@ class PageTabbedWidget(Block):
 
     """
 
-    template_name: str = 'wildewidgets/page_tab_block.html'
-    block: str = 'card'
+    template_name: str = "wildewidgets/page_tab_block.html"
+    block: str = "card"
     slug_suffix: Optional[str] = None
     overflow: str = "auto"
 
     def __init__(
-        self,
-        *blocks,
-        slug_suffix: str = None,
-        overflow: str = None,
-        **kwargs
+        self, *blocks, slug_suffix: str = None, overflow: str = None, **kwargs
     ):
         self.slug_suffix = slug_suffix if slug_suffix else self.slug_suffix
         self.overflow = overflow if overflow else self.overflow
         super().__init__(*blocks, **kwargs)
         if "style" in self._attributes:
-            self._attributes['style'] += f" overflow: {self.overflow};"
+            self._attributes["style"] += f" overflow: {self.overflow};"
         else:
-            self._attributes['style'] = f"overflow: {self.overflow};"
+            self._attributes["style"] = f"overflow: {self.overflow};"
         self.tabs = []
         self.widget = None
 
@@ -96,11 +92,11 @@ class PageTabbedWidget(Block):
         self.widget = widget
 
     def get_context_data(self, *args, **kwargs):
-        kwargs['tabs'] = self.tabs
+        kwargs["tabs"] = self.tabs
         if not self.slug_suffix:
             self.slug_suffix = random.randrange(0, 10000)
-        kwargs['identifier'] = self.slug_suffix
-        kwargs['widget'] = self.widget
+        kwargs["identifier"] = self.slug_suffix
+        kwargs["widget"] = self.widget
         return super().get_context_data(*args, **kwargs)
 
 
@@ -115,26 +111,22 @@ class TabbedWidget(Block):
         >>> tab.add_tab('My Second Widget', widget2)
     """
 
-    template_name: str = 'wildewidgets/tab_block.html'
-    block: str = 'card'
+    template_name: str = "wildewidgets/tab_block.html"
+    block: str = "card"
 
     slug_suffix: Optional[str] = None
     overflow: str = "auto"
 
     def __init__(
-        self,
-        *blocks,
-        slug_suffix: str = None,
-        overflow: str = None,
-        **kwargs
+        self, *blocks, slug_suffix: str = None, overflow: str = None, **kwargs
     ):
         self.slug_suffix = slug_suffix if slug_suffix else self.slug_suffix
         self.overflow = overflow if overflow else self.overflow
         super().__init__(*blocks, **kwargs)
         if "style" in self._attributes:
-            self._attributes['style'] += f" overflow: {self.overflow};"
+            self._attributes["style"] += f" overflow: {self.overflow};"
         else:
-            self._attributes['style'] = f"overflow: {self.overflow};"
+            self._attributes["style"] = f"overflow: {self.overflow};"
         self.tabs = []
 
     def add_tab(self, name: str, widget: Block) -> None:
@@ -148,10 +140,10 @@ class TabbedWidget(Block):
         self.tabs.append((name, widget))
 
     def get_context_data(self, *args, **kwargs):
-        kwargs['tabs'] = self.tabs
+        kwargs["tabs"] = self.tabs
         if not self.slug_suffix:
             self.slug_suffix = random.randrange(0, 10000)
-        kwargs['identifier'] = self.slug_suffix
+        kwargs["identifier"] = self.slug_suffix
         # kwargs['overflow'] = self.overflow
         return super().get_context_data(*args, **kwargs)
 
@@ -170,9 +162,10 @@ class CardWidget(Block):
         css_class: CSS to apply to the card itself in addition to the defaults
         overflow:
     """
-    template_name: str = 'wildewidgets/card_block.html'
 
-    block: str = 'card'
+    template_name: str = "wildewidgets/card_block.html"
+
+    block: str = "card"
 
     header: Optional[BasicHeader] = None
     header_text: Optional[str] = None
@@ -194,7 +187,7 @@ class CardWidget(Block):
         widget: Widget = None,
         widget_css: str = None,
         overflow: str = None,
-        **kwargs
+        **kwargs,
     ):
         self.header = header if header else deepcopy(self.header)
         self.header_text = header_text if header_text else self.header_text
@@ -208,20 +201,20 @@ class CardWidget(Block):
         self.widget_css = widget_css if widget_css else self.widget_css
         super().__init__(*blocks, **kwargs)
         if "style" in self._attributes:
-            self._attributes['style'] += f" overflow: {self.overflow};"
+            self._attributes["style"] += f" overflow: {self.overflow};"
         else:
-            self._attributes['style'] = f"overflow: {self.overflow};"
+            self._attributes["style"] = f"overflow: {self.overflow};"
 
     def get_context_data(self, *args, **kwargs):
         kwargs = super().get_context_data(*args, **kwargs)
-        kwargs['header'] = self.header
-        kwargs['header_text'] = self.header_text
-        kwargs['header_css'] = self.header_css
-        kwargs['title'] = self.card_title
-        kwargs['subtitle'] = self.card_subtitle
-        kwargs['widget'] = self.widget
-        kwargs['widget_css'] = self.widget_css
-        kwargs['css_class'] = self.css_class
+        kwargs["header"] = self.header
+        kwargs["header_text"] = self.header_text
+        kwargs["header_css"] = self.header_css
+        kwargs["title"] = self.card_title
+        kwargs["subtitle"] = self.card_subtitle
+        kwargs["widget"] = self.widget
+        kwargs["widget_css"] = self.widget_css
+        kwargs["css_class"] = self.css_class
 
         if not self.widget:
             raise ImproperlyConfigured("You must define a widget.")
@@ -266,6 +259,7 @@ class MultipleModelWidget(Block):
             dialog when deleting instances.
 
     """
+
     #: If this is defined, do ``self.model.objects.all()`` to get our list of instances.
     #: Define either this or :py:attr:`queryset`, but not both.
     model: Type[Model] = None
@@ -295,11 +289,15 @@ class MultipleModelWidget(Block):
         model_widget: Widget = None,
         model_kwargs: Dict[str, Any] = None,
         item_label: str = None,
-        **kwargs
+        **kwargs,
     ) -> None:
         self.model = model if model else self.model
-        self.model_widget = model_widget if model_widget else deepcopy(self.model_widget)
-        self.model_kwargs = model_kwargs if model_kwargs else deepcopy(self.model_kwargs)
+        self.model_widget = (
+            model_widget if model_widget else deepcopy(self.model_widget)
+        )
+        self.model_kwargs = (
+            model_kwargs if model_kwargs else deepcopy(self.model_kwargs)
+        )
         self.queryset = queryset if queryset is not None else self.queryset
         self.ordering = ordering if ordering else self.ordering
         self.item_label = item_label if item_label else self.item_label
@@ -326,7 +324,7 @@ class MultipleModelWidget(Block):
             raise ImproperlyConfigured(
                 "%(cls)s is missing a model widget. Define "
                 "%(cls)s.model_widget or override "
-                "%(cls)s.get_model_widget()." % {'cls': self.__class__.__name__}
+                "%(cls)s.get_model_widget()." % {"cls": self.__class__.__name__}
             )
 
     def get_model_widgets(self, instances: List[Model]) -> List[Widget]:
@@ -356,9 +354,7 @@ class MultipleModelWidget(Block):
             raise ImproperlyConfigured(
                 "%(cls)s is missing a QuerySet. Define "
                 "%(cls)s.model, %(cls)s.queryset, or override "
-                "%(cls)s.get_queryset()." % {
-                    'cls': self.__class__.__name__
-                }
+                "%(cls)s.get_queryset()." % {"cls": self.__class__.__name__}
             )
         ordering = self.ordering
         if ordering:
@@ -394,10 +390,11 @@ class PagedModelWidget(MultipleModelWidget):
             },
         )
     """
-    template_name: str = 'wildewidgets/paged_model_widget.html'
+
+    template_name: str = "wildewidgets/paged_model_widget.html"
     block: str = "wildewidgets-paged-model-widget"
 
-    page_kwarg: str = 'page'
+    page_kwarg: str = "page"
     paginate_by: int = 25
     max_page_controls: int = 5
 
@@ -407,7 +404,7 @@ class PagedModelWidget(MultipleModelWidget):
         page_kwarg: str = None,
         paginate_by: int = None,
         extra_url: Dict[str, Any] = None,
-        **kwargs
+        **kwargs,
     ):
         self.page_kwarg = page_kwarg if page_kwarg else self.page_kwarg
         self.paginate_by = paginate_by if paginate_by else self.paginate_by
@@ -416,7 +413,7 @@ class PagedModelWidget(MultipleModelWidget):
 
     def get_context_data(self, *args, **kwargs):
         kwargs = super().get_context_data(*args, **kwargs)
-        self.request = kwargs.get('request')
+        self.request = kwargs.get("request")
         if self.paginate_by:
             paginator = Paginator(self.get_queryset(), self.paginate_by)
             page_number = self.request.GET.get(self.page_kwarg)
@@ -428,34 +425,36 @@ class PagedModelWidget(MultipleModelWidget):
                 page = paginator.page(page_number)
             except InvalidPage as e:
                 raise Http404(
-                    'Invalid page (%(page_number)s): %(message)s' % {
-                        'page_number': page_number,
-                        'message': str(e)
-                    }
+                    "Invalid page (%(page_number)s): %(message)s"
+                    % {"page_number": page_number, "message": str(e)}
                 )
-            kwargs['widget_list'] = self.get_model_widgets(page.object_list)
-            kwargs['page_obj'] = page
-            kwargs['is_paginated'] = page.has_other_pages()
-            kwargs['paginator'] = paginator
-            kwargs['page_kwarg'] = self.page_kwarg
-            pages = kwargs['page_obj'].paginator.num_pages
+            kwargs["widget_list"] = self.get_model_widgets(page.object_list)
+            kwargs["page_obj"] = page
+            kwargs["is_paginated"] = page.has_other_pages()
+            kwargs["paginator"] = paginator
+            kwargs["page_kwarg"] = self.page_kwarg
+            pages = kwargs["page_obj"].paginator.num_pages
             if pages > self.max_page_controls:
                 pages = self.max_page_controls
             page_number = page.number
             max_controls_half = int(self.max_page_controls / 2)
-            range_start = 1 if page_number - max_controls_half < 1 else page_number - max_controls_half
-            kwargs['page_range'] = range(range_start, range_start + pages)
+            range_start = (
+                1
+                if page_number - max_controls_half < 1
+                else page_number - max_controls_half
+            )
+            kwargs["page_range"] = range(range_start, range_start + pages)
         else:
-            kwargs['widget_list'] = self.get_model_widgets(self.get_queryset().all())
-        kwargs['item_label'] = self.item_label
+            kwargs["widget_list"] = self.get_model_widgets(self.get_queryset().all())
+        kwargs["item_label"] = self.item_label
         if self.extra_url:
             anchor = self.extra_url.pop("#", None)
             extra_url = f"&{urlencode(self.extra_url)}"
             if anchor:
                 extra_url = f"{extra_url}#{anchor}"
-            kwargs['extra_url'] = extra_url
+            kwargs["extra_url"] = extra_url
         else:
-            kwargs['extra_url'] = ''
+            kwargs["extra_url"] = ""
         return kwargs
 
 
@@ -485,6 +484,7 @@ class CollapseWidget(Block):
         css_id: This ID will be shared with the :py:class:`CollapseButton`.
 
     """
+
     block: str = "collapse"
 
 
@@ -520,20 +520,20 @@ class HorizontalLayoutBlock(Block):
 
     #: The valid column content ``justify-content-`` values
     VALID_JUSTIFICATIONS: List[str] = [
-        'start',
-        'center',
-        'end',
-        'between',
-        'around',
-        'evenly'
+        "start",
+        "center",
+        "end",
+        "between",
+        "around",
+        "evenly",
     ]
     #: The valid column content ``justify-content-`` values
     VALID_ALIGNMENTS: List[str] = [
-        'start',
-        'center',
-        'end',
-        'baseline',
-        'stretch',
+        "start",
+        "center",
+        "end",
+        "baseline",
+        "stretch",
     ]
 
     #: How to align items veritcally within this widget.  Valid choices: ``start``,
@@ -558,7 +558,7 @@ class HorizontalLayoutBlock(Block):
         align: str = None,
         justify: str = None,
         flex_size: str = None,
-        **kwargs
+        **kwargs,
     ):
         self.align = align if align else self.align
         self.justify = justify if justify else self.justify
@@ -579,8 +579,8 @@ class HorizontalLayoutBlock(Block):
         else:
             flex = "d-flex"
         self.add_class(flex)
-        self.add_class(f'align-items-{self.align}')
-        self.add_class(f'justify-content-{self.justify}')
+        self.add_class(f"align-items-{self.align}")
+        self.add_class(f"justify-content-{self.justify}")
 
 
 class ListModelWidget(MultipleModelWidget):
@@ -603,9 +603,10 @@ class ListModelWidget(MultipleModelWidget):
         remove_url: The url to "POST" to in order to delete or remove the object.
 
     """
-    block: str = 'list-group'
-    name: str = 'wildewidgets-list-model-widget'
-    tag: str = 'ul'
+
+    block: str = "list-group"
+    name: str = "wildewidgets-list-model-widget"
+    tag: str = "ul"
     show_no_items: bool = True
 
     #: The url to "POST" to in order to delete or remove the object.
@@ -619,9 +620,9 @@ class ListModelWidget(MultipleModelWidget):
             self.add_block(
                 Block(
                     f"No {self.item_label}s",
-                    tag='li',
-                    name='list-group-item',
-                    css_class="fw-light fst-italic border"
+                    tag="li",
+                    name="list-group-item",
+                    css_class="fw-light fst-italic border",
                 )
             )
         for widget in widgets:
@@ -640,19 +641,23 @@ class ListModelWidget(MultipleModelWidget):
         return str(instance)
 
     def get_model_subblock(self, instance: Model):
-        if hasattr(instance, 'get_absolute_url'):
+        if hasattr(instance, "get_absolute_url"):
             url = instance.get_absolute_url()
             # FIXME: use a Link here
-            return Block(HTMLWidget(
-                html=f'<a href="{url}"><label>{self.get_object_text(instance)}</label></a>')
+            return Block(
+                HTMLWidget(
+                    html=f'<a href="{url}"><label>{self.get_object_text(instance)}</label></a>'
+                )
             )
         else:
-            return Block(self.get_object_text(instance), tag='label')
+            return Block(self.get_object_text(instance), tag="label")
 
     def get_model_widget(self, object: Model = None, **kwargs):
         if self.model_widget:
             return super().get_model_widget(object=object, **kwargs)
-        widget = HorizontalLayoutBlock(tag='li', name='list-group-item listmodelwidget__item')
+        widget = HorizontalLayoutBlock(
+            tag="li", name="list-group-item listmodelwidget__item"
+        )
         widget.add_block(self.get_model_subblock(object))
         remove_url = self.get_remove_url(object)
         if remove_url:
@@ -683,11 +688,13 @@ class ListModelCardWidget(CardWidget):
         list_model_widget_class: The class to use for the list model widget.
             The default is :py:class:`ListModelWidget`.
         list_model_header_class: The class to use for the header.
+        placeholder: The placeholder text for the filter input.
     """
+
     SCRIPT: str = """
 var filter_input = document.getElementById("{filter_id}");
 filter_input.onkeyup = function(e) {{
-    var filter = filter_input.value.toLowerCase();
+    var filter = e.target.value.toLowerCase();
     document.querySelectorAll("{query} label").forEach(label => {{
         var test_string = label.innerText.toLowerCase();
         if (test_string.includes(filter)) {{
@@ -723,35 +730,38 @@ filter_input.onkeyup = function(e) {{
         *args,
         list_model_widget_class: Type[Widget] = None,
         list_model_header_class: Type[Widget] = None,
-        **kwargs
+        placeholder: Optional[str] = None,
+        **kwargs,
     ):
         self.id_base = f"list_modal_card_{random.randrange(0, 1000)}"
         self.list_model_widget_id = f"{self.id_base}_list_model_widget"
         self.filter_id = f"{self.id_base}_filter"
         self.list_model_widget_class = (
-            list_model_widget_class if list_model_widget_class else self.list_model_widget_class
+            list_model_widget_class
+            if list_model_widget_class
+            else self.list_model_widget_class
         )
         widget_kwargs = {
-            'remove_url': kwargs.pop("remove_url", None),
-            'model': kwargs.pop("model", None),
-            'model_widget': kwargs.pop("model_widget", None),
-            'ordering': kwargs.pop("ordering", None),
-            'queryset': kwargs.pop("queryset", None),
-            'model_kwargs': kwargs.pop("model_kwargs", {}),
-            'item_label': kwargs.pop("item_label", "item"),
-            'css_id': self.list_model_widget_id,
+            "remove_url": kwargs.pop("remove_url", None),
+            "model": kwargs.pop("model", None),
+            "model_widget": kwargs.pop("model_widget", None),
+            "ordering": kwargs.pop("ordering", None),
+            "queryset": kwargs.pop("queryset", None),
+            "model_kwargs": kwargs.pop("model_kwargs", {}),
+            "item_label": kwargs.pop("item_label", "item"),
+            "css_id": self.list_model_widget_id,
         }
         self.widget = self.get_list_model_widget(**widget_kwargs)
-        kwargs['widget'] = self.widget
+        self.placeholder = placeholder or f"Filter {self.widget.item_label}s"
+        kwargs["widget"] = self.widget
         header_kwargs = {
-            'title': kwargs.pop("title", ""),
+            "title": kwargs.pop("title", ""),
         }
-        kwargs['header'] = self.get_list_model_header(**header_kwargs)
-        kwargs['header_css'] = "bg-light"
+        kwargs["header"] = self.get_list_model_header(**header_kwargs)
+        kwargs["header_css"] = "bg-light"
         filter_label_query = f"#{self.list_model_widget_id}"
-        kwargs['script'] = self.SCRIPT.format(
-            query=filter_label_query,
-            filter_id=self.filter_id
+        kwargs["script"] = self.SCRIPT.format(
+            query=filter_label_query, filter_id=self.filter_id
         )
         super().__init__(*args, **kwargs)
 
@@ -760,6 +770,7 @@ filter_input.onkeyup = function(e) {{
 
     def get_list_model_header(self, *args, **kwargs):
         from .forms import InputBlock, LabelBlock
+
         if self.list_model_header_class:
             return self.list_model_header_class(*args, **kwargs)  # pylint: disable=not-callable
 
@@ -787,21 +798,21 @@ filter_input.onkeyup = function(e) {{
         header = Block(
             Block(
                 LabelBlock(
-                    f'Filter {self.widget.item_label}s',
+                    f"Filter {self.widget.item_label}s",
                     css_class="d-none",
-                    for_input=self.filter_id
+                    for_input=self.filter_id,
                 ),
                 InputBlock(
                     attributes={
-                        'type': 'text',
-                        'placeholder': f'Filter {self.widget.item_label}s',
+                        "type": "text",
+                        "placeholder": self.placeholder,
                     },
-                    css_id=f'{self.id_base}_filter',
-                    css_class='form-control',
+                    css_id=f"{self.id_base}_filter",
+                    css_class="form-control",
                 ),
-                css_class='w-25',
+                css_class="w-25",
             ),
             Block(""),
-            css_class="d-flex flex-row-reverse w-100"
+            css_class="d-flex flex-row-reverse w-100",
         )
         return header
