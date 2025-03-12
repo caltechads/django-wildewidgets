@@ -1,4 +1,4 @@
-__version__ = "0.16.16"
+__version__ = "1.0.0"
 
 from .widgets import *  # noqa: F403,F401
 from .menus import *  # noqa: F403,F401
