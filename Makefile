@@ -5,15 +5,14 @@ PACKAGE = django-wildewidgets
 
 clean:
 	rm -rf *.tar.gz dist build *.egg-info *.rpm
-	find . -name "*.pyc" | xargs rm 
+	find . -name "*.pyc" | xargs rm
 	find . -name "__pycache__" | xargs rm -rf
 
 version:
 	@echo $(VERSION)
 
 dist: clean
-	@python setup.py sdist
-	@python setup.py bdist_wheel --universal
+	@python -m build
 
 pypi: dist
 	@twine upload dist/*

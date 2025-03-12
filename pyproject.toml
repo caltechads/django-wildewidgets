@@ -1,0 +1,41 @@
+[project]
+name = "django-wildewidgets"
+version = "1.0.0"
+description = """django-wildewidgets is a Django design library providing several tools for
+building full-featured, widget-based web applications with a standard,
+consistent design, based on Bootstrap."""
+readme = "README.md"
+requires-python = ">=3.7"
+authors = [
+    {name = "Caltech IMSS ADS", email = "imss-ads-staff@caltech.edu"}
+]
+keywords = ["design", "widget", "django"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Framework :: Django",
+    "Framework :: Django :: 3.2",
+    "Framework :: Django :: 4.0",
+    "Framework :: Django :: 4.1",
+    "Framework :: Django :: 5.1",
+    "Topic :: Software Development :: User Interfaces",
+]
+dependencies = [
+    "django-crispy-forms",
+    "crispy-bootstrap5",
+]
+
+[project.urls]
+Homepage = "https://github.com/caltechads/django-wildewidgets"
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
