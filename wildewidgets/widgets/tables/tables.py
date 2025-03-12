@@ -9,7 +9,11 @@ from django.db import models
 from django.db.models.fields.related import RelatedField, ManyToManyRel
 
 from .base import BaseDataTable
-from .actions import ActionButtonBlockMixin, ActionsButtonsBySpecMixin, RowActionButton
+from .actions import (
+    ActionButtonBlockMixin,
+    ActionsButtonsBySpecMixin,
+    RowActionButton,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -17,6 +21,7 @@ logger = logging.getLogger(__name__)
 # -------------------------------
 # Mixins
 # -------------------------------
+
 
 class ModelTableMixin:
     """
@@ -92,17 +97,27 @@ class ModelTableMixin:
         field_types: Dict[str, str] = None,
         alignment: Dict[str, str] = None,
         bool_icons: Dict[str, str] = None,
-        **kwargs
+        **kwargs,
     ):
         self.model = model if model is not None else self.model
         self.fields = fields if fields else deepcopy(self.fields)
         self.hidden = hidden if hidden else deepcopy(self.hidden)
-        self.verbose_names = verbose_names if verbose_names else deepcopy(self.verbose_names)
-        self.unsortable = unsortable if unsortable else deepcopy(self.unsortable)
-        self.unsearchable = unsearchable if unsearchable else deepcopy(self.unsearchable)
-        self.field_types = field_types if field_types else deepcopy(self.field_types)
+        self.verbose_names = (
+            verbose_names if verbose_names else deepcopy(self.verbose_names)
+        )
+        self.unsortable = (
+            unsortable if unsortable else deepcopy(self.unsortable)
+        )
+        self.unsearchable = (
+            unsearchable if unsearchable else deepcopy(self.unsearchable)
+        )
+        self.field_types = (
+            field_types if field_types else deepcopy(self.field_types)
+        )
         self.alignment = alignment if alignment else deepcopy(self.alignment)
-        self.bool_icons = bool_icons if bool_icons else deepcopy(self.bool_icons)
+        self.bool_icons = (
+            bool_icons if bool_icons else deepcopy(self.bool_icons)
+        )
         super().__init__(*args, **kwargs)
 
         #: A mapping of field name to Django field class
@@ -114,7 +129,7 @@ class ModelTableMixin:
 
         # Build our mapping of all known fields on :py:attr:`model`
         for field in self.model._meta.get_fields():
-            if field.name == 'id':
+            if field.name == "id":
                 continue
             self.model_fields[field.name] = field
             self.field_names.append(field.name)
@@ -127,23 +142,19 @@ class ModelTableMixin:
                 if field:
                     self.related_fields[field_name] = field
 
-        if not self.fields or self.fields == '__all__':
+        if not self.fields or self.fields == "__all__":
             self.load_all_fields()
         else:
             for field_name in self.fields:
                 self.load_field(field_name)
 
     def get_related_model(
-        self,
-        current_model: Type[models.Model],
-        field_name: str
+        self, current_model: Type[models.Model], field_name: str
     ) -> models.Model:
         return current_model._meta.get_field(field_name).related_model
 
     def get_related_field(
-        self,
-        current_model: models.Model,
-        name: str
+        self, current_model: models.Model, name: str
     ) -> Optional[models.Field]:
         """
         Given ``name``, a field specifier in Django QuerySet format, e.g.
@@ -157,7 +168,7 @@ class ModelTableMixin:
         Returns:
             the :py:class:`Field` instance, or ``None`` if we couldn't find one.
         """
-        name_fields: List[str] = name.split('__')
+        name_fields: List[str] = name.split("__")
         if len(name_fields) == 1:
             # This is not a related field specifier
             return None
@@ -194,34 +205,44 @@ class ModelTableMixin:
             field = None
         return field
 
-    def set_standard_column_attributes(self, field_name: str, kwargs: Dict[str, Any]) -> None:
+    def set_standard_column_attributes(
+        self, field_name: str, kwargs: Dict[str, Any]
+    ) -> None:
         if field_name in self.hidden:
-            kwargs['visible'] = False
+            kwargs["visible"] = False
         if field_name in self.unsearchable:
-            kwargs['searchable'] = False
+            kwargs["searchable"] = False
         if field_name in self.unsortable:
-            kwargs['sortable'] = False
+            kwargs["sortable"] = False
         if field_name in self.alignment:
-            kwargs['align'] = self.alignment[field_name]
+            kwargs["align"] = self.alignment[field_name]
         else:
             field = self.get_field(field_name)
-            if isinstance(field, (models.TextField, models.CharField, models.DateField, models.DateTimeField)):
-                kwargs['align'] = 'left'
+            if isinstance(
+                field,
+                (
+                    models.TextField,
+                    models.CharField,
+                    models.DateField,
+                    models.DateTimeField,
+                ),
+            ):
+                kwargs["align"] = "left"
             else:
-                kwargs['align'] = 'right'
+                kwargs["align"] = "right"
 
     def load_field(self, field_name: str) -> None:
         if field_name in self.model_fields:
             field = self.model_fields[field_name]
-            verbose_name = field.name.replace('_', ' ')
+            verbose_name = field.name.replace("_", " ")
             kwargs = {}
             if field_name in self.verbose_names:
-                kwargs['verbose_name'] = self.verbose_names[field_name]
-            elif hasattr(field, 'verbose_name'):
+                kwargs["verbose_name"] = self.verbose_names[field_name]
+            elif hasattr(field, "verbose_name"):
                 if verbose_name == field.verbose_name:
-                    kwargs['verbose_name'] = verbose_name.capitalize()
+                    kwargs["verbose_name"] = verbose_name.capitalize()
                 else:
-                    kwargs['verbose_name'] = field.verbose_name
+                    kwargs["verbose_name"] = field.verbose_name
             self.set_standard_column_attributes(field_name, kwargs)
             self.add_column(field_name, **kwargs)
         else:
@@ -229,8 +250,12 @@ class ModelTableMixin:
             if field_name in self.verbose_names:
                 verbose_name = self.verbose_names[field_name]
             else:
-                verbose_name = field_name.replace('_', ' ').replace('__', ' ').capitalize()
-            kwargs['verbose_name'] = verbose_name
+                verbose_name = (
+                    field_name.replace("_", " ")
+                    .replace("__", " ")
+                    .capitalize()
+                )
+            kwargs["verbose_name"] = verbose_name
             self.set_standard_column_attributes(field_name, kwargs)
             self.add_column(field_name, **kwargs)
 
@@ -246,7 +271,9 @@ class ModelTableMixin:
             return '<i class="bi-check-lg text-success"><span style="display:none">True</span></i>'
         return ""
 
-    def render_bool_icon_column(self, value: Any, icon_data: Tuple[str, str]) -> str:
+    def render_bool_icon_column(
+        self, value: Any, icon_data: Tuple[str, str]
+    ) -> str:
         if len(icon_data) == 0:
             return value
         if value == "True":
@@ -257,7 +284,7 @@ class ModelTableMixin:
 
     def render_datetime_type_column(self, value: datetime.datetime) -> str:
         datetime_format = "%m/%d/%Y %H:%M"
-        if hasattr(settings, 'WILDEWIDGETS_DATETIME_FORMAT'):
+        if hasattr(settings, "WILDEWIDGETS_DATETIME_FORMAT"):
             datetime_format = settings.WILDEWIDGETS_DATETIME_FORMAT
         if value:
             return value.strftime(datetime_format)
@@ -265,11 +292,23 @@ class ModelTableMixin:
 
     def render_date_type_column(self, value: datetime.date) -> str:
         date_format = "%m/%d/%Y"
-        if hasattr(settings, 'WILDEWIDGETS_DATE_FORMAT'):
+        full_date_format = date_format
+        modified_date_format = False
+        if hasattr(settings, "WILDEWIDGETS_DATE_FORMAT"):
             date_format = settings.WILDEWIDGETS_DATE_FORMAT
+            modified_date_format = True
         if value:
-            return value.strftime(date_format)
-        return ""
+            date_str = value.strftime(date_format)
+            if modified_date_format:
+                full_date_str = value.strftime(full_date_format)
+                return f"<span title='{full_date_str}'>{date_str}</span>"
+            else:
+                return date_str
+        else:
+            date_str = ""
+        if modified_date_format:
+            return f"<span title='{date_str}'>{date_str}</span>"
+        return date_str
 
     def render_column(self, row: Any, column: str) -> str:
         value = super().render_column(row, column)
@@ -283,7 +322,7 @@ class ModelTableMixin:
             field_type = self.field_types[column]
             attr_name = f"render_{field_type}_type_column"
             if hasattr(self, attr_name):
-                if attr_name in ['date', 'datetime']:
+                if attr_name in ["date", "datetime"]:
                     value = getattr(row, column)
                 return getattr(self, attr_name)(value)
         elif isinstance(field, models.DateTimeField):
@@ -319,10 +358,8 @@ class WidgetCellMixin:
 # Tables
 # -------------------------------
 
-class DataTable(
-    ActionsButtonsBySpecMixin,
-    BaseDataTable
-):
+
+class DataTable(ActionsButtonsBySpecMixin, BaseDataTable):
     pass
 
 
@@ -349,13 +386,12 @@ class BasicModelTable(ModelTableMixin, DataTable):
                     return f"{authors[0].full_name} ... "
                 return authors[0].full_name
     """
+
     pass
 
 
 class ActionButtonModelTable(
-    ActionButtonBlockMixin,
-    ModelTableMixin,
-    BaseDataTable
+    ActionButtonBlockMixin, ModelTableMixin, BaseDataTable
 ):
     """
     This class is used to create a table from a
@@ -382,13 +418,12 @@ class ActionButtonModelTable(
                     return f"{authors[0].full_name} ... "
                 return authors[0].full_name
     """
+
     pass
 
 
 class StandardActionButtonModelTable(
-    ActionButtonBlockMixin,
-    ModelTableMixin,
-    BaseDataTable
+    ActionButtonBlockMixin, ModelTableMixin, BaseDataTable
 ):
     """
     This class is used to create a table from a
@@ -429,14 +464,11 @@ class StandardActionButtonModelTable(
             model = Book
             striped = True
     """
+
     pass
 
 
-class LookupModelTable(
-    ActionButtonBlockMixin,
-    ModelTableMixin,
-    BaseDataTable
-):
+class LookupModelTable(ActionButtonBlockMixin, ModelTableMixin, BaseDataTable):
     """
     This class is used to create a table for a lookup table.  It from
     :py:class:`ActionButtonsModelTable` in that if :py:attr:`fields` is empty,
@@ -450,8 +482,8 @@ class LookupModelTable(
     actions: List[RowActionButton] = []
 
     def __init__(self, *args, **kwargs):
-        fields = kwargs.pop('fields', [])
-        model = kwargs.get('model')
+        fields = kwargs.pop("fields", [])
+        model = kwargs.get("model")
         if not model:
             model = self.model
         if not fields and not self.fields:
@@ -461,8 +493,8 @@ class LookupModelTable(
                 if not isinstance(field, (RelatedField, ManyToManyRel)):
                     # Exclude any RelatedField -- that's what
                     fields.append(field.name)
-                    if field.name == 'id':
-                        alignment['id'] = 'left'
-            kwargs['fields'] = fields
-            kwargs['alignment'] = alignment
+                    if field.name == "id":
+                        alignment["id"] = "left"
+            kwargs["fields"] = fields
+            kwargs["alignment"] = alignment
         super().__init__(*args, **kwargs)

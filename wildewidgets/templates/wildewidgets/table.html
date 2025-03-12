@@ -37,16 +37,35 @@
 
     </div>
     <div class="d-flex flex-column align-items-start border-left border-secondary">
-      <div id="{{name}}__columns" class="btn-group ms-3 mt-3 mw-auto toolbar__columns {{name}}__columns collapse" role="group" aria-label="Show/Hide Columns">
-        <a href="#" role="button" class="btn btn-info label-btn"  aria-disabled="true">Columns</a>
-        {% for key,item in header.items %}
-          {% if item.verbose_name.strip %}
-            <button type="button" data-bs-toggle="button" aria-pressed="true" autocomplete="off" class="toggle-vis btn btn-outline-secondary {{item.visible|yesno:'active,'}}" data-column="{{forloop.counter0}}">{{item.verbose_name}}</button>
-          {% endif %}
-        {% endfor %}
+      <div
+        id="{{name}}__columns"
+        class="ms-3 mt-3 mw-auto toolbar__columns {{name}}__columns collapse"
+        role="group"
+        aria-label="Show/Hide Columns"
+      >
+        <div class="d-flex">
+          <a href="#" role="button" class="btn btn-info label-btn btn-square"  aria-disabled="true">Columns</a>
+          <div class="" >
+            <div class="btn-toolbar">
+              <div class="btn-group" display="block">
+              {% for key,item in header.items %}
+                {% if item.verbose_name.strip %}
+                  <button type="button" data-bs-toggle="button" aria-pressed="true" autocomplete="off" class="toggle-vis btn btn-square btn-outline-secondary border-secondary {{item.visible|yesno:'active,'}}" data-column="{{forloop.counter0}}">{{item.verbose_name}}</button>
+                {% endif %}
+                {% if key in column_wrap_fields %}
+              </div>
+            </div>
+            <div class="btn-toolbar">
+              <div class="btn-group" display="block">
+                {% endif %}
+              {% endfor %}
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
       <div id="{{name}}__filters" class="btn-group ms-3 mt-3 {{name}}__filters collapse" role="group" aria-label="Search Filters">
-        <a href="#" role="button" class="btn btn-info label-btn"  aria-disabled="true">Filter by</a>
+        <a href="#" role="button" class="btn btn-info label-btn btn-square"  aria-disabled="true">Filter by</a>
         {% for batch in filters %}
           {% with field_counter=forloop.counter0 filter=batch.1 item=batch.0 %}
             {% if filter %}
