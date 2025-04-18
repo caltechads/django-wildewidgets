@@ -4,11 +4,11 @@
 from django.core.exceptions import ImproperlyConfigured
 
 
-from .base import TemplateWidget
+from .base import Block
 from .forms import CrispyFormWidget
 
 
-class ModalWidget(TemplateWidget):
+class ModalWidget(Block):
     """
     Renders a Bootstrap 5 Modal.
 
@@ -18,13 +18,21 @@ class ModalWidget(TemplateWidget):
         modal_body: The body of the modal, any Block.
         modal_size (optional): The size of the modal. One of 'sm', 'lg', or 'xl'.
     """
-    template_name = 'wildewidgets/modal.html'
+
+    template_name = "wildewidgets/modal.html"
     modal_id = None
     modal_title = None
     modal_body = None
     modal_size = None
 
-    def __init__(self, modal_id=None, modal_title=None, modal_body=None, modal_size=None, **kwargs):
+    def __init__(
+        self,
+        modal_id=None,
+        modal_title=None,
+        modal_body=None,
+        modal_size=None,
+        **kwargs,
+    ):
         self.modal_id = modal_id if modal_id else self.modal_id
         self.modal_title = modal_title if modal_title else self.modal_title
         self.modal_body = modal_body if modal_body else self.modal_body
@@ -33,10 +41,10 @@ class ModalWidget(TemplateWidget):
 
     def get_context_data(self, *args, **kwargs):
         kwargs = super().get_context_data(*args, **kwargs)
-        kwargs['modal_id'] = self.modal_id
-        kwargs['modal_title'] = self.modal_title
-        kwargs['modal_body'] = self.modal_body
-        kwargs['modal_size'] = self.modal_size
+        kwargs["modal_id"] = self.modal_id
+        kwargs["modal_title"] = self.modal_title
+        kwargs["modal_body"] = self.modal_body
+        kwargs["modal_size"] = self.modal_size
         return kwargs
 
 
@@ -48,6 +56,7 @@ class CrispyFormModalWidget(ModalWidget):
         form: The form to render in the modal.
         form_class: The form class to render in the modal.
     """
+
     form_class = None
     form = None
 
@@ -64,7 +73,5 @@ class CrispyFormModalWidget(ModalWidget):
         else:
             raise ImproperlyConfigured("Either 'form_class' or 'form' must be set")
         modal_body = CrispyFormWidget(form=modal_form)
-        kwargs['modal_body'] = modal_body
+        kwargs["modal_body"] = modal_body
         super().__init__(**kwargs)
-
-
