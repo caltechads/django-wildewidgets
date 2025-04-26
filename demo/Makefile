@@ -16,9 +16,8 @@ package:
 	(cd ..; python setup.py sdist)
 	cp ../dist/django-wildewidgets-${VERSION}.tar.gz django-wildewidgets.tar.gz
 
-build: package
-	# docker build -t ${PACKAGE}:${VERSION} .
-	docker buildx build --platform linux/amd64 -t ${PACKAGE}:${VERSION} .
+build:
+	docker build -t ${PACKAGE}:${VERSION} .
 	docker tag ${PACKAGE}:${VERSION} ${PACKAGE}:latest
 	docker image prune -f
 
