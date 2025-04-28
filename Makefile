@@ -14,8 +14,8 @@ version:
 dist: clean
 	@python -m build
 
-pypi: dist
-	@twine upload dist/*
+release: dist
+	@bin/release.sh
 
 tox:
 	# create a tox pyenv virtualenv based on 2.7.x
