@@ -18,10 +18,10 @@
 import django
 import os
 import sys
-sys.path.insert(0, os.path.abspath('../demo'))
-os.environ['DJANGO_SETTINGS_MODULE'] = 'demo.settings'
-django.setup()
 
+sys.path.insert(0, os.path.abspath("../demo"))
+os.environ["DJANGO_SETTINGS_MODULE"] = "demo.settings"
+django.setup()
 
 
 # -- Project information -----------------------------------------------------
@@ -29,15 +29,15 @@ django.setup()
 # the master toctree document
 master_doc = "index"
 
-project = 'django-wildewidgets'
-copyright = '2023, California Institute of Technology'   # pylint: disable=redefined-builtin
-author = 'Glenn Bach, Chris Malek'
+project = "django-wildewidgets"
+copyright = "2023, California Institute of Technology"  # pylint: disable=redefined-builtin
+author = "Glenn Bach, Chris Malek"
 
-from typing import List, Dict, Tuple, Optional
+from typing import Dict, Tuple, Optional  # noqa: E402
 
 
 # The full version, including alpha/beta/rc tags
-release = '1.0.3'
+release = "1.0.4"
 
 
 # -- General configuration ---------------------------------------------------
@@ -46,34 +46,37 @@ release = '1.0.3'
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-    'sphinx.ext.napoleon',
-    'sphinx.ext.autodoc',
-    'sphinx.ext.viewcode',
-    'sphinxcontrib.images',
-    'sphinx.ext.intersphinx',
+    "sphinx.ext.napoleon",
+    "sphinx.ext.autodoc",
+    "sphinx.ext.viewcode",
+    "sphinxcontrib.images",
+    "sphinx.ext.intersphinx",
 ]
 
 
 # Add any paths that contain templates here, relative to this directory.
-templates_path = ['_templates']
+templates_path = ["_templates"]
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
-exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
+exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
 add_function_parentheses: bool = False
 add_module_names: bool = False
 
-autodoc_member_order = 'groupwise'
+autodoc_member_order = "groupwise"
 
 # Make Sphinx not expand all our Type Aliases
-autodoc_type_aliases = {}
+autodoc_type_aliases: Dict[str, str] = {}
 
 # the locations and names of other projects that should be linked to this one
 intersphinx_mapping: Dict[str, Tuple[str, Optional[str]]] = {
-    'python': ('https://docs.python.org/3', None),
-    'django': ('http://docs.djangoproject.com/en/dev/', 'http://docs.djangoproject.com/en/dev/_objects/'),
+    "python": ("https://docs.python.org/3", None),
+    "django": (
+        "http://docs.djangoproject.com/en/dev/",
+        "http://docs.djangoproject.com/en/dev/_objects/",
+    ),
 }
 
 # Configure the path to the Django settings module
@@ -101,8 +104,8 @@ html_context = {
 # documentation.
 #
 html_theme_options = {
-    'collapse_navigation': True,
-    'navigation_depth': 3,
+    "collapse_navigation": True,
+    "navigation_depth": 3,
     "show_prev_next": False,
     "logo": {
         "image_light": "wildewidgets_logo.png",
@@ -121,12 +124,12 @@ html_theme_options = {
             "url": "https://wildewidgets.caltech.edu",
             "icon": "fa fa-desktop",
             "type": "fontawesome",
-        }
+        },
     ],
 }
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['_static']
+html_static_path = ["_static"]
 html_logo = "_static/wildewidgets.png"
 html_favicon = "_static/favicon.ico"

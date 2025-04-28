@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="demo",
-    version="1.0.3",
+    version="1.0.4",
     description="",
     author="Caltech IMSS ADS",
     author_email="imss-ads-staff@caltech.edu",

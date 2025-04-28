@@ -681,7 +681,8 @@ class HTMXView(TemplateView):
 
     def set_data(self, request_data):
         self.data = request_data.dict()
-        del self.data['submit']
+        if "submit" in self.data:
+            del self.data['submit']
 
     def get(self, request, *args, **kwargs):
         self.set_data(request.GET)
