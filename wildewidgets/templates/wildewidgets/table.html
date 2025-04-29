@@ -170,7 +170,7 @@
         ],
         {% endif %}
       language: dt_language,
-      {% comment %} searching: {{options.searchable|yesno:"true,false,true"}}, {% endcomment %}
+      searching: {{options.searchable|yesno:"true,false,true"}},
       paging: {{options.paging|yesno:"true,false,true"}},
       lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, "All"]],
       {% if options.page_length %}pageLength: {{options.page_length}},{% endif %}
