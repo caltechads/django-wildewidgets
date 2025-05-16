@@ -201,7 +201,7 @@
       ],
       createdRow: function(row,data,index,cells) {
         {% for item in stylers %}
-        if (data[{{item.test_index}}]=="{{item.cell_value}}") {
+        if (data.{{item.test_cell}}=="{{item.cell_value}}") {
           {% if item.is_row %}
           $(row).addClass("{{item.css_class}}");
           {% else %}
