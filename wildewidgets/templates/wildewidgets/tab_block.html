@@ -5,16 +5,16 @@
   <ul class="nav nav-tabs">
   {% for tab in tabs %}
   <li class="nav-item">
-    <a 
-      class="nav-link {% if forloop.first %}active{% endif %}" 
-      id="{{tab.0|slugify}}-{{identifier}}-tab" 
-      data-bs-toggle="tab" 
-      href="#nav-{{tab.0|slugify}}-{{identifier}}" 
-      role="tab" 
-      aria-controls="nav-{{tab.0|slugify}}-{{identifier}}" 
+    <a
+      class="nav-link {% if forloop.first %}active{% endif %}"
+      id="{{tab.0|slugify}}-{{identifier}}-tab"
+      data-bs-toggle="tab"
+      href="#nav-{{tab.0|slugify}}-{{identifier}}"
+      role="tab"
+      aria-controls="nav-{{tab.0|slugify}}-{{identifier}}"
       aria-selected="{{forloop.first|yesno:'true,false,false'}}"
     >
-      {{tab.0}}
+      {{tab.0|safe}}
     </a>
   </li>
   {% endfor %}
@@ -23,10 +23,10 @@
   <div class="card-body">
     <div class="tab-content" id="nav-tabContent">
       {% for tab in tabs %}
-        <div 
-          class="tab-pane fade {% if forloop.first %}show active{% endif %}" 
-          id="nav-{{tab.0|slugify}}-{{identifier}}" 
-          role="tabpanel" 
+        <div
+          class="tab-pane fade {% if forloop.first %}show active{% endif %}"
+          id="nav-{{tab.0|slugify}}-{{identifier}}"
+          role="tabpanel"
           aria-labelledby="nav-{{tab.0|slugify}}-{{identifier}}-tab"
         >
           {% wildewidgets tab.1 %}
