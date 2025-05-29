@@ -1,6 +1,6 @@
 [project]
 name = "django-wildewidgets"
-version = "1.1.3"
+version = "1.1.4"
 description = """django-wildewidgets is a Django design library providing several tools for
 building full-featured, widget-based web applications with a standard,
 consistent design, based on Bootstrap."""
