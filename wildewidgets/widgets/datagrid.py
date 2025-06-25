@@ -1,24 +1,49 @@
+from __future__ import annotations
+
 from copy import deepcopy
-from typing import Any, Dict, List, Optional, Tuple, Union, cast
+from typing import Any, cast
 
 from django.core.exceptions import ImproperlyConfigured
 
 from .base import Block
 
 
-DatagridItemDef = Union["DatagridItem", Tuple[str, str], Tuple[str, str, Dict[str, Any]]]
-
-
 class DatagridItem(Block):
     """
-    This widget implements a `Tabler datagrid-item
+    Implements a `Tabler datagrid-item
     <https://preview.tabler.io/docs/datagrid.html>`_ It should be used with
     :py:class:`Datagrid`.
 
     Note:
-        Unlike :py:class:`wildewidgets.widgets.base.Block`, :py:class:`DatagridItem` requires
-        either :py:attr:`contents` to be set, or the block contents to be
-        provided as positional arguments.
+        Unlike :py:class:`wildewidgets.widgets.base.Block`,
+        :py:class:`DatagridItem` requires either :py:attr:`contents` to be set,
+        or the block contents to be provided as positional arguments.
+
+    Examples:
+        Create a :py:class:`DatagridItem` with a title and content:
+
+        .. code-block:: python
+
+            from wildewidgets import DatagridItem, Datagrid
+
+            item = DatagridItem(
+                "This is the content of the item.",
+                title="My Item",
+                url="https://example.com"
+            )
+
+            grid = Datagrid(item)
+
+            # or
+
+            grid = Datagrid()
+            grid.add_item(item)
+
+
+    Args:
+        *blocks: strings or :py:class:`wildewidgets.widgets.base.Block` objects
+            to add to our ``datagrid-item``.  If :py:attr:`contents` is not set,
+            these blocks will be used as the contents of the ``datagrid-item``.
 
     Keyword Args:
         title: the ``datagrid-title`` of the ``datagrid-item``
@@ -28,24 +53,31 @@ class DatagridItem(Block):
         ValueError: either the ``title`` was empty, or no contents were provided
         ImproperlyConfigured: :py:attr:`url` was set, and there is more than one block
             in :py:attr:`contents`
+
     """
-    block: str = 'datagrid-item'
+
+    block: str = "datagrid-item"
 
     #: the ``datagrid-title`` of the ``datagrid-item``
-    title: Optional[str] = None
+    title: str | None = None
     #: a URL to use to turn our contents into a hyperlink
-    url: Optional[str] = None
+    url: str | None = None
 
     def __init__(
         self,
-        *blocks,
-        title: str = None,
-        url: str = None,
-        **kwargs
+        *blocks: Any,
+        title: str | None = None,
+        url: str | None = None,
+        **kwargs: Any,
     ) -> None:
         self.title = title if title else self.title
+        assert self.title is not None, "title is required"  # noqa: S101
         if not self.title:
-            raise ValueError('"title" is required as either a keyword argument or as a class attribute')
+            msg = (
+                '"title" is required as either a keyword argument or as a class '
+                "attribute"
+            )
+            raise ValueError(msg)
         self.url = url if url else self.url
         super().__init__(*blocks, **kwargs)
 
@@ -53,48 +85,52 @@ class DatagridItem(Block):
         """
         Add our content.
 
-        If :py:attr:`url` is set, and there is only one block in :py:attr:`contents`, wrap
-        that block in a :py:class:`wildewidgets.Link`.
+        If :py:attr:`url` is set, and there is only one block in
+        :py:attr:`contents`, wrap that block in a :py:class:`wildewidgets.Link`.
 
         Raises:
-            ImproperlyConfigured: :py:attr:`url` was set, and there is more than one block
-                in :py:attr:`contents`
+            ImproperlyConfigured: :py:attr:`url` was set, and there is more than
+                one block in :py:attr:`contents`
+
         """
         if self.url:
             if len(self.contents) == 1:
                 wrapper: Block = Block(
                     self.contents[0],
-                    tag='a',
-                    attributes={'href': self.url},
-                    name='datagrid-content'
+                    tag="a",
+                    attributes={"href": self.url},
+                    name="datagrid-content",
                 )
             else:
-                raise ImproperlyConfigured(
-                    f'{self.__class__.__name__}: url should only be set if contents are a single block'
+                msg = (
+                    f"{self.__class__.__name__}: url should only be set if contents "
+                    "are a single block"
                 )
+                raise ImproperlyConfigured(msg)
+        elif len(self.contents) == 1:
+            if not isinstance(self.contents[0], Block):
+                # Wrap the text in a block to allow us to assign the datagrid-content
+                # class to it
+                wrapper = Block(self.contents[0], name="datagrid-content")
+            else:
+                wrapper = self.contents[0]
         else:
-            if len(self.contents) == 1:
-                if not isinstance(self.contents[0], Block):
-                    # Wrap the text in a block to allow us to assign the datagrid-content
-                    # class to it
-                    wrapper = Block(self.contents[0], name='datagrid-content')
-                else:
-                    wrapper = self.contents[0]
-            else:
-                wrapper = Block(name='datagrid-content')
-                for block in self.contents:
-                    wrapper.add_block(block)
-        self.add_block(Block(self.title, name='datagrid-title'))
+            wrapper = Block(name="datagrid-content")
+            for block in self.contents:
+                wrapper.add_block(block)
+        self.add_block(Block(self.title, name="datagrid-title"))  # type: ignore[arg-type]
         self.add_block(wrapper)
+
+
+DatagridItemDef = DatagridItem | tuple[str, str] | tuple[str, str, dict[str, Any]]
 
 
 class Datagrid(Block):
     """
-    This widget implements a `Tabler Data grid <https://preview.tabler.io/docs/datagrid.html>`_
+    Implements a `Tabler Data grid <https://preview.tabler.io/docs/datagrid.html>`_
     It contains :py:class:`DatagridItem` objects.
 
     Examples:
-
         Add :py:class:`DatagridItem` objects to this in one of these ways:
 
         As constructor arguments::
@@ -115,39 +151,41 @@ class Datagrid(Block):
             >>> grid.add_item('foo', 'bar')
 
     Args:
-        *items: a list of ``datagrid-item`` definitions or :py:class:`DatagridItem` objects.
-    """
-    block: str = 'datagrid'
-    #: a list of ``datagrid-items`` to add to our content
-    items: List[DatagridItemDef] = []
+        *items: a list of ``datagrid-item`` definitions or
+        *:py:class:`DatagridItem` objects.
 
-    def __init__(self, *items: DatagridItemDef, **kwargs):
+    """
+
+    block: str = "datagrid"
+    #: a list of ``datagrid-items`` to add to our content
+    items: list[DatagridItemDef] = []  # noqa: RUF012
+
+    def __init__(self, *items: DatagridItemDef, **kwargs: Any) -> None:
         self.items = list(items) if items else deepcopy(self.items)
         super().__init__(**kwargs)
         for item in items:
             if isinstance(item, DatagridItem):
                 self.add_block(item)
             elif isinstance(item, tuple):
-                if len(item) == 2:
-                    item = cast(Tuple[str, str], item)
+                if len(item) == 2:  # noqa: PLR2004
+                    item = cast("tuple[str, str]", item)
                     self.add_item(item[0], item[1])
                 else:
-                    item = cast(Tuple[str, str, Dict[str, Any]], item)
+                    item = cast("tuple[str, str, dict[str, Any]]", item)
                     self.add_item(item[0], item[1], **item[2])
 
     def add_item(
         self,
         title: str,
-        content: Union[Union[str, Block], List[Union[str, Block]]],
-        url: str = None,
-        **kwargs
+        content: str | Block | list[str | Block],
+        url: str | None = None,
+        **kwargs: Any,
     ) -> None:
         """
         Add a :py:class:`DatagridItem` to our block contents, with
         ``datagrid-title`` of ``title`` and datagrid.
 
         Examples:
-
             Start with our grid::
 
                 >>> dg = DataGrid()
@@ -191,7 +229,10 @@ class Datagrid(Block):
             title: the ``datagrid-title`` of the ``datagrid-item``
             content: the ``datagrid-content`` of the ``datagrid-item``
             url: URL to use to turn content into a hyperlink
+            **kwargs: additional keyword arguments passed to the
+                :py:class:`DatagridItem` constructor
+
         """
-        if isinstance(content, str) or isinstance(content, Block):
+        if isinstance(content, (str, Block)):
             content = [content]
         self.add_block(DatagridItem(*content, title=title, url=url, **kwargs))

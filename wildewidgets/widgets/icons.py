@@ -1,11 +1,17 @@
-from typing import Optional
+from __future__ import annotations
+
+from typing import Any
+
+from django.core.exceptions import ImproperlyConfigured
 
 from .base import Block
 
 
 class FontIcon(Block):
     """
-    Render a font-based Bootstrap icon, for example::
+    Render a font-based Bootstrap icon, for example:
+
+    .. code-block:: html
 
         <i class="bi-star"></i>
 
@@ -13,6 +19,13 @@ class FontIcon(Block):
     list of icons.  Find an icon you like, and use the name of that icon on that
     page as the ``icon`` kwarg to the constructor, or set it as the :py:attr:`icon`
     class variable.
+
+    Example:
+        .. code-block:: python
+
+            from wildewidgets import FontIcon
+
+            icon = FontIcon(icon="star")
 
     Keyword Args:
         icon: the name of the icon to render, from the Bootstrap Icons list
@@ -25,59 +38,78 @@ class FontIcon(Block):
             this icon.  : This overrides :py:attr:`color`. Look
             at `Tabler: Colors <https://preview.tabler.io/docs/colors.html>`_
             for your choices; set this to the text after the ``bg-``
+
     """
 
-    tag: str = 'i'
-    block: str = 'fonticon'
+    tag: str = "i"
+    block: str = "fonticon"
 
     #: The icon font family prefix.  One could override this to use FontAwesome icons,
     #: for instance, buy changing it to ``fa``
-    prefix: str = 'bi'
+    prefix: str = "bi"
 
     #: Use this as the name for the icon to render
-    icon: Optional[str] = None
+    icon: str
     #: If not ``None``, use this as Tabler color name to use as the foreground
     #: font color, leaving the background transparent.  If :py:attr:`background`
     #: is also set, this is ignored.  Look at `Tabler: Colors
     # <https://preview.tabler.io/docs/colors.html>`_  for your choices; set
     #: this to the text after the ``bg-``
-    color: Optional[str] = None
+    color: str | None = None
     #: If not ``None``, use this as Tabler background/foreground color set for
     #: this icon.  : This overrides :py:attr:`color`. Look
     #: at `Tabler: Colors <https://preview.tabler.io/docs/colors.html>`_
     #: for your choices; set this to the text after the ``bg-``
-    background: Optional[str] = None
+    background: str | None = None
 
     def __init__(
         self,
-        icon: Optional[str] = None,
-        color: Optional[str] = None,
-        background: Optional[str] = None,
-        **kwargs
+        icon: str | None = None,
+        color: str | None = None,
+        background: str | None = None,
+        **kwargs: Any,
     ) -> None:
+        self.icon = icon if icon else self.icon
+        if not self.icon:
+            # If icon is not set, we can't render this widget
+            msg = "icon must be defined as a keyword argument or class attribute"
+            raise ImproperlyConfigured(msg)
+        if not isinstance(self.icon, str):
+            # If icon is not a string, we can't render this widget
+            msg = f"icon must be a string, not {type(self.icon).__name__}"
+            raise ImproperlyConfigured(msg)
         super().__init__(**kwargs)
         self.color = color if color else self.color
         self.background = background if background else self.background
-        self.icon = icon if icon else self.icon
-        if not self.icon:
-            raise ValueError('"icon" is required as either a keyword argument or as a class attribute')
-        self.icon = f'{self.prefix}-{icon}'
+        self.icon = f"{self.prefix}-{icon}"
         self.add_class(self.icon)
         if self.color:
-            self.add_class(f'text-{self.color} bg-transparent')
+            self.add_class(f"text-{self.color} bg-transparent")
         elif self.background:
-            self.add_class(f' bg-{self.background} text-{self.background}-fg')
+            self.add_class(f" bg-{self.background} text-{self.background}-fg")
 
 
 class TablerFontIcon(FontIcon):
     """
     :py:class:`FontIcon` for Tabler Icons.
 
-    Requires::
+    You must include the Tabler Icons CSS in your HTML template:
 
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons@latest/iconfont/tabler-icons.min.css">
+    .. code-block:: html
+
+        <link rel="stylesheet"
+            href="https://cdn.jsdelivr.net/npm/@tabler/icons@latest/iconfont/tabler-icons.min.css">
+
+    Example:
+        .. code-block:: python
+
+            from wildewidgets import TablerFontIcon
+
+            icon = TablerFontIcon(icon="star")
+
     """
-    prefix = 'ti ti'
+
+    prefix: str = "ti ti"
 
 
 class TablerMenuIcon(FontIcon):
@@ -92,13 +124,18 @@ class TablerMenuIcon(FontIcon):
     :py:class:`wildewdigets.MenuItem.icon` is not ``None``.
 
     Example:
+        .. code-block:: python
 
-        >>> icon = TablerMenuIcon(icon='target')
-        >>> item = NavItem(text='Page', url='/page', icon=icon)
-        >>> item2 = DropdownItem(text='Page', url='/page', icon=icon)
-        >>> item3 = NavDropdownItem(text='Page', url='/page', icon=icon)
+            from wildewidgets import NavItem, DropdownItem, NavDropdownItem
+            from wildewidgets import TablerMenuIcon
+
+            icon = TablerMenuIcon(icon='target')
+            item = NavItem(text='Page', url='/page', icon=icon)
+            item2 = DropdownItem(text='Page', url='/page', icon=icon)
+            item3 = NavDropdownItem(text='Page', url='/page', icon=icon)
+
     """
 
-    tag: str = 'span'
-    block: str = 'nav-link-icon'
-    css_class: str = 'd-md-none d-lg-inline-block'
+    tag: str = "span"
+    block: str = "nav-link-icon"
+    css_class: str = "d-md-none d-lg-inline-block"

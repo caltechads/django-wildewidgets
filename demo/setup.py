@@ -1,5 +1,4 @@
-#!/usr/bin/env python
-from setuptools import setup, find_packages
+from setuptools import find_packages, setup  # noqa: INP001
 
 setup(
     name="demo",
@@ -7,5 +6,7 @@ setup(
     description="",
     author="Caltech IMSS ADS",
     author_email="imss-ads-staff@caltech.edu",
-    packages=find_packages(exclude=["*.tests", "*.tests.*", "tests.*", "tests", "htmlcov"])
+    packages=find_packages(
+        exclude=["*.tests", "*.tests.*", "tests.*", "tests", "htmlcov"]
+    ),
 )

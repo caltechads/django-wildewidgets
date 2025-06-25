@@ -1,29 +1,56 @@
-from functools import lru_cache
+from __future__ import annotations
+
 import logging
 import re
+from functools import lru_cache
+from typing import TYPE_CHECKING, Any, Final, NoReturn
 
-from typing import Any, Dict, List, Optional, Tuple, Type, Union
-
-from django.db import models
-from django.db.models import Q
+from django.db.models import Model, Q
 from django.utils.html import escape
 
 from wildewidgets.views import JSONResponseView
+
+if TYPE_CHECKING:
+    from django.db import models
 
 logger = logging.getLogger(__name__)
 
 
 class DatatableMixin:
+    """
+    A mixin that provides server-side processing for jQuery DataTables.
 
-    #: Use this
-    model: Optional[Type[models.Model]] = None
+    This mixin handles all the server-side processing required by jQuery DataTables,
+    including sorting, filtering, searching, and pagination. It can work with Django
+    QuerySets and provides a customizable framework for rendering data.
+
+    The mixin works with both older (<1.10) and newer versions of DataTables,
+    automatically adapting to the format of parameters sent by the client.
+
+    Example:
+        .. code-block:: python
+
+            class MyDatatableView(DatatableMixin, JSONResponseView):
+                model = MyModel
+                columns = ['id', 'name', 'description']
+                order_columns = ['id', 'name', 'description']
+
+                def render_description_column(self, row, column):
+                    return f"{row.description[:50]}..."
+
+    """
+
+    #: The Django model that this datatable will be based on.
+    #: If not provided, you must implement the :py:meth:`get_initial_queryset`
+    #: method to return a queryset.
+    model: type[models.Model] | None = None
 
     #: The names of the columns to display in our table
-    columns: List[str] = []
+    columns: list[str] = []  # noqa: RUF012
     #: internal cache for columns definition
-    _columns = []
+    _columns: list[Any] = []  # noqa: RUF012
     #: The list of column names by which the table will be ordered.
-    order_columns: List[str] = []
+    order_columns: list[str] = []  # noqa: RUF012
 
     #: The max number of of records that will be returned, so that we can protect our
     #: our server from rendering huge amounts of data
@@ -31,33 +58,40 @@ class DatatableMixin:
     #: Set to ``True`` if you are using datatables < 1.10
     pre_camel_case_notation: bool = False
     #: Replace any column value that is ``None`` with this string
-    none_string: str = ''
-    # If set to ``True`` then values returned by :py:meth:`render_column`` will be escaped
+    none_string: str = ""
+    #: If set to ``True`` then values returned by :py:meth:`render_column`` will
+    #: be escaped
     escape_values: bool = True
     #: This gets set by the dataTables Javascript when it does the AJAX call
-    columns_data: List[Dict[str, Any]] = []
+    columns_data: list[dict[str, Any]] = []  # noqa: RUF012
     #: This determines the type of results. If the AJAX call passes us a data attribute
     #: that is not an integer, it expects a dictionary with specific fields in
     #: the response, see: `dataTables columns.data
     #: <https://datatables.net/reference/option/columns.data>`_
     is_data_list: bool = True
 
-    FILTER_ISTARTSWITH: str = 'istartswith'
-    FILTER_ICONTAINS: str = 'icontains'
+    #: The filter method to use for global searches and single column filtering
+    #: for case-insensitive "startswith" searches
+    FILTER_ISTARTSWITH: Final[str] = "istartswith"
+    #: The filter method to use for global searches and single column filtering
+    #: for case-insensitive "contins" searches
+    FILTER_ICONTAINS: Final[str] = "icontains"
 
     def __init__(
         self,
-        model: Type[models.Model] = None,
-        order_columns: List[str] = None,
-        max_display_length: int = None,
-        none_string: str = None,
-        is_data_list: bool = None,
-        escape_values: bool = None,
-        **kwargs
+        model: type[models.Model] | None = None,
+        order_columns: list[str] | None = None,
+        max_display_length: int | None = None,
+        none_string: str | None = None,
+        is_data_list: bool | None = None,
+        escape_values: bool | None = None,
+        **kwargs,
     ):
         self.model = model if model else self.model
         self.order_columns = order_columns if order_columns else self.order_columns
-        self.max_display_length = max_display_length if max_display_length else self.max_display_length
+        self.max_display_length = (
+            max_display_length if max_display_length else self.max_display_length
+        )
         self.none_string = none_string if none_string else self.none_string
         self.is_data_list = is_data_list if is_data_list else self.is_data_list
         self.escape_values = escape_values if escape_values else self.escape_values
@@ -65,58 +99,74 @@ class DatatableMixin:
 
     @property
     def _querydict(self):
-        if self.request.method == 'POST':
+        if self.request.method == "POST":
             return self.request.POST
         return self.request.GET
 
     def get_initial_queryset(self) -> models.QuerySet:
+        """
+        Get the initial queryset for the datatable.
+
+        By default, returns all objects from the model specified in the `model`
+        attribute.  Override this method to provide custom querysets, filtering
+        by user permissions, or any other logic needed to determine the base
+        dataset.
+
+        Returns:
+            QuerySet: The initial queryset for the datatable
+
+        Raises:
+            NotImplementedError: If no model is specified and this method is not
+                overridden
+
+        """
         if not self.model:
-            raise NotImplementedError(
-                "Need to provide a model or implement get_initial_queryset!"
-            )
+            msg = "You need to provide a model or implement get_initial_queryset"
+            raise NotImplementedError(msg)
         return self.model.objects.all()
 
     def get_filter_method(self) -> str:
         """
-        Returns preferred Django queryset filter method, e.g. ``istartswith``,
-        ``icontains``.
+        Get the preferred Django queryset filter method for searches.
 
-        This will be used to filter querysets doing global searches and single
-        column filtering.
+        This determines how text searching is performed on columns. By default, uses
+        "istartswith" for case-insensitive prefix matching, but can be overridden to
+        use other methods like "icontains" for substring matching.
 
         Returns:
-            The filter method string.
+            str: The filter method string (e.g., "istartswith", "icontains")
+
         """
         return self.FILTER_ISTARTSWITH
 
-    def initialize(self, *args, **kwargs):
+    def initialize(self, *args, **kwargs):  # noqa: ARG002
         """
-        Determine which version of DataTables is being used - there are
-        differences in parameters sent by DataTables < 1.10.x
+        Initialize the datatable by determining the DataTables version in use.
+
+        This method checks request parameters to detect whether the client is using
+        DataTables <1.10 (which uses different parameter naming conventions), and
+        configures the mixin accordingly.
+
+        Args:
+            *args: Variable length argument list
+            **kwargs: Arbitrary keyword arguments
+
         """
-        if 'iSortingCols' in self._querydict:
+        if "iSortingCols" in self._querydict:
             self.pre_camel_case_notation = True
 
-    def get_order_columns(self) -> List[str]:
+    def get_order_columns(self) -> list[str]:
         """
-        Return list of columns used for ordering.
+        Get the list of columns that can be used for ordering/sorting.
 
-        By default returns :py:attr`order_columns` but if these are not defined
-        it tries to get columns from the request using the ``columns[i][name]``
-        attribute. This requires proper client side definition of columns, eg::
+        This method returns the columns that can be sorted in the datatable. It first
+        checks the :py:attr:`order_columns` attribute, then falls back to
+        extracting column information from the dataTables.js request parameters if
+        using newer versions.
 
-            columns: [
-                {
-                    name: 'username',
-                    data: 'username',
-                    orderable: true,
-                },
-                {
-                    name: 'email',
-                    data: 'email',
-                    orderable: false
-                }
-            ]
+        Returns:
+            list[str]: List of column names that can be sorted
+
         """
         if self.order_columns or self.pre_camel_case_notation:
             return self.order_columns
@@ -124,17 +174,17 @@ class DatatableMixin:
         # try to build list of order_columns using request data
         order_columns = []
         for column_def in self.columns_data:
-            if column_def['name'] or not self.is_data_list:
+            if column_def["name"] or not self.is_data_list:
                 # if self.is_data_list is False then we have a column name in
                 # the 'data' attribute, otherwise 'data' attribute is an integer
                 # with column index
-                if column_def['orderable']:
+                if column_def["orderable"]:
                     if self.is_data_list:
-                        order_columns.append(column_def['name'])
+                        order_columns.append(column_def["name"])
                     else:
-                        order_columns.append(column_def.get('data'))
+                        order_columns.append(column_def.get("data"))
                 else:
-                    order_columns.append('')
+                    order_columns.append("")
             else:
                 # fallback to columns
                 order_columns = self._columns
@@ -143,37 +193,28 @@ class DatatableMixin:
         self.order_columns = order_columns
         return order_columns
 
-    def get_columns(self) -> List[str]:
+    def get_columns(self) -> list[str]:
         """
-        Returns the list of columns to be returned in the result set.
+        Get the list of columns to display in the datatable.
 
-        By default returns :py:attr:`columns` but if these are not defined it tries to
-        get columns from the request using the ``columns[i][data]`` or
-        columns[i][name] attribute.  This requires proper client side definition
-        of columns, e.g.::
+        This method determines which columns will be included in the response.
+        It first checks the :py:class:`columns` attribute, then falls back to
+        extracting column information from the dataTables.js request parameters
+        if using newer versions.
 
-            columns: [
-                {
-                    data: 'username'
-                },
-                {
-                    data: 'email'
-                }
-            ]
+        Returns:
+            list[str]: List of column names to display
+
         """
         if self.columns or self.pre_camel_case_notation:
             return self.columns
 
         columns = []
         for column_def in self.columns_data:
-            if self.is_data_list:
-                # if self.is_data_list is True then 'data' atribute is an
-                # integer - column index, so we cannot use it as a column name,
-                # let's try 'name' attribute instead
-                col_name = column_def['name']
-            else:
-                col_name = column_def['data']
-
+            # if self.is_data_list is True then 'data' atribute is an integer -
+            # column index, so we cannot use it as a column name, let's try
+            # 'name' attribute instead
+            col_name = column_def["name"] if self.is_data_list else column_def["data"]
             if col_name:
                 columns.append(col_name)
             else:
@@ -184,7 +225,19 @@ class DatatableMixin:
     @staticmethod
     def _column_value(obj: Any, key: str) -> Any:
         """
-        Returns the value from a queryset item.
+        Extract a value from a model instance or dictionary.
+
+        This helper method retrieves attribute or dictionary values safely, handling
+        nested attribute access with dot notation.
+
+        Args:
+            obj: :py:class:`~django.db.models.Model` instance or dictionary for
+                the current row
+            key: Attribute or key name to retrieve
+
+        Returns:
+            Any: The value from the object, or None if not found
+
         """
         if isinstance(obj, dict):
             return obj.get(key, None)
@@ -193,20 +246,32 @@ class DatatableMixin:
 
     def _render_column(self, row: Any, column: str) -> str:
         """
-        Renders a column on a row. column can be given in a module notation eg.
-        ``document.invoice.type``
+        Render a column value from a model instance or dictionary.
+
+        This internal method handles the actual value extraction and formatting,
+        including support for Django's choice fields via ``get_FIELDNAME_display``
+        methods, nested attribute access with dot notation, and HTML escaping.
+
+        Args:
+            row: :py:class:`~django.db.models.Model` instance or dictionary for
+                the current row
+            column: Column name or path (can use dot notation for nested access)
+
+        Returns:
+            str: The rendered value as a string
+
         """
         # try to find rightmost object
         obj = row
-        parts = column.split('.')
+        parts = column.split(".")
         for part in parts[:-1]:
             if obj is None:
                 break
             obj = getattr(obj, part)
 
         # try using get_OBJECT_display for choice fields
-        if hasattr(obj, f'get_{parts[-1]}_display'):
-            value = getattr(obj, f'get_{parts[-1]}_display')()
+        if hasattr(obj, f"get_{parts[-1]}_display"):
+            value = getattr(obj, f"get_{parts[-1]}_display")()
         else:
             value = self._column_value(obj, parts[-1])
 
@@ -219,51 +284,72 @@ class DatatableMixin:
 
     def render_column(self, row: Any, column: str) -> str:
         """
-        Renders a column on a row. column can be given in a module notation eg.
-        ``document.invoice.type``
-        """
-        value = self._render_column(row, column)
-        # if value and hasattr(row, 'get_absolute_url'):
-        #     return format_html('<a href="{}">{}</a>', row.get_absolute_url(), value)
-        return value
+        Render a column value for display in the datatable.
 
-    def ordering(self, qs: models.QuerySet) -> models.QuerySet:
-        """
-        Get parameters from the request and prepare order by clause.
-        """
+        This is the main method for formatting column values. Override this or create
+        methods named ``get_FIELDNAME_display`` on your Django model to
+        customize how specific columns are displayed.  See
+        :py:meth:`_render_column` for details on how to implement custom
+        rendering logic.
 
+        Args:
+            row: :py:class:`~django.db.models.Model` instance or dictionary for
+                the current row
+            column: Column name
+
+        Returns:
+            str: The rendered value as a string, ready for display
+
+        """
+        return self._render_column(row, column)
+
+    def ordering(self, qs: models.QuerySet) -> models.QuerySet[Model]:  # noqa: PLR0912
+        """
+        Apply ordering to the queryset based on dataTables.js parameters.
+
+        This method parses sorting parameters from the dataTables.js request
+        and applies them to the queryset. It supports multi-column sorting and
+        handles both older and newer dataTables.js parameter formats.
+
+        Args:
+            qs: The queryset to order
+
+        Returns:
+            models.QuerySet: The ordered queryset
+
+        """
         # Number of columns that are used in sorting
         sorting_cols = 0
         if self.pre_camel_case_notation:
             try:
-                sorting_cols = int(self._querydict.get('iSortingCols', 0))
+                sorting_cols = int(self._querydict.get("iSortingCols", 0))
             except ValueError:
                 sorting_cols = 0
         else:
-            sort_key = f'order[{sorting_cols}][column]'
+            sort_key = f"order[{sorting_cols}][column]"
             while sort_key in self._querydict:
                 sorting_cols += 1
-                sort_key = f'order[{sorting_cols}][column]'
+                sort_key = f"order[{sorting_cols}][column]"
 
         order = []
         order_columns = self.get_order_columns()
 
         for i in range(sorting_cols):
             # sorting column
-            sort_dir = 'asc'
+            sort_dir = "asc"
             try:
                 if self.pre_camel_case_notation:
-                    sort_col = int(self._querydict.get(f'iSortCol_{i}'))
+                    sort_col = int(self._querydict.get(f"iSortCol_{i}"))
                     # sorting order
-                    sort_dir = self._querydict.get(f'sSortDir_{i}')
+                    sort_dir = self._querydict.get(f"sSortDir_{i}")
                 else:
-                    sort_col = int(self._querydict.get(f'order[{i}][column]'))
+                    sort_col = int(self._querydict.get(f"order[{i}][column]"))
                     # sorting order
-                    sort_dir = self._querydict.get(f'order[{i}][dir]')
+                    sort_dir = self._querydict.get(f"order[{i}][dir]")
             except ValueError:
                 sort_col = 0
 
-            sdir = '-' if sort_dir == 'desc' else ''
+            sdir = "-" if sort_dir == "desc" else ""
             sortcol = order_columns[sort_col]
             if not sortcol:
                 continue
@@ -271,77 +357,160 @@ class DatatableMixin:
             # pylint: disable=consider-using-f-string
             if isinstance(sortcol, list):
                 for sc in sortcol:
-                    order.append('{0}{1}'.format(sdir, sc.replace('.', '__')))
+                    order.append("{}{}".format(sdir, sc.replace(".", "__")))  # noqa: PERF401
             else:
-                order.append('{0}{1}'.format(sdir, sortcol.replace('.', '__')))
+                order.append("{}{}".format(sdir, sortcol.replace(".", "__")))
 
         if order:
             return qs.order_by(*order)
         return qs
 
     def paging(self, qs: models.QuerySet) -> models.QuerySet:
-        if self.pre_camel_case_notation:
-            limit = min(int(self._querydict.get('iDisplayLength', 10)), self.max_display_length)
-            start = int(self._querydict.get('iDisplayStart', 0))
-        else:
-            limit = min(int(self._querydict.get('length', 10)), self.max_display_length)
-            start = int(self._querydict.get('start', 0))
+        """
+        Apply pagination to the queryset based on dataTables.js parameters.
 
+        This method extracts pagination parameters (start position and length)
+        from the dataTables.js request and slices the queryset accordingly.
+
+        Args:
+            qs: The queryset to paginate
+
+        Returns:
+            models.QuerySet: The paginated queryset
+
+        """
+        if self.pre_camel_case_notation:
+            limit = min(
+                int(self._querydict.get("iDisplayLength", 10)), self.max_display_length
+            )
+            start = int(self._querydict.get("iDisplayStart", 0))
+        else:
+            limit = min(int(self._querydict.get("length", 10)), self.max_display_length)
+            start = int(self._querydict.get("start", 0))
         # if pagination is disabled ("paging": false)
         if limit == -1:
             return qs
-
         offset = start + limit
-
         return qs[start:offset]
 
-    def extract_datatables_column_data(self) -> List[Dict[str, str]]:
+    def extract_datatables_column_data(self) -> list[dict[str, str]]:
         """
-        Helper method to extract columns data from request as passed by Datatables 1.10+.
+        Extract column configuration data from the dataTables.js request.
+
+        This method parses the complex column configuration parameters sent by
+        dataTables.js 1.10+ into a more manageable structure for internal use.
+
+        Returns:
+            list[dict[str, str]]: List of column configuration dictionaries
+
         """
         request_dict = self._querydict
         col_data = []
         if not self.pre_camel_case_notation:
             counter = 0
-            data_name_key = f'columns[{counter}][name]'
+            data_name_key = f"columns[{counter}][name]"
             while data_name_key in request_dict:
-                searchable = request_dict.get(f'columns[{counter}][searchable]') == 'true'
-                orderable = request_dict.get(f'columns[{counter}][orderable]') == 'true'
+                searchable = (
+                    request_dict.get(f"columns[{counter}][searchable]") == "true"
+                )
+                orderable = request_dict.get(f"columns[{counter}][orderable]") == "true"
                 col_data.append(
                     {
-                        'name': request_dict.get(data_name_key),
-                        'data': request_dict.get(f'columns[{counter}][data]'),
-                        'searchable': searchable,
-                        'orderable': orderable,
-                        'search.value': request_dict.get(f'columns[{counter}][search][value]'),
-                        'search.regex': request_dict.get(f'columns[{counter}][search][regex]')
+                        "name": request_dict.get(data_name_key),
+                        "data": request_dict.get(f"columns[{counter}][data]"),
+                        "searchable": searchable,
+                        "orderable": orderable,
+                        "search.value": request_dict.get(
+                            f"columns[{counter}][search][value]"
+                        ),
+                        "search.regex": request_dict.get(
+                            f"columns[{counter}][search][regex]"
+                        ),
                     }
                 )
                 counter += 1
-                data_name_key = f'columns[{counter}][name]'
+                data_name_key = f"columns[{counter}][name]"
         return col_data
 
     def prepare_results(
-        self,
-        qs: models.QuerySet
-    ) -> Union[List[List[str]], List[Dict[str, Any]]]:
-        data = []
+        self, qs: models.QuerySet
+    ) -> list[list[str]] | list[dict[str, Any]]:
+        """
+        Transform queryset results into the format expected by dataTables.js.
+
+        This method converts Django model instances into either:
+
+        - Lists of values (when :py:attr:`is_data_list` is True)
+        - Dictionaries mapping column names to values (when
+          :py:attr:`is_data_list` is False)
+
+        It calls :py:meth:`render_column` for each value to allow custom formatting.
+
+        Args:
+            qs: The queryset containing the results to display
+
+        Returns:
+            Either a list of lists (row-based format) or a list of dictionaries
+            (column-based format) depending on the DataTables configuration
+
+        """
+        if self.is_data_list:
+            return [
+                [self.render_column(item, column) for column in self._columns]
+                for item in qs
+            ]
+        _dict_data: list[dict[str, Any]] = []
         for item in qs:
-            if self.is_data_list:
-                data.append([self.render_column(item, column) for column in self._columns])
-            else:
-                data.append({
-                    col_data['data']: self.render_column(item, col_data['data'])
+            _dict_data.append(  # noqa: PERF401
+                {
+                    col_data["data"]: self.render_column(item, col_data["data"])
                     for col_data in self.columns_data
-                })
+                }
+            )
+        return _dict_data
 
-        return data
+    def handle_exception(self, e: Exception) -> NoReturn:
+        """
+        Handle exceptions that occur during processing.
 
-    def handle_exception(self, e):
+        This method logs the exception and re-raises it by default. Override
+        this method to implement custom exception handling.
+
+        Args:
+            e: The exception that was raised
+
+        Raises:
+            Exception: Re-raises the original exception
+
+        """
         logger.exception(str(e))
         raise e
 
     def get_context_data(self, *args, **kwargs):
+        """
+        Process the DataTables request and prepare the response data.
+
+        This is the main entry point that:
+
+        1. Initializes the configuration based on the request
+        2. Gets the initial queryset
+        3. Applies filtering, sorting, and pagination
+        4. Formats the results as expected by DataTables
+
+        Args:
+            *args: Variable length argument list
+
+        Keyword Args:
+            **kwargs: Arbitrary keyword arguments
+
+        Returns:
+            dict: Response data in the format expected by DataTables
+
+        Note:
+            The returned dictionary contains different keys depending on the
+            dataTables.js version in use.
+
+        """
         try:
             self.initialize(*args, **kwargs)
 
@@ -357,7 +526,7 @@ class DatatableMixin:
             if self.columns_data:
                 self.is_data_list = False
                 try:
-                    int(self.columns_data[0]['data'])
+                    int(self.columns_data[0]["data"])
                     self.is_data_list = True
                 except ValueError:
                     pass
@@ -375,277 +544,397 @@ class DatatableMixin:
             # prepare output data
             if self.pre_camel_case_notation:
                 ret = {
-                    'sEcho': int(self._querydict.get('sEcho', 0)),
-                    'iTotalRecords': total_records,
-                    'iTotalDisplayRecords': total_display_records,
-                    'aaData': self.prepare_results(qs)
+                    "sEcho": int(self._querydict.get("sEcho", 0)),
+                    "iTotalRecords": total_records,
+                    "iTotalDisplayRecords": total_display_records,
+                    "aaData": self.prepare_results(qs),
                 }
             else:
                 ret = {
-                    'draw': int(self._querydict.get('draw', 0)),
-                    'recordsTotal': total_records,
-                    'recordsFiltered': total_display_records,
-                    'data': self.prepare_results(qs)
+                    "draw": int(self._querydict.get("draw", 0)),
+                    "recordsTotal": total_records,
+                    "recordsFiltered": total_display_records,
+                    "data": self.prepare_results(qs),
                 }
-            return ret
-        except Exception as e:  # pylint: disable=broad-except
+        except Exception as e:  # noqa: BLE001
             return self.handle_exception(e)
+        else:
+            return ret
 
 
-class BaseDatatableView(DatatableMixin, JSONResponseView):
-    pass
+class BaseDatatableView(DatatableMixin, JSONResponseView):  # type: ignore[misc]
+    """
+    Base view for handling dataTables.js server-side processing.
+
+    This class combines the dataTables.js processing functionality from
+    :py:class:`DatatableMixin` with the JSON response handling from
+    :py:class:`wildewidgets.JSONResponseView` to create a complete server-side
+    processing view for dataTables.js.
+
+    Extend this class and override the necessary methods to create a custom
+    dataTables.js server-side processing view.
+    """
 
 
 class DatatableAJAXView(BaseDatatableView):
     """
-    This is a JSON view that a DataTables.js table can hit for its AJAX queries.
+    Enhanced view for handling dataTables.js AJAX requests with advanced features.
+
+    This class extends :py:class:`BaseDatatableView` with additional functionality for:
+
+    - Advanced column configuration parsing
+    - Per-column filtering and searching
+    - Support for dotted attribute notation and relationship traversal
+    - Custom column rendering based on method naming conventions
+
+    It's designed to be extended for specific datatables, with custom filtering
+    and rendering logic implemented through method overrides.
+
+    Example:
+        .. code-block:: python
+
+            class UserTableView(DatatableAJAXView):
+                model = User
+                columns = ['id', 'username', 'email', 'is_staff', 'date_joined']
+
+                def render_is_staff_column(self, row, column):
+                    return '✓' if row.is_staff else '✗'
+
+                def render_date_joined_column(self, row, column):
+                    return row.date_joined.strftime('%Y-%m-%d')
+
     """
 
-    def columns(self, querydict: Dict[str, Any]) -> Dict[str, Any]:
+    def columns(self, querydict: dict[str, Any]) -> dict[str, Any]:  # type: ignore[override]
         """
-        Parse the request we got from the DataTables AJAX request
-        (``querydict``) from a list of strings to a more useful nested dict.
-        We'll use this to more readily figure out what we need to be doing.
+        Parse dataTables.js column configuration into a more usable format.
 
-        A single column's data in the querystring we got from datatables looks
-        like::
+        This method converts the flattened column configuration from dataTables.js
+        into a nested dictionary structure that's easier to work with. It maps
+        column data by column name rather than index for more intuitive access.
 
-            {
-                'columns[4][data]': 'employee_number',
-                'columns[4][name]': '',
-                'columns[4][orderable]': 'true',
-                'columns[4][search][regex]': 'false',
-                'columns[4][search][value]': '',
-                'columns[4][searchable]': 'true'
-            }
-
-        Turn all such data into a dict that looks like::
-
-            {
-                'employee_number': {
-                    'column_number': 4,
-                    'data': 'employee_number',
-                    'name': '',
-                    'orderable': True,
-                    'search': {
-                        'regex': False,
-                        'value': ''
-                    },
-                    'searchable': True
-                }
-            }
+        Note:
+            This overrides the :py:attr:`columns` attribute from
+            :py:class:`DatatableMixin` to provide a more advanced parsing
+            mechanism.
 
         Args:
-            querydict: dict of all key, value pairs from the AJAX request.
+            querydict: The query parameters from the dataTables.js request
 
         Returns:
-            The dictionary of column definitions keyed by column name
+            dict[str, Any]: Dictionary mapping column names to their configuration
+
         """
-        by_number = {}
+        # First organize by column index, then transform to column name indexing
+        by_number = self._parse_columns_by_index(querydict)
+        return self._convert_to_name_indexed(by_number)
+
+    def _parse_value(self, value: str) -> bool | str:
+        """
+        Convert string boolean values to Python booleans.
+
+        Args:
+            value: The string value to parse
+
+        Returns:
+            bool | str: Returns True or False for "true" or "false", otherwise
+            returns the original value
+
+        """
+        if value == "true":
+            return True
+        if value == "false":
+            return False
+        return value
+
+    def _parse_columns_by_index(
+        self, querydict: dict[str, Any]
+    ) -> dict[str, dict[str, Any]]:
+        """
+        Parse column parameters and organize by column index.
+
+        Handles both direct attributes ``(columns[n][attr])`` and
+        nested attributes ``(columns[n][attr][subattr])``.
+
+        Args:
+            querydict: The query parameters from the DataTables request
+
+        Returns:
+            dict[str, dict[str, Any]]: Dictionary mapping column index to its attributes
+            and values, structured for easy access by column number.
+
+        """
+        by_number: dict[str, dict[str, Any]] = {}
+
         for key, value in querydict.items():
-            if value == 'true':
-                value = True
-            elif value == 'false':
-                value = False
-            if key.startswith('columns'):
-                parts = key.split('[')
-                column_number = parts[1][:-1]
-                column_attribute = parts[2][:-1]
-                if column_number not in by_number:
-                    by_number[column_number] = {
-                        'column_number': int(column_number)
+            if not key.startswith("columns"):
+                continue
+
+            parts = key.split("[")
+            if len(parts) < 3:  # noqa: PLR2004
+                continue
+
+            # Extract key components
+            column_number = parts[1][:-1]  # "n" from columns[n]
+            column_attribute = parts[2][:-1]  # "attr" from [attr]
+
+            # Initialize dict for this column if needed
+            if column_number not in by_number:
+                by_number[column_number] = {"column_number": int(column_number)}
+
+            # Process the value based on depth
+            parsed_value = self._parse_value(value)
+
+            if (
+                len(parts) == 4  # noqa: PLR2004
+            ):  # Nested attribute like columns[n][search][value]
+                nested_attribute = parts[3][:-1]
+
+                # Create or update nested dictionary
+                if column_attribute not in by_number[column_number]:
+                    by_number[column_number][column_attribute] = {
+                        nested_attribute: parsed_value
                     }
-                if len(parts) == 4:
-                    if column_attribute not in by_number[column_number]:
-                        by_number[column_number][column_attribute] = {parts[3][:-1]: value}
-                    else:
-                        by_number[column_number][column_attribute][parts[3][:-1]] = value
                 else:
-                    by_number[column_number][column_attribute] = value
-        # Now make the real lookup be by column name
+                    by_number[column_number][column_attribute][nested_attribute] = (
+                        parsed_value
+                    )
+            else:  # Direct attribute like columns[n][data]
+                by_number[column_number][column_attribute] = parsed_value
+
+        return by_number
+
+    def _convert_to_name_indexed(
+        self, by_number: dict[str, dict[str, Any]]
+    ) -> dict[str, Any]:
+        """
+        Transform ``by_number`` from column-index-indexed to column-name-indexed
+        structure.
+
+        This makes lookups more intuitive by using column names rather than positions.
+
+        Args:
+            by_number: Dictionary mapping column indices to their attributes
+
+        Returns:
+            dict[str, Any]: Dictionary mapping column names to their attributes
+                and values, structured for easy access by column name.
+
+        """
         by_name = {}
-        for key, value in by_number.items():
-            # 'data' is the column name
-            by_name[by_number[key]['data']] = value
+        for column_data in by_number.values():
+            # Skip columns without a data attribute
+            if "data" not in column_data:
+                continue
+
+            # Use the 'data' attribute as the key
+            column_name = column_data["data"]
+            by_name[column_name] = column_data
+
         return by_name
 
     @lru_cache(maxsize=4)
-    def searchable_columns(self) -> List[str]:
+    def searchable_columns(self) -> list[str]:
         """
-        Return the list of all column names from our DataTable that are marked
-        as "searchable".
+        Get the list of column names that are marked as searchable.
+
+        This method parses the column configuration to identify which columns
+        should be included in global searches and per-column filtering.
+        The result is cached for performance.
 
         Returns:
-            List of searchable columns.
+            list[str]: List of searchable column names
+
         """
         return [
-            key for key, value in self.columns(self._querydict).items()
-            if value['searchable']
+            key
+            for key, value in self.columns(self._querydict).items()
+            if value["searchable"]
         ]
 
-    def column_specific_searches(self) -> List[Tuple[str, str]]:
+    def column_specific_searches(self) -> list[tuple[str, str]]:
         """
-        Look through the request data we got from the DataTable AJAX request for
-        any single-column searches.  These will look like
-        ``column[$number][search][value]`` in the request.
+        Get a list of active per-column search filters.
+
+        This method identifies columns that have search values specified
+        in the DataTables request, which happens when a user enters a search
+        term in a specific column's filter input.
 
         Returns:
-            A list of 2-tuples that look like ``(column name, search string)``
+            list[tuple[str, str]]: List of (column_name, search_value) pairs
+
         """
         return [
-            (key, value['search']['value'])
+            (key, value["search"]["value"])
             for key, value in self.columns(self._querydict).items()
-            if value['search']['value']
+            if value["search"]["value"]
         ]
 
     def single_column_filter(
-        self,
-        qs: models.QuerySet,
-        column: str,
-        value: str
+        self, qs: models.QuerySet, column: str, value: str
     ) -> models.QuerySet:
         """
-        Filter our queryset by a single column.  Columns will be searched by
-        ``__icontains``.
+        Apply filtering to a queryset based on a single column search.
 
-        This gets executed when someone runs a search on a single DataTables.js
-        column::
+        This method filters the queryset by a specific column value. It supports:
 
-            data_table.column($number).search($search_string);
-
-        If you want to implement a different search filter for a particular
-        column, add a ``search_COLUMN_column(self, qs, column, value)`` method
-        that returns a QuerySet to your subclass and that will be called
-        instead.
-
-        Example::
-
-            def search_foobar_column(self, qs, column, value):
-                if value == 'something':
-                    qs = qs.filter(foobar__attribute=True)
-                elif value == 'other_thing':
-                    qs = qs.filter(foobar__other_attribute=False)
-                return qs
+        1. Custom filtering via ``filter_COLUMNNAME_column`` methods
+        2. Default ``icontains`` filtering for searchable columns
 
         Args:
-            qs: the Django QuerySet
-            column: the dataTables data attribute for the column we're interested in
-            value: the search string
+            qs: The queryset to filter
+            column: The column name to filter on
+            value: The search value to filter by
 
         Returns:
-            An appropriately filtered :py:class:`QuerySet`
+            models.QuerySet: The filtered queryset
+
+        Example:
+            To implement custom filtering for a specific column:
+
+            .. code-block:: python
+
+                from django.db.models import QuerySet
+
+                def filter_status_column(
+                    self,
+                    qs: QuerySet,
+                    column: str,
+                    value: str
+                ) -> QuerySet:
+                    if value.lower() == 'active':
+                        return qs.filter(is_active=True)
+                    elif value.lower() == 'inactive':
+                        return qs.filter(is_active=False)
+                    return qs
+
         """
-        attr_name = f'filter_{column}_column'
+        attr_name = f"filter_{column}_column"
         if hasattr(self, attr_name):
             qs = getattr(self, attr_name)(qs, column, value)
         elif column in self.searchable_columns():
-            kwarg_name = f'{column}__icontains'
+            kwarg_name = f"{column}__icontains"
             qs = qs.filter(**{kwarg_name: value})
         return qs
 
-    def search_query(self, qs: models.QuerySet, value: str) -> models.Q:
+    def search_query(self, qs: models.QuerySet, value: str) -> Q | None:
         """
-        Return an ORed Q() object that will search the searchable fields for ``value``
+        Build a Q object for performing global search across multiple columns.
+
+        This method constructs a query that searches all searchable columns
+        for the given value, using OR logic to match records that have the value
+        in any searchable column.
 
         Args:
-            qs: the Django QuerySet
-            value: the search string
+            qs: The queryset (not used in the default implementation)
+            value: The search term to look for
 
         Returns:
-            A properly formatted :py:class:`Q` object
+            Q | None: A Django Q object representing the search, or None if no
+               searchable columns exist
+
         """
-        # FIXME: we doesn't use qs, so why are we accepting it as a parameter
-        query = None
+        query: Q | None = None
         for column in self.searchable_columns():
-            attr_name = f'search_{column}_column'
+            attr_name = f"search_{column}_column"
             if hasattr(self, attr_name):
                 q = getattr(self, attr_name)(qs, column, value)
             else:
-                kwarg_name = f'{column}__icontains'
+                kwarg_name = f"{column}__icontains"
                 q = Q(**{kwarg_name: value})
             query = query | q if query else q
         return query
 
     def search(self, qs: models.QuerySet, value: str) -> models.QuerySet:
         """
-        Filter our queryset across all of our searchable columns for ``value``.
+        Apply a global search across all searchable columns.
 
-        This gets executed when someone runs a search over the whole
-        DataTables.js table::
-
-            data_table.search($search_string);
-
-        This is what happens when the user uses the "Search" input on the
-        DataTable.
+        This method is called when a user enters a search term in the main
+        dataTables.js search input. It applies the search across all searchable
+        columns and returns distinct results.
 
         Args:
-            qs: the Django QuerySet
-            value: the search string
+            qs: The queryset to search
+            value: The search term
 
         Returns:
-            Our ``qs`` filtered by our searchable columns.
+            models.QuerySet: The filtered queryset containing only matching records
+
         """
         query = self.search_query(qs, value)
-        qs = qs.filter(query).distinct()
-        return qs
+        return qs.filter(query).distinct()
 
     def filter_queryset(self, qs: models.QuerySet) -> models.QuerySet:
         """
-        We're overriding the default filter_queryset(method) here so we can
-        implement proper searches on our pseudo-columns "responded" and
-        "disabled", and do column specific searches, as well as doing general
-        searches across our regular CharField columns.
+        Apply all filtering to the queryset based on dataTables.js parameters.
+
+        This method handles both:
+
+        1. Per-column searches specified by column-specific filters
+        2. Global searches from the main dataTables.js search input
+
+        Args:
+            qs: The queryset to filter
+
+        Returns:
+            models.QuerySet: The filtered queryset
+
         """
         column_searches = self.column_specific_searches()
         if column_searches:
             for column, value in column_searches:
                 qs = self.single_column_filter(qs, column, value)
-        value = self.request.GET.get('search[value]', None)
-        if value:
-            qs = self.search(qs, value)
+        _value = self.request.GET.get("search[value]")
+        if _value:
+            qs = self.search(qs, _value)
         return qs
 
     def _render_column(self, row: Any, column: str) -> str:
         """
-        When defining our DataTable config, we declare DataTable columns that
-        access columns of models of foreign keys on our model with ``__``
-        notation.  Convert the ``__`` to ``.`` before trying to render the data
-        so that things will work correctly.
+        Preprocess column names before rendering values.
+
+        This method converts Django-style relationship traversal notation (`__`)
+        to dot notation (`.`) for proper attribute access.
 
         Args:
-            row: A Django model instance
-            column: the name of the column to render
+            row: The model instance or dictionary for this row
+            column: The column name, possibly using relationship notation
 
-        Return:
-            The rendered column as valid HTML.
+        Returns:
+            str: The rendered column value
+
         """
-        column = re.sub('__', '.', column)
+        column = re.sub("__", ".", column)
         return super()._render_column(row, column)
 
     def render_column(self, row: Any, column: str) -> str:
         """
-        Return the data to add to the DataTable for column ``column`` of the
-        table row corresponding to the model object ``row``.
+        Render a column value with custom rendering support.
 
-        If you want to implement special rendering a particular column (for
-        instance to display something about an object that doesn't map directly
-        to a model column), add a ``render_COLUMN_column(self, row, column)``
-        method that returns a string to your subclass and that will be called
-        instead.
-
-        Example::
-
-            def render_foobar_column(self, row: Any, column: str) -> str:
-                return 'some data'
+        This method enables custom column rendering through convention-based
+        method naming. If a method named ``render_COLUMNNAME_column`` exists, it
+        will be called to render the column instead of the default implementation.
 
         Args:
-            row: A Django model instance
-            column: the name of the column to render
+            row: The model instance or dictionary for this row
+            column: The column name
 
-        Return:
-            The rendered column as valid HTML.
+        Returns:
+            str: The rendered column value
+
+        Example:
+            To customize rendering for a 'status' column:
+
+            .. code-block:: python
+
+                def render_status_column(self, row: Model, column: str) -> str:
+                    status = row.status
+                    if status == 'active':
+                        return f'<span class="badge bg-success">{status}</span>'
+                    return f'<span class="badge bg-secondary">{status}</span>'
+
         """
-        attr_name = f'render_{column}_column'
+        attr_name = f"render_{column}_column"
         if hasattr(self, attr_name):
             return getattr(self, attr_name)(row, column)
         return super().render_column(row, column)

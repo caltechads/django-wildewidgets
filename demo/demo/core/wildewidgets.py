@@ -1,12 +1,13 @@
+from __future__ import annotations
+
 import inspect
 import random
+from typing import TYPE_CHECKING
 
-import pandas as pd
 import altair as alt
-from django.db.models import Model
-from book_manager.models import Book, Author
+import pandas as pd
 from book_manager.forms import MinimalBookForm
-
+from book_manager.models import Author, Book
 from wildewidgets import (
     AltairChart,
     ApexChartBase,
@@ -38,7 +39,6 @@ from wildewidgets import (
     MarkdownWidget,
     ModalButton,
     ModalWidget,
-    UnorderedList,
     PagedModelWidget,
     PageHeader,
     PieChart,
@@ -47,10 +47,15 @@ from wildewidgets import (
     TablerFontIcon,
     TagBlock,
     TimeStamp,
+    UnorderedList,
     WidgetCellMixin,
     WidgetStream,
 )
+
 from .models import Measurement
+
+if TYPE_CHECKING:
+    from django.db.models import Model
 
 
 def get_code_block(fn):
@@ -62,46 +67,56 @@ def get_code_block(fn):
 
     Args:
         fn: the function to inspect
+
     """
     lines = inspect.getsourcelines(fn)[0]
     code = ""
-    if len(lines) < 2:
-        return
+    if len(lines) < 2:  # noqa: PLR2004
+        return None
     space_len = len(lines[1]) - len(lines[1].strip())
     for line in lines[1:-1]:
-        code += line[space_len - 1:]
+        code += line[space_len - 1 :]
     return code
 
 
 class BusinessChartHeader(BasicHeader):
     header_level = 5
-    header_type = 'display'
+    header_type = "display"
     header_text = "Basic Business Charts w/ ChartJS"
 
 
 class TestChart(StackedBarChart):
-
     def get_categories(self):
         """Return 7 labels for the x-axis."""
         return ["January", "February", "March", "April", "May", "June", "July"]
 
     def get_dataset_labels(self):
         """Return names of datasets."""
-        return ["Central", "Eastside", "Westside", "Central2", "Eastside2",
-                "Westside2", "Central3", "Eastside3", "Westside3"]
+        return [
+            "Central",
+            "Eastside",
+            "Westside",
+            "Central2",
+            "Eastside2",
+            "Westside2",
+            "Central3",
+            "Eastside3",
+            "Westside3",
+        ]
 
     def get_datasets(self):
         """Return 3 datasets to plot."""
-
-        return [[750, 440, 920, 1100, 440, 950, 350],
-                [410, 1920, 180, 300, 730, 870, 920],
-                [870, 210, 940, 3000, 900, 130, 650],
-                [750, 440, 920, 1100, 440, 950, 350],
-                [410, 920, 180, 2000, 730, 870, 920],
-                [870, 210, 940, 300, 900, 130, 650],
-                [750, 440, 920, 1100, 440, 950, 3500],
-                [410, 920, 180, 3000, 730, 870, 920],
-                [870, 210, 940, 300, 900, 130, 650]]
+        return [
+            [750, 440, 920, 1100, 440, 950, 350],
+            [410, 1920, 180, 300, 730, 870, 920],
+            [870, 210, 940, 3000, 900, 130, 650],
+            [750, 440, 920, 1100, 440, 950, 350],
+            [410, 920, 180, 2000, 730, 870, 920],
+            [870, 210, 940, 300, 900, 130, 650],
+            [750, 440, 920, 1100, 440, 950, 3500],
+            [410, 920, 180, 3000, 730, 870, 920],
+            [870, 210, 940, 300, 900, 130, 650],
+        ]
 
 
 class TestDoughnutChart(DoughnutChart):
@@ -117,7 +132,6 @@ class TestDoughnutChart(DoughnutChart):
 
 
 class TestHistogram(Histogram):
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         mu = 0
@@ -132,7 +146,6 @@ class TestHistogram(Histogram):
 
 
 class TestHorizontalHistogram(HorizontalHistogram):
-
     color = False
 
     def load(self):
@@ -149,39 +162,32 @@ class TestHorizontalHistogram(HorizontalHistogram):
 
 class SciChartHeader(BasicHeader):
     header_level = 5
-    header_type = 'display'
+    header_type = "display"
     header_text = "Scientific Charts w/ Altair"
 
 
 class SciChart(AltairChart):
-    title = 'Scientific Proofiness'
+    title = "Scientific Proofiness"
 
     def load(self):
-        data = pd.DataFrame({
-            'a': list('CCCDDDEEE'),
-            'b': [2, 7, 4, 1, 2, 6, 8, 4, 10]
-        })
-        spec = alt.Chart(data).mark_point().encode(
-            x='a',
-            y='b'
-        )
+        data = pd.DataFrame({"a": list("CCCDDDEEE"), "b": [2, 7, 4, 1, 2, 6, 8, 4, 10]})
+        spec = alt.Chart(data).mark_point().encode(x="a", y="b")
         self.set_data(spec)
 
 
 class WidgetCodeTab(TabbedWidget):
-
     def __init__(self, *args, **kwargs):
-        title = kwargs.pop('title', "")
-        code = kwargs.pop('code', [])
-        widget = kwargs.pop('widget', None)
+        title = kwargs.pop("title", "")
+        code = kwargs.pop("code", [])
+        widget = kwargs.pop("widget", None)
         super().__init__(*args, **kwargs)
         if not isinstance(code, list):
             code = [code]
         code_stream = WidgetStream()
         for code_block in code:
-            code_widget = CodeWidget(code=code_block, language='python')
+            code_widget = CodeWidget(code=code_block, language="python")
             code_stream.add_widget(code_widget)
-        self.add_tab(f'{title} Widget', widget)
+        self.add_tab(f"{title} Widget", widget)
         self.add_tab(f"{title} Code", code_stream)
 
 
@@ -196,21 +202,14 @@ class SciSyncChartCard(CardWidget):
         self.set_widget(tab, "mb-5")
 
     def get_widget(self):
-        data = pd.DataFrame({
-            'a': list('CCCDDDEEE'),
-            'b': [2, 7, 4, 1, 2, 6, 8, 4, 7]
-        })
-        spec = alt.Chart(data).mark_point().encode(
-            x='a',
-            y='b'
-        )
-        chart = AltairChart(title='Scientific Proof')
+        data = pd.DataFrame({"a": list("CCCDDDEEE"), "b": [2, 7, 4, 1, 2, 6, 8, 4, 7]})
+        spec = alt.Chart(data).mark_point().encode(x="a", y="b")
+        chart = AltairChart(title="Scientific Proof")
         chart.set_data(spec)
         return chart
 
 
 class SciChartCard(CardWidget):
-
     title = "Scientific Chart"
     subtitle = "Altair (AJAX)"
 
@@ -228,49 +227,47 @@ class TestTable(DataTable):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.add_column('name')
-        self.add_column('time', searchable=False)
-        self.add_column('pressure', align='right')
-        self.add_column('temperature', align='right')
-        self.add_column('restricted', visible=False)
-        self.add_column('open', sortable=False)
+        self.add_column("name")
+        self.add_column("time", searchable=False)
+        self.add_column("pressure", align="right")
+        self.add_column("temperature", align="right")
+        self.add_column("restricted", visible=False)
+        self.add_column("open", sortable=False)
 
         filtr = DataTableFilter()
         filtr.add_choice("True", "True")
         filtr.add_choice("False", "False")
-        self.add_filter('restricted', filtr)
+        self.add_filter("restricted", filtr)
 
         filtr = DataTableFilter()
         filtr.add_choice("True", "True")
         filtr.add_choice("False", "False")
-        self.add_filter('open', filtr)
+        self.add_filter("open", filtr)
 
         filtr = DataTableFilter()
         filtr.add_choice("< 1000", "level_1000")
         filtr.add_choice("1000-2000", "level_2000")
         filtr.add_choice("2000-3000", "level_3000")
-        self.add_filter('pressure', filtr)
+        self.add_filter("pressure", filtr)
 
-    def filter_pressure_column(self, qs, column, value):
-        if value == 'level_1000':
+    def filter_pressure_column(self, qs, column, value):  # noqa: ARG002
+        if value == "level_1000":
             qs = qs.filter(pressure__lt=1000)
-        elif value == 'level_2000':
+        elif value == "level_2000":
             qs = qs.filter(pressure__lt=2000).filter(pressure__gte=1000)
-        elif value == 'level_3000':
+        elif value == "level_3000":
             qs = qs.filter(pressure__lt=3000).filter(pressure__gte=2000)
         else:
             qs = qs.filter(pressure__contains=value)
         return qs
 
-    def filter_restricted_column(self, qs, column, value):
-        test = value == 'True'
-        qs = qs.filter(restricted=test)
-        return qs
+    def filter_restricted_column(self, qs, column, value):  # noqa: ARG002
+        test = value == "True"
+        return qs.filter(restricted=test)
 
-    def filter_open_column(self, qs, column, value):
-        test = value == 'True'
-        qs = qs.filter(open=test)
-        return qs
+    def filter_open_column(self, qs, column, value):  # noqa: ARG002
+        test = value == "True"
+        return qs.filter(open=test)
 
 
 class PieCard(CardWidget):
@@ -284,8 +281,10 @@ class PieCard(CardWidget):
         self.set_widget(tab, "mb-5")
 
     def get_widget(self):
-        pie = PieChart(title='Dramatic Colors')
-        pie.set_categories(["January", "February", "March", "April", "May", "June", "July"])
+        pie = PieChart(title="Dramatic Colors")
+        pie.set_categories(
+            ["January", "February", "March", "April", "May", "June", "July"]
+        )
         pie.add_dataset([75, 44, 92, 11, 44, 95, 35])
         return pie
 
@@ -308,7 +307,7 @@ class BarChartCard(CardWidget):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        chart = TestChart(width='500', height='400', thousands=True)
+        chart = TestChart(width="500", height="400", thousands=True)
         code = inspect.getsource(TestChart)
         tab = WidgetCodeTab(code=code, widget=chart)
         self.set_widget(tab, "mb-5")
@@ -330,10 +329,12 @@ class HorizontalBarChartCard(CardWidget):
             title="Formage Through July",
             money=True,
             legend=True,
-            width='500',
-            color=False
+            width="500",
+            color=False,
         )
-        barchart.set_categories(["January", "February", "March", "April", "May", "June", "July"])
+        barchart.set_categories(
+            ["January", "February", "March", "April", "May", "June", "July"]
+        )
         barchart.add_dataset([75, 44, 92, 11, 44, 95, 35], "Central")
         barchart.add_dataset([41, 92, 18, 35, 73, 87, 92], "Eastside")
         barchart.add_dataset([87, 21, 94, 13, 90, 13, 65], "Westside")
@@ -346,7 +347,7 @@ class HistogramCard(CardWidget):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        histogram = TestHistogram(width='500', height='400')
+        histogram = TestHistogram(width="500", height="400")
         code = inspect.getsource(TestHistogram)
         tab = WidgetCodeTab(code=code, widget=histogram)
         self.set_widget(tab, "mb-5")
@@ -358,7 +359,7 @@ class HorizontalHistogramCard(CardWidget):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        histogram = TestHorizontalHistogram(width='500', height='400')
+        histogram = TestHorizontalHistogram(width="500", height="400")
         code = inspect.getsource(TestHorizontalHistogram)
         tab = WidgetCodeTab(code=code, widget=histogram)
         self.set_widget(tab, "mb-5")
@@ -366,17 +367,16 @@ class HorizontalHistogramCard(CardWidget):
 
 class TableHeader(BasicHeader):
     header_level = 5
-    header_type = 'display'
+    header_type = "display"
     header_text = "Scientific Tables w/ DatatablesJS"
-    css_class = None
+    css_class = ""
 
 
 class DataTableCard(CardWidget):
-
     INTRO: str = """
-This table is built on a lower level class that provides a lot of flexibility, but can often
-require more code to specify.  You can use any data source as appropriate. Here, we are manually
-adding data in rows.
+This table is built on a lower level class that provides a lot of flexibility,
+but can often require more code to specify.  You can use any data source as
+appropriate. Here, we are manually adding data in rows.
 """
     title = "Data Table"
     subtitle = "DatatablesJS"
@@ -391,9 +391,9 @@ adding data in rows.
     def get_widget(self):
         table = DataTable()
         table.is_data_list = False
-        table.add_column('time')
-        table.add_column('pressure')
-        table.add_column('temperature')
+        table.add_column("time")
+        table.add_column("pressure")
+        table.add_column("temperature")
         table.add_row(time=12, pressure=53, temperature=25)
         table.add_row(time=13, pressure=63, temperature=24)
         table.add_row(time=14, pressure=73, temperature=23)
@@ -402,9 +402,9 @@ adding data in rows.
 
 class TestTableCard(CardWidget):
     INTRO: str = """
-This table is built on a lower level class that provides a lot of flexibility, but can often
-require more code to specify. You can use any data source as appropriate. Here, we are using a
-Django Model.
+This table is built on a lower level class that provides a lot of flexibility,
+but can often require more code to specify. You can use any data source as
+appropriate. Here, we are using a Django Model.
 """
     title = "Test Table"
     subtitle = "DatatablesJS (AJAX)"
@@ -418,14 +418,14 @@ Django Model.
 
 
 class BookModelTable(BasicModelTable):
-    fields = ['title', 'authors__full_name', 'isbn']
+    fields = ["title", "authors__full_name", "isbn"]  # noqa: RUF012
     model = Book
-    alignment = {'authors': 'left'}
-    verbose_names = {'authors__full_name': 'Authors'}
+    alignment = {"authors": "left"}  # noqa: RUF012
+    verbose_names = {"authors__full_name": "Authors"}  # noqa: RUF012
     buttons = True
     striped = True
 
-    def render_authors__full_name_column(self, row, column):
+    def render_authors__full_name_column(self, row, column):  # noqa: ARG002
         authors = row.authors.all()
         if authors.count() > 1:
             return f"{authors[0].full_name} ... "
@@ -434,9 +434,10 @@ class BookModelTable(BasicModelTable):
 
 class BookModelTableCard(CardWidget):
     INTRO: str = """
-This table is built on a high level class designed to work easily with Django models. It
-automatically generates the table columns and provides a lot of flexibility for customization.
-It is dynamic, using AJAX to retrieve data from the server.
+This table is built on a high level class designed to work easily with Django
+models. It automatically generates the table columns and provides a lot of
+flexibility for customization.  It is dynamic, using AJAX to retrieve data from
+the server.
 """
     title = "Book Model Table"
     subtitle = "DatatablesJS (AJAX)"
@@ -450,30 +451,31 @@ It is dynamic, using AJAX to retrieve data from the server.
 
 
 class PressureCellWidget(Block):
-
-    def __init__(self, *args, row=None, column="", **kwargs):
+    def __init__(self, *args, row=None, column="", **kwargs):  # noqa: ARG002
         value = row.pressure
-        if value > 2000:
+        if value > 2000:  # noqa: PLR2004
             icon = "thermometer-high"
             color = "red"
-        elif value > 1000:
+        elif value > 1000:  # noqa: PLR2004
             icon = "thermometer-half"
             color = "orange"
         else:
             icon = "thermometer-low"
             color = "green"
         super().__init__(
-            HorizontalLayoutBlock(FontIcon(icon=icon, color=color), f"{value}", justify="end"), 
-            *args, 
-            **kwargs
-        )        
+            HorizontalLayoutBlock(
+                FontIcon(icon=icon, color=color), f"{value}", justify="end"
+            ),
+            *args,
+            **kwargs,
+        )
 
 
-class WidgetCellTable(WidgetCellMixin, BasicModelTable):
-    fields = ['name', 'pressure', 'temperature']
-    cell_widgets = {'pressure': PressureCellWidget}
+class WidgetCellTable(WidgetCellMixin, BasicModelTable):  # type: ignore[misc]
+    fields = ["name", "pressure", "temperature"]  # noqa: RUF012
+    cell_widgets = {"pressure": PressureCellWidget}  # noqa: RUF012
     model = Measurement
-    alignment = {'pressure': 'right', 'temperature': 'right'}
+    alignment = {"pressure": "right", "temperature": "right"}  # noqa: RUF012
     striped = True
 
 
@@ -491,25 +493,40 @@ class WidgetCellTableCard(CardWidget):
 
 class ApexHeader(BasicHeader):
     header_level = 5
-    header_type = 'display'
+    header_type = "display"
     header_text = "Apex Charts"
-    css_class = None
+    css_class = ""
 
 
 class ApexLineDataset(ApexDatasetBase):
     name = "Data"
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs):  # noqa: ARG002
         super().__init__(**kwargs)
         self.data = [25, 66, 41, 89, 63, 25, 44, 12, 36, 9, 54]
 
 
 class ApexLineChart(ApexJSONMixin, ApexChartBase):
-    chart_type = 'line'
+    chart_type = "line"
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.add_categories(['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'])
+        self.add_categories(
+            [
+                "Jan",
+                "Feb",
+                "Mar",
+                "Apr",
+                "May",
+                "Jun",
+                "Jul",
+                "Aug",
+                "Sep",
+                "Oct",
+                "Nov",
+                "Dec",
+            ]
+        )
 
     def load(self):
         self.add_dataset(ApexLineDataset())
@@ -529,12 +546,27 @@ class ApexChart1Card(CardWidget):
 
 
 class ApexSparkLineChart(ApexSparkline):
-    chart_type = 'bar'
+    chart_type = "bar"
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.add_dataset(ApexLineDataset())
-        self.add_categories(['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'])
+        self.add_categories(
+            [
+                "Jan",
+                "Feb",
+                "Mar",
+                "Apr",
+                "May",
+                "Jun",
+                "Jul",
+                "Aug",
+                "Sep",
+                "Oct",
+                "Nov",
+                "Dec",
+            ]
+        )
 
 
 class ApexSparklineCard(CardWidget):
@@ -551,25 +583,26 @@ class ApexSparklineCard(CardWidget):
 
 
 class MarkdownCard(CardWidget):
-
     MARKDOWN: str = """
 # Markdown Example
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut
-labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco
-laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in
-voluptate velit esse cillum dolore eu fugiat nulla pariatur.
+Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
+incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis
+nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu
+fugiat nulla pariatur.
 
-    Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim
-    id est laborum.
+    Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia
+    deserunt mollit anim id est laborum.
 
 ## de Finibus Bonorum et Malorum
 
-1. Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque
-laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto
-beatae vitae dicta sunt explicabo.
+1. Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium
+   doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore
+   veritatis et quasi architecto beatae vitae dicta sunt explicabo.
 
-2. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia...
+2. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit,
+   sed quia...
 """
 
     def __init__(self, *args, **kwargs):
@@ -579,32 +612,31 @@ beatae vitae dicta sunt explicabo.
         self.set_widget(tab, "mb-5")
 
     def get_markdown_widget(self):
-        widget = MarkdownWidget(text=self.MARKDOWN)
-        return widget
+        return MarkdownWidget(text=self.MARKDOWN)
 
 
 class HTMLCard(CardWidget):
-
     HTML: str = """
 <h1>HTML Example</h1>
-<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut
-labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco
-laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in
-voluptate velit esse cillum dolore eu fugiat nulla pariatur. </p>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
+tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
+quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
+consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum
+dolore eu fugiat nulla pariatur. </p>
 
-<pre><code>Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id
-est laborum.
-</code></pre>
+<pre><code>Excepteur sint occaecat cupidatat non proident, sunt in culpa qui
+officia deserunt mollit anim id est laborum.  </code></pre>
 
 <h2>de Finibus Bonorum et Malorum</h2>
 <ol>
 <li>
-<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque
-laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto
-beatae vitae dicta sunt explicabo.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium
+doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore
+veritatis et quasi architecto beatae vitae dicta sunt explicabo.</p>
 </li>
 <li>
-<p>Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia...</p>
+<p>Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit,
+sed quia...</p>
 </li>
 </ol>
 """
@@ -616,12 +648,10 @@ beatae vitae dicta sunt explicabo.</p>
         self.set_widget(tab, "mb-5")
 
     def get_html_widget(self):
-        widget = HTMLWidget(html=self.HTML)
-        return widget
+        return HTMLWidget(html=self.HTML)
 
 
 class CodeCard(CardWidget):
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         code = get_code_block(CodeCard.get_code_widget)
@@ -629,8 +659,7 @@ class CodeCard(CardWidget):
         self.set_widget(tab, "mb-5")
 
     def get_code_widget(self):
-        widget = CodeWidget(code=inspect.getsource(MarkdownCard), language='python')
-        return widget
+        return CodeWidget(code=inspect.getsource(MarkdownCard), language="python")
 
 
 class StringCard(CardWidget):
@@ -644,26 +673,25 @@ class StringCard(CardWidget):
         self.set_widget(tab, "mb-5")
 
     def get_string_widget(self):
-        widget = Block(
+        return Block(
             Block("This is a string block", css_class="mb-2"),
             TimeStamp("4:53 PM - this is a time block."),
             Block(LabelBlock("This is a label block", css_class="my-2")),
             TagBlock("This is a tag block"),
-
         )
-        return widget
 
 
 class BookModelWidget(Block):
-
-    def __init__(self, object: Model = None, **kwargs) -> None:
-        authors = ', '.join([x.full_name for x in object.authors.all()])
+    def __init__(self, object: Model | None = None, **kwargs) -> None:
+        if object is None:
+            msg = "object must be provided"
+            raise ValueError(msg)
+        authors = ", ".join([x.full_name for x in object.authors.all()])
         super().__init__(
             Block(
-                f"{object.title} - {authors}",
-                css_class='p-3 mb-1 border text-bg-light'
+                f"{object.title} - {authors}", css_class="p-3 mb-1 border text-bg-light"
             ),
-            **kwargs
+            **kwargs,
         )
 
 
@@ -701,8 +729,7 @@ class AuthorListCard(CardWidget):
         self.set_widget(tab, "mb-5")
 
     def get_author_list_widget(self):
-        widget = ListModelWidget(queryset=Author.objects.all()[:10])
-        return widget
+        return ListModelWidget(queryset=Author.objects.all()[:10])
 
 
 class AuthorListModelCardWidgetCard(CardWidget):
@@ -716,8 +743,7 @@ class AuthorListModelCardWidgetCard(CardWidget):
         self.set_widget(tab, "mb-5")
 
     def get_author_list_widget(self):
-        widget = ListModelCardWidget(queryset=Author.objects.all()[:10])
-        return widget
+        return ListModelCardWidget(queryset=Author.objects.all()[:10])
 
 
 class TabCard(CardWidget):
@@ -766,8 +792,7 @@ class CrispyFormCard(CardWidget):
     def get_crispy_form_widget(self):
         form = MinimalBookForm()
         form.helper.form_method = "get"
-        widget = CrispyFormWidget(form=form)
-        return widget
+        return CrispyFormWidget(form=form)
 
 
 class CollapseCard(CardWidget):
@@ -793,8 +818,7 @@ class CollapseCard(CardWidget):
             CrispyFormWidget(form=form),
             css_id="collapse1",
         )
-        widget = Block(header, form_widget)
-        return widget
+        return Block(header, form_widget)
 
 
 class HorizontalLayoutCard(CardWidget):
@@ -808,13 +832,12 @@ class HorizontalLayoutCard(CardWidget):
         self.set_widget(tab, "mb-5")
 
     def get_horizontal_layout_widget(self):
-        widget = HorizontalLayoutBlock(
-            Block("This is a string block", css_class='border p-3 bg-azure'),
-            Block("This is a string block", css_class='border p-3 bg-yellow'),
-            Block("This is a string block", css_class='border p-3 bg-lime'),
-            Block("This is a string block", css_class='border p-3 bg-cyan'),
+        return HorizontalLayoutBlock(
+            Block("This is a string block", css_class="border p-3 bg-azure"),
+            Block("This is a string block", css_class="border p-3 bg-yellow"),
+            Block("This is a string block", css_class="border p-3 bg-lime"),
+            Block("This is a string block", css_class="border p-3 bg-cyan"),
         )
-        return widget
 
 
 class ModalCard(CardWidget):
@@ -839,8 +862,7 @@ class ModalCard(CardWidget):
             modal_title="Modal Title",
             modal_body=Block("This is a modal widget"),
         )
-        widget = Block(header, modal)
-        return widget
+        return Block(header, modal)
 
 
 class CrispyFormModalCard(CardWidget):
@@ -867,33 +889,31 @@ class CrispyFormModalCard(CardWidget):
             modal_title="Modal Title",
             form=form,
         )
-        widget = Block(header, modal)
-        return widget
+        return Block(header, modal)
 
 
 class HomeTable(BasicModelTable):
     model = Book
-    fields = ['title', 'isbn', 'binding']
+    fields = ["title", "isbn", "binding"]  # noqa: RUF012
     hide_controls = True
     page_length = 25
     striped = True
     small = True
-    unsearchable = ['binding']
+    unsearchable = ["binding"]  # noqa: RUF012
 
 
 class AuthorListModelWidget(ListModelWidget):
-
-    def get_object_text(self, object):
-        return f"{str(FontIcon(icon='person-fill', css_class='pe-2'))} {str(object)}"
+    def get_object_text(self, obj):
+        return f"{FontIcon(icon='person-fill', css_class='pe-2')!s} {obj!s}"
 
 
 class HomeBlock(Block):
-
     description = """
-django-wildewidgets is a Django design library providing several tools for building full-featured,
-widget-based web applications with a standard, consistent design, based on Bootstrap.
+django-wildewidgets is a Django design library providing several tools for
+building full-featured, widget-based web applications with a standard,
+consistent design, based on Bootstrap.
 """
-    features = [
+    features = [  # noqa: RUF012
         "Large library of standard widgets",
         "Custom widgets",
         "Widgets can be composable",
@@ -901,7 +921,7 @@ widget-based web applications with a standard, consistent design, based on Boots
         "AJAX data for tables, charts, and other data based widgets",
         "Several supporting views",
     ]
-    standard_widgets = [
+    standard_widgets = [  # noqa: RUF012
         "Basic blocks",
         "Template based widgets",
         "Basic Buttons",
@@ -913,20 +933,24 @@ widget-based web applications with a standard, consistent design, based on Boots
         "Form widgets",
         "Table widgets",
         "Text widgets, like HTML, Code, Markdown, and Label widgets",
-        "Other miscillaneous widgets, like Breadcrumb, Gravatar, and KeyValueList widgets.",
+        "Other miscillaneous widgets, like Breadcrumb, "
+        "Gravatar, and KeyValueList widgets.",
     ]
-    notice = "This entire site is built using django-wildewidgets, with only a single shared template."
+    notice = (
+        "This entire site is built using django-wildewidgets, "
+        "with only a single shared template."
+    )
 
-    def __init__(self, *args, **kwargs):
-        # file_path = os.path.dirname(__file__)
-        # print(file_path)
+    def __init__(self, *args, **kwargs):  # noqa: ARG002
         header = PageHeader(
             header_text="django-wildewidgets Demo",
-            css_class=f'{PageHeader.css_class} mx-1',
+            css_class=f"{PageHeader.css_class} mx-1",
         )
 
         pie = PieChart(width=100, height=100)
-        pie.set_categories(["January", "February", "March", "April", "May", "June", "July"])
+        pie.set_categories(
+            ["January", "February", "March", "April", "May", "June", "July"]
+        )
         pie.add_dataset([75, 44, 92, 11, 44, 95, 35])
 
         modal = ModalWidget(
@@ -939,71 +963,83 @@ widget-based web applications with a standard, consistent design, based on Boots
             header,
             CardWidget(
                 widget=Block(
-                    Block(self.description, css_class='w-75'),
-                    Block(self.notice, css_class='w-75 my-3 fw-bold'),
+                    Block(self.description, css_class="w-75"),
+                    Block(self.notice, css_class="w-75 my-3 fw-bold"),
                 ),
-                css_class='mb-2',
+                css_class="mb-2",
             ),
             HorizontalLayoutBlock(
                 Block(
                     CardWidget(
-                        header=BasicHeader(header_text="Features", css_class="my-0", header_level=3),
+                        header=BasicHeader(
+                            header_text="Features", css_class="my-0", header_level=3
+                        ),
                         widget=UnorderedList(*self.features),
-                        css_class='mb-2',
+                        css_class="mb-2",
                     ),
                     CardWidget(
-                        header=BasicHeader(header_text="Standard Widgets", css_class="my-0", header_level=3),
+                        header=BasicHeader(
+                            header_text="Standard Widgets",
+                            css_class="my-0",
+                            header_level=3,
+                        ),
                         widget=UnorderedList(*self.standard_widgets),
-                        css_class='mb-2',
+                        css_class="mb-2",
                     ),
-                    # css_class='mx-1',
                 ),
                 Block(
                     CardWidget(
                         widget=TestDoughnutChart(legend=False, width=240, height=300),
-                        css_class='mb-2',
+                        css_class="mb-2",
                     ),
                     CardWidget(
                         widget=HorizontalLayoutBlock(
                             ModalButton(
-                                text=Block(FontIcon(icon="window", css_class="pe-1"), "Modal"),
+                                text=Block(
+                                    FontIcon(icon="window", css_class="pe-1"), "Modal"
+                                ),
                                 color="primary",
                                 target="#modal1",
                             ),
                             LinkButton(
                                 url="https://github.com/caltechads/django-wildewidgets",
-                                text=Block(TablerFontIcon(icon="brand-github", css_class="pe-1"), "Github"),
+                                text=Block(
+                                    TablerFontIcon(
+                                        icon="brand-github", css_class="pe-1"
+                                    ),
+                                    "Github",
+                                ),
                                 color="secondary",
                             ),
                             justify="evenly",
                         ),
-                        css_class='py-3 mb-2',
+                        css_class="py-3 mb-2",
                     ),
                     CardWidget(
-                        widget=AuthorListModelWidget(queryset=Author.objects.all()[5:8]),
-                        css_class='mb-2',
-                        attributes={'style': 'height: 223px;'},
+                        widget=AuthorListModelWidget(
+                            queryset=Author.objects.all()[5:8]
+                        ),
+                        css_class="mb-2",
+                        attributes={"style": "height: 223px;"},
                     ),
-                    css_class='mx-xl-2',
+                    css_class="mx-xl-2",
                 ),
                 Block(
                     CardWidget(
                         widget=TestChart(width="300px", height="371px"),
-                        css_class='mb-2',
+                        css_class="mb-2",
                     ),
                     CardWidget(
                         widget=ApexLineChart(),
-                        css_class='mb-2 pt-4',
+                        css_class="mb-2 pt-4",
                     ),
-                    # css_class='mx-1',
                 ),
                 align="start",
                 flex_size="xl",
-                # css_class='mb-2',
             ),
             CardWidget(
                 widget=HomeTable(),
-                css_class=' overflow-auto',
+                css_class=" overflow-auto",
             ),
             modal,
         )

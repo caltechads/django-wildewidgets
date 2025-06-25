@@ -1,5 +1,5 @@
 from django.apps import AppConfig
 
 
-class WildewidgetsConfig(AppConfig):
-    name = 'wildewidgets'
+class WildewidgetsConfig(AppConfig):  # noqa: D101
+    name: str = "wildewidgets"

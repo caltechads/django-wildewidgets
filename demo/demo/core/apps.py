@@ -1,6 +1,6 @@
 from django.apps import AppConfig
 
 
-class CoreConfig(AppConfig):
-    name = 'demo.core'
-    label = 'core'
+class CoreConfig(AppConfig):  # noqa: D101
+    name = "demo.core"
+    label = "core"
