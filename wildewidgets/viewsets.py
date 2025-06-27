@@ -52,12 +52,12 @@ class ModelViewSet:
         .. code-block:: python
 
             from wildewidgets import (
-                ModelViewSet,
                 BreadcrumbBlock,
                 TablerVerticalNavbar,
                 Menu,
                 MenuItem,
             )
+            from wildewidgets.viewsets import ModelViewSet
             from myapp.models import Book
 
             class MainMenu(Menu):
