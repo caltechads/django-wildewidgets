@@ -7,7 +7,6 @@ from urllib.parse import urlencode
 
 from django.core.exceptions import ImproperlyConfigured
 from django.core.paginator import InvalidPage, Paginator
-from django.db.models import Model
 from django.http import Http404
 
 from .base import Block, Widget
@@ -16,7 +15,7 @@ from .headers import BasicHeader, CardHeader
 from .text import HTMLWidget
 
 if TYPE_CHECKING:
-    from django.db.models import QuerySet
+    from django.db.models import Model, QuerySet
 
 
 class TabConfig:
@@ -516,14 +515,14 @@ class MultipleModelWidget(Block):
         # TODO: why is instance an argument here?  It is not used here.
         return self.item_label
 
-    def get_model_widget(self, obj: Model, **kwargs) -> Widget:
+    def get_model_widget(self, object: Model, **kwargs) -> Widget:  # noqa: A002
         """
         Create a widget for a specific model instance.
 
         This method creates and returns a widget for displaying a single model instance.
 
         Args:
-            obj: The model instance to create a widget for
+            object: The model instance to create a widget for
             **kwargs: Additional keyword arguments to pass to the widget constructor
 
         Returns:
@@ -535,7 +534,7 @@ class MultipleModelWidget(Block):
 
         """
         if self.model_widget:
-            return self.model_widget(object=obj, **kwargs)
+            return self.model_widget(object=object, **kwargs)
         msg = (
             f"{self.__class__.__name__} is missing a model widget. Define "
             f"{self.__class__.__name__}.model_widget or override "
@@ -919,7 +918,7 @@ class ListModelWidget(MultipleModelWidget):
         self.remove_url = remove_url if remove_url else self.remove_url
         super().__init__(*args, **kwargs)
         result = self.get_queryset()
-        if not isinstance(result, list[Model]):  # type: ignore[misc]
+        if not isinstance(result, list):
             result = list(result.all())
         widgets = self.get_model_widgets(result)
         if not widgets and self.show_no_items:
@@ -1003,7 +1002,7 @@ class ListModelWidget(MultipleModelWidget):
             )
         return Block(self.get_object_text(instance), tag="label")
 
-    def get_model_widget(self, obj: Model | None = None, **kwargs) -> Widget:  # type: ignore[override]
+    def get_model_widget(self, object: Model, **kwargs) -> Widget:  # type: ignore[override]  # noqa: A002
         """
         Create a widget for a specific model instance.
 
@@ -1011,7 +1010,9 @@ class ListModelWidget(MultipleModelWidget):
         widget with the instance text and an optional remove button.
 
         Args:
-            obj: The model instance to create a widget for
+            object: The model instance to create a widget for
+
+        Keyword Args:
             **kwargs: Additional keyword arguments for the widget
 
         Returns:
@@ -1022,24 +1023,27 @@ class ListModelWidget(MultipleModelWidget):
 
         """
         if self.model_widget:
-            return super().get_model_widget(object=obj, **kwargs)
-        if not obj:
-            msg = (
-                f"{self.__class__.__name__} is missing a model widget but no "
-                "Model object was provided."
-            )
-            raise ValueError(msg)
+            return super().get_model_widget(object=object, **kwargs)
+        if object is None:
+            if not self.model_widget:
+                msg = (
+                    f"{self.__class__.__name__} is missing a model widget. Define "
+                    f"{self.__class__.__name__}.model_widget or override "
+                    f"{self.__class__.__name__}.get_model_widget()."
+                )
+                raise ValueError(msg)
+            return self.model_widget(**kwargs)
         widget = HorizontalLayoutBlock(
             tag="li", name="list-group-item listmodelwidget__item"
         )
-        widget.add_block(self.get_model_subblock(obj))
-        remove_url = self.get_remove_url(obj)
+        widget.add_block(self.get_model_subblock(object))
+        remove_url = self.get_remove_url(object)
         if remove_url:
             widget.add_block(
                 FormButton(
                     close=True,
                     action=remove_url,
-                    confirm_text=self.get_confirm_text(obj),
+                    confirm_text=self.get_confirm_text(object),
                 ),
             )
         return widget
