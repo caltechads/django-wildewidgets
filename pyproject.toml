@@ -42,6 +42,7 @@ default-groups = ["docs", "test"]
 dev = [
   "ipython>=7.27.0",
   "django-stubs==5.1.1",
+  "build>=1.2.2.post1",
 ]
 docs = [
   "Sphinx<7",
