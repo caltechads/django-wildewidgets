@@ -37,7 +37,7 @@ from typing import Dict, Tuple, Optional  # noqa: E402
 
 
 # The full version, including alpha/beta/rc tags
-release = "1.1.6"
+release = "1.1.7"
 
 
 # -- General configuration ---------------------------------------------------
