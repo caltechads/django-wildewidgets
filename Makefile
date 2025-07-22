@@ -17,6 +17,9 @@ dist: clean
 release: dist
 	@bin/release.sh
 
+compile: uv.lock
+	@uv pip compile --group demo --group docs --group test pyproject.toml -o requirements.txt
+
 tox:
 	# create a tox pyenv virtualenv based on 2.7.x
 	# install tox and tox-pyenv in that ve

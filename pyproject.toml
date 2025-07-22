@@ -45,7 +45,7 @@ dev = [
 ]
 docs = [
   "Sphinx<7",
-  "pydata-sphinx-theme >= 0.16.1",
+  "pydata-sphinx-theme <= 2.0.0",
   "sphinxcontrib-images >= 0.9.4",
   "setuptools>=75.1.0",
   "sphinxcontrib-django>=2.5",
