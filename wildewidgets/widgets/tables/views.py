@@ -99,9 +99,9 @@ class DatatableMixin:
 
     @property
     def _querydict(self):
-        if self.request.method == "POST":
-            return self.request.POST
-        return self.request.GET
+        if self.request.method == "POST":  # type: ignore[attr-defined]
+            return self.request.POST  # type: ignore[attr-defined]
+        return self.request.GET  # type: ignore[attr-defined]
 
     def get_initial_queryset(self) -> models.QuerySet:
         """
@@ -536,7 +536,7 @@ class DatatableMixin:
 
             qs = self.get_initial_queryset()
             total_records = qs.count()
-            qs = self.filter_queryset(qs)
+            qs = self.filter_queryset(qs)  # type: ignore[attr-defined]
             total_display_records = qs.count()
             qs = self.ordering(qs)
             qs = self.paging(qs)

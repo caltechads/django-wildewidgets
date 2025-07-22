@@ -74,7 +74,8 @@ class BaseDataTable(Widget, WidgetInitKwargsMixin, DatatableAJAXView):  # type: 
         form_url: URL to submit form actions (optional)
         ajax_url_name: URL name for the AJAX endpoint (default is "wildewidgets_json")
         column_wrap_fields: List of fields to wrap in table controls (optional)
-        async: If True, use AJAX to load data when the table is empty (default is True)
+        is_async: If True, use AJAX to load data when the table is empty
+        (default is True)
         **kwargs: Keyword arguments for parent Widget class initialization
 
 
@@ -122,6 +123,8 @@ class BaseDataTable(Widget, WidgetInitKwargsMixin, DatatableAJAXView):  # type: 
     #: The URL to which to POST our form actions if :py:attr:`form_actions` is
     #: not ``None``
     form_url: str = ""
+    #: If ``True``, use AJAX to load data when the table is empty
+    is_async: bool = True
 
     def __init__(  # noqa: PLR0913
         self,
@@ -143,6 +146,7 @@ class BaseDataTable(Widget, WidgetInitKwargsMixin, DatatableAJAXView):  # type: 
         form_url: str | None = None,
         ajax_url_name: str | None = None,
         column_wrap_fields: list[str] | None = None,
+        is_async: bool | None = None,
         **kwargs,
     ):
         self.width = width if width is not None else self.width
@@ -177,7 +181,7 @@ class BaseDataTable(Widget, WidgetInitKwargsMixin, DatatableAJAXView):  # type: 
         self.table_name = f"datatable_table_{self.table_id}"
         # We have to do this this way instead of naming it above in the kwargs
         # because ``async`` is a reserved keyword
-        self.async_if_empty: bool = kwargs.get("async", True)
+        self.async_if_empty: bool = is_async if is_async is not None else self.is_async
         #: A mapping of field name to column definition
         self.column_fields: dict[str, DataTableColumn] = {}
         #: A mapping of field name to column filter definition
@@ -491,7 +495,7 @@ class BaseDataTable(Widget, WidgetInitKwargsMixin, DatatableAJAXView):  # type: 
 
         """
         context = self.get_template_context_data(**kwargs)
-        html_template = template.loader.get_template(self.template_file)
+        html_template = template.loader.get_template(self.template_file)  # type: ignore[attr-defined]
         return html_template.render(context)
 
     def __str__(self) -> str:
