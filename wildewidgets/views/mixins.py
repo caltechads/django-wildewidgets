@@ -9,7 +9,7 @@ from django.http import HttpResponse
 from django.utils.cache import add_never_cache_headers
 
 try:
-    from django.utils.encoding import force_text
+    from django.utils.encoding import force_text  # type: ignore[import]
 except ImportError:
     from django.utils.encoding import force_str as force_text
 from django.utils.functional import Promise
@@ -281,7 +281,7 @@ class JSONResponseMixin:
         self.csrf_token: str | None = self.request.GET.get("csrf_token", None)
         response: dict[str, Any] | None = None
 
-        func_val = self.get_context_data(**kwargs)
+        func_val = self.get_context_data(**kwargs)  # type: ignore[attr-defined]
         assert isinstance(func_val, dict), "get_context_data must return a dict"  # noqa: S101
         if not self.is_clean:
             response = dict(func_val)
