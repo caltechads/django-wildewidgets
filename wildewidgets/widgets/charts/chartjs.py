@@ -115,7 +115,9 @@ class CategoryChart(Widget, WidgetInitKwargsMixin, JSONDataView):
             "height": kwargs.get("height", "400px"),
             "title": kwargs.get("title"),
             "legend": kwargs.get("legend", self.legend),
-            "legend_position": kwargs.get("legend_position", self.legend_position),
+            "legend_position": kwargs.get(
+                "legend_position", self.legend_position
+            ),
             "chart_type": kwargs.get("chart_type"),
             "histogram": kwargs.get("histogram", False),
             "max": kwargs.get("max"),
@@ -130,7 +132,9 @@ class CategoryChart(Widget, WidgetInitKwargsMixin, JSONDataView):
         self.color = kwargs.get("color", self.color)
         self.colors = []
         if hasattr(settings, "CHARTJS_FONT_FAMILY"):
-            self.chart_options["chartjs_font_family"] = settings.CHARTJS_FONT_FAMILY
+            self.chart_options["chartjs_font_family"] = (
+                settings.CHARTJS_FONT_FAMILY
+            )
         if hasattr(settings, "CHARTJS_TITLE_FONT_SIZE"):
             self.chart_options["chartjs_title_font_size"] = (
                 settings.CHARTJS_TITLE_FONT_SIZE
@@ -140,7 +144,9 @@ class CategoryChart(Widget, WidgetInitKwargsMixin, JSONDataView):
                 settings.CHARTJS_TITLE_FONT_STYLE
             )
         if hasattr(settings, "CHARTJS_TITLE_PADDING"):
-            self.options["chartjs_title_padding"] = settings.CHARTJS_TITLE_PADDING
+            self.chart_options["chartjs_title_padding"] = (
+                settings.CHARTJS_TITLE_PADDING
+            )
         super().__init__(*args, **kwargs)
 
     def set_categories(self, categories: list[str] | list[float]) -> None:
@@ -206,11 +212,13 @@ class CategoryChart(Widget, WidgetInitKwargsMixin, JSONDataView):
             str: The rendered HTML for the chart
 
         """
-        chart_id = self.chart_id if self.chart_id else str(random.randrange(0, 1000))  # noqa: S311
+        chart_id = (
+            self.chart_id if self.chart_id else str(random.randrange(0, 1000))  # noqa: S311
+        )
         template_file = self.template_file
         context = self.get_context_data() if self.datasets else {"async": True}
         html_template = template.loader.get_template(template_file)
-        context["options"] = self.options
+        context["options"] = self.chart_options
         context["name"] = f"chart_{chart_id}"
         context["wildewidgetclass"] = self.__class__.__name__
         context["extra_data"] = self.get_encoded_extra_data()
@@ -237,7 +245,10 @@ class CategoryChart(Widget, WidgetInitKwargsMixin, JSONDataView):
         context = super().get_context_data(**kwargs)
         self.load()
         context.update(
-            {"labels": self.get_categories(), "datasets": self.get_dataset_configs()}
+            {
+                "labels": self.get_categories(),
+                "datasets": self.get_dataset_configs(),
+            }
         )
         return context
 
@@ -541,7 +552,9 @@ class BarChart(CategoryChart):
             "backgroundColor": f"rgba({color[0]}, {color[1]}, {color[2]}, 0.65)",
         }
         if not self.chart_options["histogram"]:
-            default_opt["borderColor"] = f"rgba({color[0]}, {color[1]}, {color[2]}, 1)"
+            default_opt["borderColor"] = (
+                f"rgba({color[0]}, {color[1]}, {color[2]}, 1)"
+            )
             default_opt["borderWidth"] = 0.2
         return default_opt
 
@@ -565,7 +578,9 @@ class BarChart(CategoryChart):
             dataset: dict[str, str | float | list[float]] = {"data": entry}
             dataset.update(self.get_dataset_options(i, color))
             if i < num:
-                dataset["label"] = dataset_labels[i]  # series labels for Chart.js
+                dataset["label"] = dataset_labels[
+                    i
+                ]  # series labels for Chart.js
                 dataset["name"] = dataset_labels[i]  # HighCharts may need this
             datasets.append(dataset)
         return datasets
@@ -757,11 +772,15 @@ class Histogram(BarChart):
         bin_power = math.floor(math.log10(bin_chunk))
         bin_chunk = math.ceil(bin_chunk / 10**bin_power) * 10**bin_power
         if num_min < 0:
-            bin_min = math.ceil(math.fabs(num_min / bin_chunk)) * bin_chunk * -1
+            bin_min = (
+                math.ceil(math.fabs(num_min / bin_chunk)) * bin_chunk * -1
+            )
         else:
             bin_min = math.floor(num_min / bin_chunk) * bin_chunk
         if num_max < 0:
-            bin_max = math.floor(math.fabs(num_max / bin_chunk)) * bin_chunk * -1
+            bin_max = (
+                math.floor(math.fabs(num_max / bin_chunk)) * bin_chunk * -1
+            )
         else:
             bin_max = math.ceil(num_max / bin_chunk) * bin_chunk
         categories = list(float_range(bin_min, bin_max + bin_chunk, bin_chunk))
