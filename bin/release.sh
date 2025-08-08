@@ -11,6 +11,12 @@ if test $(git rev-parse --abbrev-ref HEAD) = "main"; then
             echo "---------------------------------------------------"
             echo
             echo
+            git checkout build
+            git merge main
+            echo "Pushing build to origin ..."
+            git push --tags deploy build
+            git checkout main
+            git push --tags deploy main
             echo "Pushing main to origin ..."
             git push --tags origin main
             echo "Uploading to PyPI ..."
