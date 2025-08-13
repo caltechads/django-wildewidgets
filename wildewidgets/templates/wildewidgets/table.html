@@ -64,17 +64,40 @@
           </div>
         </div>
       </div>
-      <div id="{{name}}__filters" class="btn-group ms-3 mt-3 {{name}}__filters collapse" role="group" aria-label="Search Filters">
+      <div id="{{name}}__filters" class="btn-group ms-3 mt-3 {{name}}__filters collapse {{has_filter_defaults|yesno:'show,'}}" role="group" aria-label="Search Filters">
         <a href="#" role="button" class="btn btn-info label-btn btn-square"  aria-disabled="true">Filter by</a>
         {% for batch in filters %}
           {% with field_counter=forloop.counter0 filter=batch.1 item=batch.0 %}
             {% if filter %}
               <div class="btn-group" role="group">
-                <button id="{{item.field}}-group" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" class="btn btn-outline-secondary dropdown-toggle">{{item.verbose_name}}?: <span class="filter-target">Any</span></button>
+                <button
+                  id="{{item.field}}-group"
+                  type="button"
+                  data-bs-toggle="dropdown"
+                  aria-haspopup="true"
+                  aria-expanded="false"
+                  class="btn btn-outline-secondary dropdown-toggle {% if filter.default %}active{% endif %}"
+                  {% if filter.default %}data-default="{{filter.default_value}}"{% endif %}
+                >{{item.verbose_name}}?:
+                  <span class="filter-target">
+                    {% if filter.default %}
+                      {{filter.default_label}}
+                    {% else %}
+                      Any
+                    {% endif %}
+                  </span>
+                </button>
                 <div class="dropdown-menu" aria-labelledby="{{item.field}}-group">
                   <h6 class="dropdown-header">Filter by {{item.verbose_name}}?</h6>
                   {% for choice in filter.choices %}
-                    <button class="dropdown-item" href="#" data-column="{{field_counter}}" data-search="{{choice.1}}">{{choice.0}}</button>
+                    <button
+                      class="dropdown-item {% if choice.1 == filter.default_value %}active{% endif %}"
+                      href="#"
+                      data-column="{{field_counter}}"
+                      data-search="{{choice.1}}"
+                    >
+                      {{choice.0}}
+                    </button>
                   {% endfor %}
                 </div>
               </div>
@@ -243,8 +266,16 @@
         }
         {{name}}.column(column).search(searchstr).draw();
       }
-  });
+    });
 
+    {% for batch in filters %}
+      {% with field_counter=forloop.counter0 filter=batch.1 item=batch.0 %}
+        {% if filter and filter.default %}
+          // var
+          {{name}}.column('{{field_counter}}').search('{{filter.default_value}}').draw();
+        {% endif %}
+      {% endwith %}
+    {% endfor %}
   });
 
 

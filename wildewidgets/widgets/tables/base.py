@@ -152,8 +152,12 @@ class BaseDataTable(Widget, WidgetInitKwargsMixin, DatatableAJAXView):  # type: 
         self.width = width if width is not None else self.width
         self.height = height if height is not None else self.height
         self.title = title if title is not None else self.title
-        self.searchable = searchable if searchable is not None else self.searchable
-        self.page_length = page_length if page_length is not None else self.page_length
+        self.searchable = (
+            searchable if searchable is not None else self.searchable
+        )
+        self.page_length = (
+            page_length if page_length is not None else self.page_length
+        )
         self.small = small if small is not None else self.small
         self.buttons = buttons if buttons is not None else self.buttons
         self.striped = striped if striped is not None else self.striped
@@ -181,7 +185,9 @@ class BaseDataTable(Widget, WidgetInitKwargsMixin, DatatableAJAXView):  # type: 
         self.table_name = f"datatable_table_{self.table_id}"
         # We have to do this this way instead of naming it above in the kwargs
         # because ``async`` is a reserved keyword
-        self.async_if_empty: bool = is_async if is_async is not None else self.is_async
+        self.async_if_empty: bool = (
+            is_async if is_async is not None else self.is_async
+        )
         #: A mapping of field name to column definition
         self.column_fields: dict[str, DataTableColumn] = {}
         #: A mapping of field name to column filter definition
@@ -190,13 +196,17 @@ class BaseDataTable(Widget, WidgetInitKwargsMixin, DatatableAJAXView):  # type: 
         self.column_styles: list[DataTableStyler] = []
         self.data = data if data else []
         self.sort_ascending = (
-            sort_ascending if sort_ascending is not None else self.sort_ascending
+            sort_ascending
+            if sort_ascending is not None
+            else self.sort_ascending
         )
         self.form_actions = (
             form_actions if form_actions else deepcopy(self.form_actions)
         )
         self.form_url = form_url if form_url else self.form_url
-        self.ajax_url_name = ajax_url_name if ajax_url_name else self.ajax_url_name
+        self.ajax_url_name = (
+            ajax_url_name if ajax_url_name else self.ajax_url_name
+        )
         self.column_wrap_fields = (
             column_wrap_fields
             if column_wrap_fields
@@ -408,7 +418,9 @@ class BaseDataTable(Widget, WidgetInitKwargsMixin, DatatableAJAXView):  # type: 
                 )
 
         """
-        styler.test_index = list(self.column_fields.keys()).index(styler.test_cell)
+        styler.test_index = list(self.column_fields.keys()).index(
+            styler.test_cell
+        )
         if styler.target_cell:
             styler.target_index = list(self.column_fields.keys()).index(
                 styler.target_cell
@@ -419,8 +431,9 @@ class BaseDataTable(Widget, WidgetInitKwargsMixin, DatatableAJAXView):  # type: 
         """
         Build the context for synchronous table rendering.
 
-        This method adds the table's row data to the context for template rendering.
-        Override this method to customize how data is prepared for the template.
+        This method adds the table's row data to the context for template
+        rendering. Override this method to customize how data is prepared
+        for the template.
 
         Args:
             **kwargs: The template context to update
@@ -437,8 +450,8 @@ class BaseDataTable(Widget, WidgetInitKwargsMixin, DatatableAJAXView):  # type: 
         Prepare the complete context for table template rendering.
 
         This method builds the context dictionary with all necessary data for
-        rendering the table template, including configuration, filters, headers,
-        and data mode (async or sync).
+        rendering the table template, including configuration, filters,
+        headers, and data mode (async or sync).
 
         Args:
             **kwargs: Initial context values
@@ -449,11 +462,15 @@ class BaseDataTable(Widget, WidgetInitKwargsMixin, DatatableAJAXView):  # type: 
         """
         kwargs = super().get_template_context_data(**kwargs)
         has_filters = False
+        has_filter_defaults = False
         filters: list[tuple[DataTableColumn, DataTableFilter] | None] = []
         for key, item in self.column_fields.items():
             if key in self.column_filters:
-                filters.append((item, self.column_filters[key]))
+                column_filter = self.column_filters[key]
+                filters.append((item, column_filter))
                 has_filters = True
+                if column_filter.default:
+                    has_filter_defaults = True
             else:
                 filters.append(None)
         if self.data or not self.async_if_empty:
@@ -466,8 +483,11 @@ class BaseDataTable(Widget, WidgetInitKwargsMixin, DatatableAJAXView):  # type: 
         kwargs["filters"] = filters
         kwargs["stylers"] = self.column_styles
         kwargs["has_filters"] = has_filters
+        kwargs["has_filter_defaults"] = has_filter_defaults
         kwargs["options"] = self.datatable_options
-        table_id = self.table_id if self.table_id else str(random.randrange(0, 1000))  # noqa: S311
+        table_id = (
+            self.table_id if self.table_id else str(random.randrange(0, 1000))  # noqa: S311
+        )
         kwargs["name"] = f"datatable_table_{table_id}"
         kwargs["sort_ascending"] = self.sort_ascending
         kwargs["column_wrap_fields"] = self.column_wrap_fields

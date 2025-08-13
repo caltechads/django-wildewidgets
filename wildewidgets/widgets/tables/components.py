@@ -52,7 +52,9 @@ class DataTableColumn:
         wrap: bool = True,
     ):
         self.field = field
-        self.verbose_name = verbose_name if verbose_name else self.field.capitalize()
+        self.verbose_name = (
+            verbose_name if verbose_name else self.field.capitalize()
+        )
         self.searchable = searchable
         self.sortable = sortable
         self.align = align
@@ -66,7 +68,8 @@ class DataTableFilter:
     Defines a filter control for a :py:class:`wildewidgets.DataTable` column.
 
     This class represents a UI control for filtering data in a specific column,
-    typically displayed as a dropdown list of options.
+    typically displayed as a dropdown list of options.If no default is
+    provided, the filter is off by default.
 
     Example:
         .. code-block:: python
@@ -92,17 +95,27 @@ class DataTableFilter:
     def __init__(self, header: Any | None = None) -> None:
         self.header = header
         self.choices: list[tuple[str, str]] = [("Any", "")]
+        self.default: bool = False
+        self.default_value: str | None = None
+        self.default_label: str | None = None
 
-    def add_choice(self, label: str, value: str) -> None:
+    def add_choice(
+        self, label: str, value: str, default: bool = False
+    ) -> None:
         """
         Add a filter option to the choices list.
 
         Args:
             label: The human-readable label displayed in the UI
             value: The value used for filtering when this option is selected
+            default: Whether this option is the default selected option
 
         """
         self.choices.append((label, value))
+        if default:
+            self.default_value = value
+            self.default_label = label
+            self.default = True
 
 
 class DataTableStyler:
