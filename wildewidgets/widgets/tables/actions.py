@@ -470,13 +470,16 @@ class RowDjangoUrlButton(RowActionButton):
             str: The resolved URL for the button
 
         """
-        if not (self.args and self.kwargs):
+        if not (self.url_args and self.url_kwargs):
             url = reverse(self.url_path)
-        if self.args:
-            args = [getattr(row, arg) for arg in self.args]
+        if self.url_args:
+            args = [getattr(row, arg) for arg in self.url_args]
             url = reverse(self.url_path, args=args)
-        if self.kwargs:
-            kwargs = {kwarg: getattr(self.row, attr) for kwarg, attr in self.kwargs}
+        if self.url_kwargs:
+            kwargs = {
+                kwarg: getattr(self.row, attr)
+                for kwarg, attr in self.url_kwargs
+            }
             url = reverse(self.url_path, kwargs=kwargs)
         return url
 
@@ -557,7 +560,9 @@ class RowFormButton(RowModelUrlButton):
         confirm_text: str | None = None,
         **kwargs,
     ):
-        self.form_fields = form_fields if form_fields else deepcopy(self.form_fields)
+        self.form_fields = (
+            form_fields if form_fields else deepcopy(self.form_fields)
+        )
         self.confirm_text = confirm_text if confirm_text else self.confirm_text
         if not self.confirm_text:
             msg = "RowFormButton requires a 'confirm_text' argument or class attribute"
@@ -584,7 +589,9 @@ class RowFormButton(RowModelUrlButton):
         """
         return self.confirm_text  # type: ignore[return-value]
 
-    def bind(self, row: Any, table: Any, size: str | None = None) -> RowFormButton:
+    def bind(
+        self, row: Any, table: Any, size: str | None = None
+    ) -> RowFormButton:
         """
         Bind this button to a specific row and create a form.
 
@@ -607,7 +614,9 @@ class RowFormButton(RowModelUrlButton):
             size = self.size
         action = deepcopy(self)
         action.add_block(
-            HiddenInputBlock(input_name="csrfmiddlewaretoken", value=table.csrf_token)
+            HiddenInputBlock(
+                input_name="csrfmiddlewaretoken", value=table.csrf_token
+            )
         )
         action._attributes["action"] = self.get_url(row)
         for field in self.form_fields:
@@ -836,7 +845,9 @@ class ActionsButtonsBySpecMixin:
     ):
         self.actions = actions if actions is not None else self.actions
         self.action_button_size = (
-            action_button_size if action_button_size else self.action_button_size
+            action_button_size
+            if action_button_size
+            else self.action_button_size
         )
         self.default_action_button_label = (
             default_action_button_label
@@ -1037,7 +1048,13 @@ class ActionsButtonsBySpecMixin:
                 attr = action[4] if len(action) > 4 else "id"  # noqa: PLR2004
                 js_function_name = action[5] if len(action) > 5 else ""  # noqa: PLR2004
                 response += self.get_action_button(
-                    row, label, url_name, method, color_class, attr, js_function_name
+                    row,
+                    label,
+                    url_name,
+                    method,
+                    color_class,
+                    attr,
+                    js_function_name,
                 )
         response += self.get_conditional_action_buttons(row)
         response += "</div>"
@@ -1091,7 +1108,9 @@ class ActionButtonBlockMixin:
 
     #: A list of :py:class:`RowActionButton` subclasses to display in the
     #: "Actions" column.
-    actions: list[RowActionButton] = [RowModelUrlButton(text="View", color="secondary")]  # noqa: RUF012
+    actions: list[RowActionButton] = [
+        RowModelUrlButton(text="View", color="secondary")
+    ]  # noqa: RUF012
 
     def __init__(
         self,
@@ -1101,7 +1120,9 @@ class ActionButtonBlockMixin:
         justify: Literal["start", "center", "end"] | None = None,
         **kwargs,
     ):
-        self.actions = actions if actions is not None else deepcopy(self.actions)
+        self.actions = (
+            actions if actions is not None else deepcopy(self.actions)
+        )
         self.button_size = button_size if button_size else self.button_size
         self.justify = justify if justify else self.justify
         super().__init__(*args, **kwargs)
@@ -1198,9 +1219,13 @@ class StandardModelActionButtonBlockMixin(ActionButtonBlockMixin):
     """
 
     actions: list[RowActionButton] = [  # noqa: RUF012
-        RowModelUrlButton(text="Edit", color="primary", attribute="get_update_url"),
+        RowModelUrlButton(
+            text="Edit", color="primary", attribute="get_update_url"
+        ),
         # TODO: change this to RowFormButton
         RowModelUrlButton(
-            text="delete", color="outline-secondary", attribute="get_delete_url"
+            text="delete",
+            color="outline-secondary",
+            attribute="get_delete_url",
         ),
     ]
