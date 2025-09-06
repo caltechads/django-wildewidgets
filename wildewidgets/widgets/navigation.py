@@ -73,7 +73,9 @@ def is_url(text: str) -> bool:
         False
 
     """
-    return bool(path_validator_re.search(text) or url_validator_re.search(text))
+    return bool(
+        path_validator_re.search(text) or url_validator_re.search(text)
+    )
 
 
 # ==============================
@@ -340,7 +342,9 @@ class BreadcrumbBlock(Block):
         """
         for item in self.items:
             if self.title_class:
-                title: Block = Block(item.title, tag="span", css_class=self.title_class)
+                title: Block = Block(
+                    item.title, tag="span", css_class=self.title_class
+                )
             else:
                 title = Block(item.title, tag="span")
             block = Link(title, url=item.url) if item.url else title
@@ -426,7 +430,9 @@ class NavigationTogglerButton(Block):
     #: The ARIA label for this button
     label: str = "Toggle navigation"
 
-    def __init__(self, target: str | None = None, label: str | None = None, **kwargs):
+    def __init__(
+        self, target: str | None = None, label: str | None = None, **kwargs
+    ):
         """
         Initialize a navigation toggler button.
 
@@ -599,12 +605,18 @@ class Navbar(Block):
         # Set our attributes based on constructor arguments
         self.contents_id = contents_id if contents_id else self.contents_id
         self.hide_below_viewport = (
-            hide_below_viewport if hide_below_viewport else self.hide_below_viewport
+            hide_below_viewport
+            if hide_below_viewport
+            else self.hide_below_viewport
         )
-        self.container_size = container_size if container_size else self.container_size
+        self.container_size = (
+            container_size if container_size else self.container_size
+        )
         self.dark = dark if dark is not None else self.dark
         self.background_color = (
-            background_color if background_color is not None else self.background_color
+            background_color
+            if background_color is not None
+            else self.background_color
         )
         if self.hide_below_viewport not in self.VALID_BREAKPOINTS:
             msg = (
@@ -636,10 +648,14 @@ class Navbar(Block):
         self._attributes["role"] = "navigation"
         #: Everything inside our sidebar lives in this inner container
         margin_class = "ms-0" if self.container_size == "fluid" else "ms-auto"
-        self.inner: Block = Container(size=self.container_size, css_class=margin_class)
+        self.inner: Block = Container(
+            size=self.container_size, css_class=margin_class
+        )
         self.add_block(self.inner)
         #: This is the branding block at the start of the navbar
-        self.branding: Block = branding if branding else deepcopy(self.branding)
+        self.branding: Block = (
+            branding if branding else deepcopy(self.branding)
+        )
         self.build_brand()
         # The menu toggler button for small viewports
         self.inner.add_block(NavigationTogglerButton(target=self.contents_id))
@@ -840,7 +856,9 @@ class MenuHeading(Block):
     def __init__(self, text: str | None = None, **kwargs):
         self.text = text if text else self.text
         if not self.text:
-            msg = '"text" is required as either a class attribute or keyword arg'
+            msg = (
+                '"text" is required as either a class attribute or keyword arg'
+            )
             raise ValueError(msg)
         super().__init__(**kwargs)
         self.add_block(self.text)
@@ -1043,7 +1061,9 @@ class ClickableNavDropdownControl(Block):
         #: in the related :py:class:`DropdownMenu` is
         self.active: bool = active
         self.text = text if text else self.text
-        self.icon: str | TablerMenuIcon | None = icon if icon else deepcopy(self.icon)
+        self.icon: str | TablerMenuIcon | None = (
+            icon if icon else deepcopy(self.icon)
+        )
         self.url = url if url else self.url
         if not self.url:
             msg = '"url" is required as either a class attribute of a keyword arg'
@@ -1263,7 +1283,10 @@ class NavDropdownControl(Link):
 
     block: str = "nav-link"
     name: str = "dropdown-toggle"
-    data_attributes: dict[str, str] = {"toggle": "dropdown", "auto-close": "true"}  # type: ignore[misc]  # noqa: RUF012
+    data_attributes: dict[str, str] = {
+        "toggle": "dropdown",
+        "auto-close": "true",
+    }  # type: ignore[misc]  # noqa: RUF012
     aria_attributes: dict[str, str] = {"expanded": "false"}  # type: ignore[misc]  # noqa: RUF012
     #: Either the name of a Bootstrap icon, or a :py:class:`TablerMenuIcon`
     #: class or subclass
@@ -1404,10 +1427,14 @@ class DropdownItem(Link):
             self.text = text if text else self.text
             self.icon = icon if icon else self.icon
         if not self.text:
-            msg = '"text" is required as either a class attribute or keyword arg'
+            msg = (
+                '"text" is required as either a class attribute or keyword arg'
+            )
             raise ValueError(msg)
         if not self.url:
-            msg = '"url" is required as either a class attribute or keyword arg'
+            msg = (
+                '"url" is required as either a class attribute or keyword arg'
+            )
             raise ValueError(msg)
         super().__init__(**kwargs)
         if self.active:
@@ -1464,7 +1491,9 @@ class DropdownMenu(Block):
     #: The id of the dropdown-toggle button that controls this menu
     button_id: str | None = None
 
-    def __init__(self, *items: MenuItem, button_id: str | None = None, **kwargs):
+    def __init__(
+        self, *items: MenuItem, button_id: str | None = None, **kwargs
+    ):
         self.button_id = button_id if button_id else self.button_id
         if items:
             self.items: Iterable[MenuItem] = items
@@ -1633,7 +1662,10 @@ class NavDropdownItem(Block):
             button_id: str = f"nav-item-{self.text.lower()}"
             button_id = re.sub("[ ._]", "-", button_id)
             self.control = NavDropdownControl(
-                button_id=button_id, text=self.text, icon=self.icon, active=self.active
+                button_id=button_id,
+                text=self.text,
+                icon=self.icon,
+                active=self.active,
             )
             self.menu = DropdownMenu(*self.items, button_id=button_id)
         self.add_block(self.control)
@@ -1662,7 +1694,9 @@ class NavDropdownItem(Block):
         so that any menu item activation that happens after instance construction
         time is accounted for.
         """
-        is_active: bool = self.active or any(item.is_active for item in self.items)
+        is_active: bool = self.active or any(
+            item.is_active for item in self.items
+        )
         if is_active:
             self.show()
         else:
