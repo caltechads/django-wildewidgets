@@ -1972,7 +1972,7 @@ class NavbarMixin:
         """
         return self.menu_item
 
-    def get_navbar(self) -> Navbar:
+    def get_navbar(self) -> Navbar | None:
         """
         Create and return an instance of the primary navbar.
 
@@ -1987,10 +1987,9 @@ class NavbarMixin:
 
         """
         navbar_class = self.get_navbar_class()
-        if not navbar_class:
-            msg = '"navbar_class" must not be None'
-            raise ImproperlyConfigured(msg)
-        return navbar_class()
+        if navbar_class:
+            return navbar_class()
+        return None
 
     def get_secondary_navbar_class(self) -> type[Navbar] | None:
         """
@@ -2039,8 +2038,9 @@ class NavbarMixin:
 
         """
         kwargs["menu"] = self.get_navbar()
-        if menu_item := self.get_menu_item():
-            kwargs["menu"].activate(menu_item)
+        if kwargs["menu"]:
+            if menu_item := self.get_menu_item():
+                kwargs["menu"].activate(menu_item)
         secondary_navbar = self.get_secondary_navbar()
         if secondary_navbar:
             kwargs["submenu"] = secondary_navbar
