@@ -1,6 +1,6 @@
 [project]
 name = "django_wildewidgets"
-version = "1.2.2"
+version = "1.2.3"
 description = "django-wildewidgets is a Django design library providing several tools for building full-featured, widget-based web applications with a standard, consistent design, based on Bootstrap."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -41,7 +41,7 @@ default-groups = ["docs", "test"]
 dev = [
   "ipython>=7.27.0",
   "django-stubs==5.1.1",
-  "build>=1.2.2.post1",
+  "build>=1.2.3.post1",
 ]
 docs = [
   "Sphinx<7",
