@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Final
+from typing import TYPE_CHECKING, Any, Final, cast
 
 from django.urls import URLPattern, path, reverse
 
@@ -440,7 +440,9 @@ filter_input.onkeyup = function(e) {{
         self.instance = instance
         self.model = instance.__class__
         if hasattr(self.model, "model_verbose_name_plural"):
-            self.verbose_name_plural = self.model.model_verbose_name_plural()
+            self.verbose_name_plural = cast(
+                "Model", self.model
+            ).model_verbose_name_plural()
         else:
             self.verbose_name_plural = self.model._meta.verbose_name_plural
             assert self.verbose_name_plural, (  # noqa: S101
@@ -471,7 +473,9 @@ filter_input.onkeyup = function(e) {{
         self.set_header(self.get_header)
         self.set_widget(
             CrispyFormWidget(
-                form=self.get_form(self.instance, self.field_name, self.form_action),
+                form=self.get_form(
+                    self.instance, self.field_name, cast("str", self.form_action)
+                ),
                 css_id=self.form_id,
             )
         )
@@ -548,7 +552,7 @@ filter_input.onkeyup = function(e) {{
         if not issubclass(self.form_class, ToggleableManyToManyFieldForm):
             msg = "form_class must be a subclass of ToggleableManyToManyFieldForm"
             raise TypeError(msg)
-        return self.form_class(instance, fields=[field_name], form_action=form_action)
+        return self.form_class(instance, field_name=field_name, form_action=form_action)
 
     def get_header(self) -> Block:
         """
