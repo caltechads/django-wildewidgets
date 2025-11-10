@@ -605,7 +605,14 @@ class GenericDatatableMixin:
         if self.user_can_update():
             actions.append(RowEditButton())
         if self.user_can_delete():
-            actions.append(RowDeleteButton())
+            actions.append(
+                RowDeleteButton(
+                    confirm_text=(
+                        "Are you sure you want to delete this "
+                        f"{self.model._meta.verbose_name}?"
+                    )
+                )
+            )
         if actions:
             kwargs["actions"] = actions
         return self.table_class(*args, **kwargs)
