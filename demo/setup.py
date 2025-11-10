@@ -2,7 +2,7 @@ from setuptools import find_packages, setup  # noqa: INP001
 
 setup(
     name="demo",
-    version="1.2.3",
+    version="1.2.4",
     description="",
     author="Caltech IMSS ADS",
     author_email="imss-ads-staff@caltech.edu",
