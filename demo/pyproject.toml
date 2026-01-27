@@ -1,6 +1,6 @@
 [project]
 name = "wildewidgets-demo"
-version = "1.2.5"
+version = "1.2.6"
 description = "Cheetah Demo - Django application demonstrating django-wildewidgets"
 readme = "README.md"
 requires-python = ">=3.14"
@@ -25,7 +25,7 @@ dependencies = [
     "django-chartjs >= 2.2.1",
     "django-theme-academy >= 0.3.2",
     "django-book-manager >= 0.3.2",
-    "django-wildewidgets >= 1.2.5",
+    "django-wildewidgets >= 1.2.6",
     # Other utils
     "bleach >= 5.0.1",
     "altair >= 5.5.0",
