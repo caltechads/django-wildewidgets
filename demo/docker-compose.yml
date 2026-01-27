@@ -1,33 +1,32 @@
-version: "2"
-
 services:
   demo:
     image: "wildewidgets_demo:latest"
     container_name: "wildewidgets_demo"
-    platform: linux/amd64
+    # platform: linux/amd64
     restart: always
     hostname: "wildewidgets_demo"
     ports:
-      - 443:443
+      - "443:8443"
     environment:
       - DEBUG=True
       - DEVELOPMENT=True
       - GUNICORN_RELOAD=True
     depends_on:
-      - mysql
-    command: bin/wait-for-it.sh mysql:3306 --and /opt/python/bin/supervisord
+      mysql:
+        condition: service_healthy
     volumes:
       - .:/app
       - ../wildewidgets:/ve/lib/python3.10/site-packages/wildewidgets
 
   mysql:
-    image: mysql:8.0.23
+    image: mysql:8.0
     container_name: "db"
-    platform: linux/amd64
+    # platform: linux/amd64
     environment:
       MYSQL_ROOT_PASSWORD: root_password
-    # Apply the MySQL 5.6.40+ default sql_modes, which are not enabled in Docker's MySQL containers, even in 5.6.49.
-    command: mysqld --sql_mode="REAL_AS_FLOAT,PIPES_AS_CONCAT,ANSI_QUOTES,IGNORE_SPACE,ANSI,STRICT_TRANS_TABLES"
+    cap_add:
+      # removes error messages like: mbind: Operation not permitted
+      - SYS_NICE
     ports:
       # Expose port 3306 on the container as port 3307 on the host, so that
       # sql clients can connect to it.
@@ -36,6 +35,11 @@ services:
       - ./sql/docker/my.cnf:/etc/mysql/conf.d/dev.cnf
       - ./sql/docker:/docker-entrypoint-initdb.d
       - wildewidgets_demo_data:/var/lib/mysql
+    healthcheck:
+      test: mysql --user=root --password=root_password --execute "SHOW DATABASES;"
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
 volumes:
   # The Docker volume in which the database's files are stored. Works in tandem
