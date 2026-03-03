@@ -112,7 +112,13 @@
     <thead>
       <tr>
         {% for key,item in header.items %}
-          <th>{{item.verbose_name|safe}}</th>
+          <th>
+            {% if has_form_actions and key == 'checkbox' and options.has_select_all %}
+              <input type="checkbox" id="{{name}}-select-all" aria-label="Select all">
+            {% else %}
+              {{item.verbose_name|safe}}
+            {% endif %}
+          </th>
         {% endfor %}
       </tr>
     </thead>
@@ -278,6 +284,21 @@
         {% endif %}
       {% endwith %}
     {% endfor %}
+
+    {% if has_form_actions and options.has_select_all %}
+    $('#{{ name }}-select-all').on('change', function() {
+      $('.{{ name }} tbody input[name=checkbox]').prop('checked', this.checked);
+    });
+    $('.{{ name }}').on('change', 'tbody input[name=checkbox]', function() {
+      var total = $('.{{ name }} tbody input[name=checkbox]').length;
+      var checked = $('.{{ name }} tbody input[name=checkbox]').filter(':checked').length;
+      $('#{{ name }}-select-all').prop(
+        'checked', total > 0 && checked === total
+      ).prop(
+        'indeterminate', checked > 0 && checked < total
+      );
+    });
+    {% endif %}
   });
 
 

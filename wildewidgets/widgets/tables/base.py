@@ -76,6 +76,8 @@ class BaseDataTable(Widget, WidgetInitKwargsMixin, DatatableAJAXView):  # type: 
         column_wrap_fields: List of fields to wrap in table controls (optional)
         is_async: If True, use AJAX to load data when the table is empty
         (default is True)
+        has_select_all: If True and form_actions is set, show a "select all"
+            checkbox in the checkbox column header (default is False)
         **kwargs: Keyword arguments for parent Widget class initialization
 
 
@@ -120,6 +122,10 @@ class BaseDataTable(Widget, WidgetInitKwargsMixin, DatatableAJAXView):  # type: 
     #: checkboxes to each row, and a form that allows you to choose bulk actions
     #: to perform on all checked rows.
     form_actions = None
+    #: If ``True`` and :py:attr:`form_actions` is set, show a "select all" checkbox
+    #: in the checkbox column header. Default is ``False`` so existing tables are
+    #: unchanged.
+    has_select_all: bool = False
     #: The URL to which to POST our form actions if :py:attr:`form_actions` is
     #: not ``None``
     form_url: str = ""
@@ -147,6 +153,7 @@ class BaseDataTable(Widget, WidgetInitKwargsMixin, DatatableAJAXView):  # type: 
         ajax_url_name: str | None = None,
         column_wrap_fields: list[str] | None = None,
         is_async: bool | None = None,
+        has_select_all: bool | None = None,
         **kwargs,
     ):
         self.width = width if width is not None else self.width
@@ -164,6 +171,9 @@ class BaseDataTable(Widget, WidgetInitKwargsMixin, DatatableAJAXView):  # type: 
         self.hide_controls = (
             hide_controls if hide_controls is not None else self.hide_controls
         )
+        self.has_select_all = (
+            has_select_all if has_select_all is not None else self.has_select_all
+        )
         #: These are options for dataTable itself and get set in the JavaScript
         #: constructor for the table.
         self.datatable_options: dict[str, Any] = {
@@ -177,6 +187,7 @@ class BaseDataTable(Widget, WidgetInitKwargsMixin, DatatableAJAXView):  # type: 
             "buttons": self.buttons,
             "striped": self.striped,
             "hide_controls": self.hide_controls,
+            "has_select_all": self.has_select_all,
         }
         #: The CSS id for this table
         self.table_id = table_id if table_id else self.table_id
