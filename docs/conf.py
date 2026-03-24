@@ -32,7 +32,7 @@ copyright = "2023, California Institute of Technology"  # noqa: A001
 author = "Glenn Bach, Chris Malek"
 
 # The full version, including alpha/beta/rc tags
-release = "1.2.6"
+release = "1.3.0"
 
 
 # -- General configuration ---------------------------------------------------

@@ -259,7 +259,7 @@ class PermissionRequiredMixin(AccessMixin):
 
         """
         if groups_required is None:
-            groups_required = self.get_groups_required()
+            groups_required = [group.name for group in self.get_groups_required()]
         if permissions_required is None:
             permissions_required = self.get_permissions_required()
         if self.required_model_permissions:

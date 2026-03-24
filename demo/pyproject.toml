@@ -1,6 +1,6 @@
 [project]
 name = "wildewidgets-demo"
-version = "1.2.6"
+version = "1.3.0"
 description = "Cheetah Demo - Django application demonstrating django-wildewidgets"
 readme = "README.md"
 requires-python = ">=3.14"
