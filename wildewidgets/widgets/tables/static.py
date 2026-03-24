@@ -263,15 +263,16 @@ class StaticTableWidget(Block):
         self.rows = rows or []
         self.header = Block(tag="thead")
         self.body = Block(tag="tbody")
+        self.cell_css_class = cell_css_class
 
         if self.headings:
             for heading in self.headings:
                 self.header.add_block(
-                    Block(heading, tag="th", css_class=cell_css_class)
+                    Block(heading, tag="th", css_class=self.cell_css_class)
                 )
         for row in self.rows:
             self.body.add_block(
-                StaticTableRowWidget(row, cell_css_class=cell_css_class)
+                StaticTableRowWidget(row, cell_css_class=self.cell_css_class)
             )
 
         if self.headings:
@@ -290,7 +291,8 @@ class StaticTableWidget(Block):
             heading: the heading to add to the table
 
         """
-        self.header.add_block(Block(heading, tag="th"))
+        self.header.add_block(
+            Block(heading, tag="th", css_class=self.cell_css_class))
         if self.header not in self.blocks:
             self.add_block(self.header)
 
@@ -298,6 +300,6 @@ class StaticTableWidget(Block):
         """
         Add a single row to the table.  Do this after adding headings.
         """
-        self.body.add_block(StaticTableRowWidget(row))
+        self.body.add_block(StaticTableRowWidget(row, cell_css_class=self.cell_css_class))
         if self.body not in self.blocks:
             self.add_block(self.body)
