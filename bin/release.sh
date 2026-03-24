@@ -14,7 +14,7 @@ if test $(git rev-parse --abbrev-ref HEAD) = "main"; then
             git checkout build
             git merge main
             echo "Pushing build to origin ..."
-            git push --tags build
+            git push --tags origin build
             git checkout main
             sleep 3
             echo "Pushing main to origin ..."
