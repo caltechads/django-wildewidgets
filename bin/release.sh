@@ -14,9 +14,9 @@ if test $(git rev-parse --abbrev-ref HEAD) = "main"; then
             git checkout build
             git merge main
             echo "Pushing build to origin ..."
-            git push --tags deploy build
+            git push --tags build
             git checkout main
-            git push --tags deploy main
+            sleep 3
             echo "Pushing main to origin ..."
             git push --tags origin main
             echo "Uploading to PyPI ..."
