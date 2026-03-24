@@ -1,6 +1,6 @@
 [project]
 name = "wildewidgets-demo"
-version = "1.4.0"
+version = "1.4.1"
 description = "Cheetah Demo - Django application demonstrating django-wildewidgets"
 readme = "README.md"
 requires-python = ">=3.14"
@@ -21,7 +21,7 @@ dependencies = [
     "django-markdownify >= 0.9.2",
     "django-redis >= 4.11.0",
     "django-storages >= 1.14.4",
-    "django-xff >= 1.4.0",
+    "django-xff >= 1.4.1",
     "django-chartjs >= 2.2.1",
     "django-theme-academy >= 0.3.2",
     "django-book-manager >= 0.3.2",
