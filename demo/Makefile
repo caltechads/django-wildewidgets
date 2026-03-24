@@ -13,9 +13,9 @@ dist:: clean
 
 package::
 	(cd ..; uv build --sdist)
-	cp ../dist/django-wildewidgets-${VERSION}.tar.gz django-wildewidgets.tar.gz
+	cp ../dist/django_wildewidgets-${VERSION}.tar.gz django_wildewidgets.tar.gz
 
-build::
+build:: package
 	docker build -t ${PACKAGE}:${VERSION} .
 	docker tag ${PACKAGE}:${VERSION} ${PACKAGE}:latest
 	docker image prune -f

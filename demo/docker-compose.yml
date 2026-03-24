@@ -16,7 +16,7 @@ services:
         condition: service_healthy
     volumes:
       - .:/app
-      - ../wildewidgets:/ve/lib/python3.10/site-packages/wildewidgets
+      - ../wildewidgets:/ve/lib/python3.14/site-packages/wildewidgets
 
   mysql:
     image: mysql:8.0

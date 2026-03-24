@@ -4,6 +4,10 @@ Table Widgets
 Tables
 ------
 
+.. automodule:: wildewidgets.widgets.tables.static
+   :members:
+   :show-inheritance:
+
 .. automodule:: wildewidgets.widgets.tables.tables
    :members:
    :show-inheritance:

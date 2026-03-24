@@ -1,4 +1,4 @@
-# Configuration file for the Sphinx documentation builder.
+# Configuration file for the Sphinx documentation builder.  # noqa: INP001
 #
 # This file only contains a selection of the most common options. For a full
 # list see the documentation:
@@ -10,16 +10,14 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
-# import os
-# import sys
-# sys.path.insert(0, os.path.abspath('.'))
-# import sphinx_rtd_theme
 
-import django
 import os
 import sys
 
+import django
+
 sys.path.insert(0, os.path.abspath("../demo"))
+os.environ.setdefault("TESTING", "True")
 os.environ["DJANGO_SETTINGS_MODULE"] = "demo.settings"
 django.setup()
 
@@ -30,11 +28,8 @@ django.setup()
 master_doc = "index"
 
 project = "django-wildewidgets"
-copyright = "2023, California Institute of Technology"  # pylint: disable=redefined-builtin
+copyright = "2023, California Institute of Technology"  # noqa: A001
 author = "Glenn Bach, Chris Malek"
-
-from typing import Dict, Tuple, Optional  # noqa: E402
-
 
 # The full version, including alpha/beta/rc tags
 release = "1.2.6"
@@ -68,10 +63,10 @@ add_module_names: bool = False
 autodoc_member_order = "groupwise"
 
 # Make Sphinx not expand all our Type Aliases
-autodoc_type_aliases: Dict[str, str] = {}
+autodoc_type_aliases: dict[str, str] = {}
 
 # the locations and names of other projects that should be linked to this one
-intersphinx_mapping: Dict[str, Tuple[str, Optional[str]]] = {
+intersphinx_mapping: dict[str, tuple[str, str | None]] = {
     "python": ("https://docs.python.org/3", None),
     "django": (
         "http://docs.djangoproject.com/en/dev/",
@@ -90,7 +85,6 @@ django_show_db_tables = True
 # a list of builtin themes.
 #
 html_theme = "pydata_sphinx_theme"
-# html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 html_context = {
     "display_github": True,  # Integrate github
     "github_user": "caltech-imss-ads",  # Username

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import inspect
 import random
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, ClassVar, Literal
 
 import altair as alt
 import pandas as pd
@@ -43,11 +43,13 @@ from wildewidgets import (
     PageHeader,
     PieChart,
     StackedBarChart,
+    StaticTableWidget,
     TabbedWidget,
     TablerFontIcon,
     TagBlock,
     TimeStamp,
     UnorderedList,
+    Widget,
     WidgetCellMixin,
     WidgetStream,
 )
@@ -55,7 +57,7 @@ from wildewidgets import (
 from .models import Measurement
 
 if TYPE_CHECKING:
-    from django.db.models import Model
+    from django.db.models import Model, QuerySet
 
 
 def get_code_block(fn):
@@ -80,18 +82,38 @@ def get_code_block(fn):
 
 
 class BusinessChartHeader(BasicHeader):
+    """
+    Basic business charts with ChartJS.
+    """
+
     header_level = 5
     header_type = "display"
     header_text = "Basic Business Charts w/ ChartJS"
 
 
 class TestChart(StackedBarChart):
-    def get_categories(self):
-        """Return 7 labels for the x-axis."""
+    """
+    Test chart with ChartJS.
+    """
+
+    def get_categories(self) -> list[str]:
+        """
+        Return 7 labels for the x-axis.
+
+        Returns:
+            A list of 7 labels for the x-axis.
+
+        """
         return ["January", "February", "March", "April", "May", "June", "July"]
 
-    def get_dataset_labels(self):
-        """Return names of datasets."""
+    def get_dataset_labels(self) -> list[str]:
+        """
+        Return names of datasets.
+
+        Returns:
+            A list of names of datasets.
+
+        """
         return [
             "Central",
             "Eastside",
@@ -104,7 +126,7 @@ class TestChart(StackedBarChart):
             "Westside3",
         ]
 
-    def get_datasets(self):
+    def get_datasets(self) -> list[list[float]]:
         """Return 3 datasets to plot."""
         return [
             [750, 440, 920, 1100, 440, 950, 350],
@@ -120,18 +142,43 @@ class TestChart(StackedBarChart):
 
 
 class TestDoughnutChart(DoughnutChart):
+    """
+    Test doughnut chart with ChartJS.
+    """
+
+    #: Whether to show the legend.
     legend = True
+    #: The position of the legend.
     legend_position = "right"
+    #: Whether to color the chart.
     color = False
 
-    def get_categories(self):
+    def get_categories(self) -> list[str]:
+        """
+        Return names of categories.
+
+        Returns:
+            A list of names of categories.
+
+        """
         return ["January", "February", "March", "April", "May", "June", "July"]
 
-    def get_dataset(self):
+    def get_dataset(self) -> list[int]:
+        """
+        Return a dataset.
+
+        Returns:
+            A list of values for the dataset.
+
+        """
         return [75, 44, 92, 11, 44, 95, 53]
 
 
 class TestHistogram(Histogram):
+    """
+    Test histogram with ChartJS.
+    """
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         mu = 0
@@ -146,9 +193,18 @@ class TestHistogram(Histogram):
 
 
 class TestHorizontalHistogram(HorizontalHistogram):
+    """
+    Test horizontal histogram with ChartJS.
+    """
+
+    #: Whether to color the chart.
     color = False
 
-    def load(self):
+    def load(self) -> None:
+        """
+        Load the histogram data.
+
+        """
         mu = 100
         sigma = 30
         nums = []
@@ -161,22 +217,42 @@ class TestHorizontalHistogram(HorizontalHistogram):
 
 
 class SciChartHeader(BasicHeader):
+    """
+    Header for the scientific charts with Altair page.
+    """
+
+    #: The level of the header.
     header_level = 5
+    #: The type of the header.
     header_type = "display"
+    #: The text of the header.
     header_text = "Scientific Charts w/ Altair"
 
 
 class SciChart(AltairChart):
+    """
+    Scientific chart with Altair.
+    """
+
+    #: The title of the chart.
     title = "Scientific Proofiness"
 
-    def load(self):
+    def load(self) -> None:
+        """
+        Load the chart data.
+
+        """
         data = pd.DataFrame({"a": list("CCCDDDEEE"), "b": [2, 7, 4, 1, 2, 6, 8, 4, 10]})
         spec = alt.Chart(data).mark_point().encode(x="a", y="b")
         self.set_data(spec)
 
 
 class WidgetCodeTab(TabbedWidget):
-    def __init__(self, *args, **kwargs):
+    """
+    Tabbed widget for the code behind the widget displayed in the tab.
+    """
+
+    def __init__(self, *args, **kwargs) -> None:
         title = kwargs.pop("title", "")
         code = kwargs.pop("code", [])
         widget = kwargs.pop("widget", None)
@@ -192,8 +268,14 @@ class WidgetCodeTab(TabbedWidget):
 
 
 class SciSyncChartCard(CardWidget):
-    title = "Scientific Chart"
-    subtitle = "Altair"
+    """
+    Scientific chart with Altair.
+    """
+
+    #: The title of the card.
+    title: str = "Scientific Chart"
+    #: The subtitle of the card.
+    subtitle: str = "Altair"
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -201,16 +283,29 @@ class SciSyncChartCard(CardWidget):
         tab = WidgetCodeTab(code=code, widget=self.get_widget())
         self.set_widget(tab, "mb-5")
 
-    def get_widget(self):
+    def get_widget(self) -> AltairChart:
+        """
+        Return the scientific chart.
+
+        Returns:
+            The scientific chart.
+
+        """
         data = pd.DataFrame({"a": list("CCCDDDEEE"), "b": [2, 7, 4, 1, 2, 6, 8, 4, 7]})
         spec = alt.Chart(data).mark_point().encode(x="a", y="b")
-        chart = AltairChart(title="Scientific Proof")
+        chart = AltairChart(title=self.title)
         chart.set_data(spec)
         return chart
 
 
 class SciChartCard(CardWidget):
-    title = "Scientific Chart"
+    """
+    Scientific chart with Altair (AJAX).
+    """
+
+    #: The title of the card.
+    title: str = "Scientific Chart"
+    #: The subtitle of the card.
     subtitle = "Altair (AJAX)"
 
     def __init__(self, *args, **kwargs):
@@ -222,11 +317,18 @@ class SciChartCard(CardWidget):
 
 
 class TestTable(DataTable):
+    """
+    Test table with DatatablesJS.
+    """
+
+    #: The model to use for the table.
     model = Measurement
-    table_id = "data_measurement"
+    #: The ID of the table.
+    table_id: str = "data_measurement"
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        # Add all the columns.
         self.add_column("name")
         self.add_column("time", searchable=False)
         self.add_column("pressure", align="right")
@@ -234,23 +336,38 @@ class TestTable(DataTable):
         self.add_column("restricted", visible=False)
         self.add_column("open", sortable=False)
 
+        # Set the `restricted` filter.
         filtr = DataTableFilter()
         filtr.add_choice("True", "True")
         filtr.add_choice("False", "False")
         self.add_filter("restricted", filtr)
 
+        # Set the `open` filter.
         filtr = DataTableFilter()
         filtr.add_choice("True", "True")
         filtr.add_choice("False", "False")
         self.add_filter("open", filtr)
 
+        # Set the `pressure` filter.
         filtr = DataTableFilter()
         filtr.add_choice("< 1000", "level_1000")
         filtr.add_choice("1000-2000", "level_2000")
         filtr.add_choice("2000-3000", "level_3000")
         self.add_filter("pressure", filtr)
 
-    def filter_pressure_column(self, qs, column, value):  # noqa: ARG002
+    def filter_pressure_column(self, qs, column, value) -> QuerySet:  # noqa: ARG002
+        """
+        Filter endpoint for the ``pressure`` column.
+
+        Args:
+            qs: The queryset to filter.
+            column: The column to filter (unused).
+            value (str): The value to filter by.
+
+        Returns:
+            The filtered queryset.
+
+        """
         if value == "level_1000":
             qs = qs.filter(pressure__lt=1000)
         elif value == "level_2000":
@@ -261,18 +378,48 @@ class TestTable(DataTable):
             qs = qs.filter(pressure__contains=value)
         return qs
 
-    def filter_restricted_column(self, qs, column, value):  # noqa: ARG002
+    def filter_restricted_column(self, qs, column, value) -> QuerySet:  # noqa: ARG002
+        """
+        Filter endpoint for the ``restricted`` column.
+
+        Args:
+            qs: The queryset to filter.
+            column: The column to filter (unused).
+            value: The value to filter by.
+
+        Returns:
+            The filtered queryset.
+
+        """
         test = value == "True"
         return qs.filter(restricted=test)
 
-    def filter_open_column(self, qs, column, value):  # noqa: ARG002
+    def filter_open_column(self, qs, column, value) -> QuerySet:  # noqa: ARG002
+        """
+        Filter endpoint for the ``open`` column.
+
+        Args:
+            qs: The queryset to filter.
+            column: The column to filter (unused).
+            value (str): The value to filter by.
+
+        Returns:
+            The filtered queryset.
+
+        """
         test = value == "True"
         return qs.filter(open=test)
 
 
 class PieCard(CardWidget):
-    title = "Pie Chart"
-    subtitle = "ChartJS"
+    """
+    Pie chart with ChartJS.
+    """
+
+    #: The title of the card.
+    title: str = "Pie Chart"
+    #: The subtitle of the card.
+    subtitle: str = "ChartJS"
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -280,7 +427,14 @@ class PieCard(CardWidget):
         tab = WidgetCodeTab(code=code, widget=self.get_widget())
         self.set_widget(tab, "mb-5")
 
-    def get_widget(self):
+    def get_widget(self) -> PieChart:
+        """
+        Return the pie chart.
+
+        Returns:
+            The pie chart.
+
+        """
         pie = PieChart(title="Dramatic Colors")
         pie.set_categories(
             ["January", "February", "March", "April", "May", "June", "July"]
@@ -290,8 +444,14 @@ class PieCard(CardWidget):
 
 
 class DonutCard(CardWidget):
-    title = "Donut Chart"
-    subtitle = "ChartJS (AJAX)"
+    """
+    Donut chart with ChartJS (AJAX).
+    """
+
+    #: The title of the card.
+    title: str = "Donut Chart"
+    #: The subtitle of the card.
+    subtitle: str = "ChartJS (AJAX)"
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -302,8 +462,14 @@ class DonutCard(CardWidget):
 
 
 class BarChartCard(CardWidget):
-    title = "Bar Chart"
-    subtitle = "ChartJS (AJAX)"
+    """
+    Bar chart with ChartJS (AJAX).
+    """
+
+    #: The title of the card.
+    title: str = "Bar Chart"
+    #: The subtitle of the card.
+    subtitle: str = "ChartJS (AJAX)"
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -314,8 +480,14 @@ class BarChartCard(CardWidget):
 
 
 class HorizontalBarChartCard(CardWidget):
-    title = "Horizontal Bar Chart"
-    subtitle = "ChartJS"
+    """
+    Horizontal bar chart with ChartJS.
+    """
+
+    #: The title of the card.
+    title: str = "Horizontal Bar Chart"
+    #: The subtitle of the card.
+    subtitle: str = "ChartJS"
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -324,7 +496,14 @@ class HorizontalBarChartCard(CardWidget):
         tab = WidgetCodeTab(code=code, widget=self.get_widget())
         self.set_widget(tab, "mb-5")
 
-    def get_widget(self):
+    def get_widget(self) -> HorizontalStackedBarChart:
+        """
+        Return the horizontal bar chart.
+
+        Returns:
+            The horizontal bar chart.
+
+        """
         barchart = HorizontalStackedBarChart(
             title="Formage Through July",
             money=True,
@@ -342,8 +521,14 @@ class HorizontalBarChartCard(CardWidget):
 
 
 class HistogramCard(CardWidget):
-    title = "Histogram"
-    subtitle = "ChartJS (AJAX)"
+    """
+    Histogram with ChartJS (AJAX).
+    """
+
+    #: The title of the card.
+    title: str = "Histogram"
+    #: The subtitle of the card.
+    subtitle: str = "ChartJS (AJAX)"
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -354,8 +539,14 @@ class HistogramCard(CardWidget):
 
 
 class HorizontalHistogramCard(CardWidget):
-    title = "Horizontal Histogram"
-    subtitle = "ChartJS"
+    """
+    Horizontal histogram with ChartJS.
+    """
+
+    #: The title of the card.
+    title: str = "Horizontal Histogram"
+    #: The subtitle of the card.
+    subtitle: str = "ChartJS"
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -366,20 +557,76 @@ class HorizontalHistogramCard(CardWidget):
 
 
 class TableHeader(BasicHeader):
+    """
+    Header for the scientific tables with DatatablesJS page.
+    """
+
+    #: The level of the header.
     header_level = 5
+    #: The type of the header.
     header_type = "display"
+    #: The text of the header.
     header_text = "Scientific Tables w/ DatatablesJS"
+    #: The CSS class of the header.
     css_class = ""
 
 
+class StaticTable(StaticTableWidget):
+    """
+    Static data table build with :class:`~wildewidgets.StaticTableWidget`.
+    """
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.add_heading("Time")
+        self.add_heading("Pressure")
+        self.add_heading("Temperature")
+        self.add_row([12, 53, 25])
+        self.add_row([13, 63, 24])
+        self.add_row([14, 73, 23])
+
+
+class StaticTableCard(CardWidget):
+    """
+    Wrapper around the :class:`~demo.core.wildewidgets.StaticTable` widget.
+    """
+
+    #: The introduction text.
+    INTRO: str = """
+This table is built with :class:`~wildewidgets.StaticTableWidget`.
+It is a static table that does not use dataTables.js useful for small lists of data,
+especially data that is not in Django models.
+"""
+
+    #: The title of the card.
+    title: str = "Static Table"
+    #: The subtitle of the card.
+    subtitle: str = "Static Table"
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        code = inspect.getsource(StaticTable)
+        text = Block(self.INTRO, css_class="mb-4")
+        tab = WidgetCodeTab(code=code, widget=StaticTable())
+        self.set_widget(Block(text, tab), "mb-5")
+
+
 class DataTableCard(CardWidget):
+    """
+    Static Data table with DatatablesJS (Non-AJAX).
+    """
+
+    #: The title of the card.
+    title: str = "Data Table"
+    #: The subtitle of the card.
+    subtitle: str = "DatatablesJS (Non-AJAX)"
+
+    #: The introduction text.
     INTRO: str = """
 This table is built on a lower level class that provides a lot of flexibility,
 but can often require more code to specify.  You can use any data source as
 appropriate. Here, we are manually adding data in rows.
 """
-    title = "Data Table"
-    subtitle = "DatatablesJS"
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -388,7 +635,14 @@ appropriate. Here, we are manually adding data in rows.
         tab = WidgetCodeTab(code=code, widget=self.get_widget())
         self.set_widget(Block(text, tab), "mb-5")
 
-    def get_widget(self):
+    def get_widget(self) -> DataTable:
+        """
+        Return the data table.
+
+        Returns:
+            The data table.
+
+        """
         table = DataTable()
         table.is_data_list = False
         table.add_column("time")
@@ -401,13 +655,20 @@ appropriate. Here, we are manually adding data in rows.
 
 
 class TestTableCard(CardWidget):
+    """
+    Wrapper around the :class:`~demo.core.wildewidgets.TestTable` widget.
+    """
+
+    #: The title of the card.
+    title: str = "Test Table"
+    #: The subtitle of the card.
+    subtitle: str = "DatatablesJS (AJAX)"
+    #: The introduction text.
     INTRO: str = """
 This table is built on a lower level class that provides a lot of flexibility,
 but can often require more code to specify. You can use any data source as
 appropriate. Here, we are using a Django Model.
 """
-    title = "Test Table"
-    subtitle = "DatatablesJS (AJAX)"
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -418,14 +679,38 @@ appropriate. Here, we are using a Django Model.
 
 
 class BookModelTable(BasicModelTable):
-    fields = ["title", "authors__full_name", "isbn"]  # noqa: RUF012
-    model = Book
-    alignment = {"authors": "left"}  # noqa: RUF012
-    verbose_names = {"authors__full_name": "Authors"}  # noqa: RUF012
-    buttons = True
-    striped = True
+    """
+    Book model table with DatatablesJS (AJAX).
+    """
+
+    #: The model to use for the table.
+    model: type[Model] = Book
+    #: The fields to display in the table.
+    fields: list[str] = ["title", "authors__full_name", "isbn"]  # noqa: RUF012
+    #: The alignment of the columns.
+    alignment: ClassVar[dict[str, Literal["left", "right", "center"]]] = {  # type: ignore[misc]
+        "authors": "left",
+    }
+    #: The verbose names of the columns.
+    verbose_names: dict[str, str] = {"authors__full_name": "Authors"}  # noqa: RUF012
+    #: Whether to show the dataTables.js buttons
+    buttons: bool = True
+    #: Whether to stripe the table rows.
+    striped: bool = True
 
     def render_authors__full_name_column(self, row, column):  # noqa: ARG002
+        """
+        Return the full name of the authors, split into multiple lines if there
+        are multiple authors.
+
+        Args:
+            row: The row to render.
+            column: The column to render.
+
+        Returns:
+            The full name of the authors.
+
+        """
         authors = row.authors.all()
         if authors.count() > 1:
             return f"{authors[0].full_name} ... "
@@ -433,6 +718,11 @@ class BookModelTable(BasicModelTable):
 
 
 class BookModelTableCard(CardWidget):
+    """
+    Wrapper around the :class:`~demo.core.wildewidgets.BookModelTable` widget.
+    """
+
+    #: The introduction text.
     INTRO: str = """
 This table is built on a high level class designed to work easily with Django
 models. It automatically generates the table columns and provides a lot of
@@ -451,6 +741,11 @@ the server.
 
 
 class PressureCellWidget(Block):
+    """
+    Pressure cell widget with FontIcon.  This is used to demonstrate the use of
+    cell widgets in a table.
+    """
+
     def __init__(self, *args, row=None, column="", **kwargs):  # noqa: ARG002
         value = row.pressure
         if value > 2000:  # noqa: PLR2004
@@ -472,15 +767,35 @@ class PressureCellWidget(Block):
 
 
 class WidgetCellTable(WidgetCellMixin, BasicModelTable):  # type: ignore[misc]
-    fields = ["name", "pressure", "temperature"]  # noqa: RUF012
-    cell_widgets = {"pressure": PressureCellWidget}  # noqa: RUF012
-    model = Measurement
-    alignment = {"pressure": "right", "temperature": "right"}  # noqa: RUF012
-    striped = True
+    """
+    Table with widget cells.  This is used to demonstrate the use of widget cells
+    in a table.
+    """
+
+    #: The fields to display in the table.
+    fields: list[str] = ["name", "pressure", "temperature"]  # noqa: RUF012
+    #: The cell widgets to use for the table.
+    cell_widgets: dict[str, type[Widget]] = {"pressure": PressureCellWidget}  # noqa: RUF012
+    #: The model to use for the table.
+    model: type[Model] = Measurement
+    #: The alignment of the columns.
+    alignment: ClassVar[dict[str, Literal["left", "right", "center"]]] = {  # type: ignore[misc]
+        "pressure": "right",
+        "temperature": "right",
+    }
+    #: Whether to stripe the table rows.
+    striped: bool = True
 
 
 class WidgetCellTableCard(CardWidget):
-    title = "Widget Cell Table"
+    """
+    Wrapper around the :class:`~demo.core.wildewidgets.WidgetCellTable` widget.
+    """
+
+    #: The title of the card.
+    title: str = "Widget Cell Table"
+    #: The subtitle of the card.
+    subtitle: str = "DatatablesJS (AJAX)"
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -492,14 +807,27 @@ class WidgetCellTableCard(CardWidget):
 
 
 class ApexHeader(BasicHeader):
+    """
+    Header for the Apex Charts page.
+    """
+
+    #: The level of the header.
     header_level = 5
+    #: The type of the header.
     header_type = "display"
+    #: The text of the header.
     header_text = "Apex Charts"
+    #: The CSS class of the header.
     css_class = ""
 
 
 class ApexLineDataset(ApexDatasetBase):
-    name = "Data"
+    """
+    Apex line dataset.
+    """
+
+    #: The name of the dataset.
+    name: str = "Data"
 
     def __init__(self, *args, **kwargs):  # noqa: ARG002
         super().__init__(**kwargs)
@@ -507,7 +835,12 @@ class ApexLineDataset(ApexDatasetBase):
 
 
 class ApexLineChart(ApexJSONMixin, ApexChartBase):
-    chart_type = "line"
+    """
+    Apex line chart.
+    """
+
+    #: The type of the chart.
+    chart_type: str = "line"
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -528,13 +861,22 @@ class ApexLineChart(ApexJSONMixin, ApexChartBase):
             ]
         )
 
-    def load(self):
+    def load(self) -> None:
+        """
+        Load the Apex line dataset.
+        """
         self.add_dataset(ApexLineDataset())
 
 
 class ApexChart1Card(CardWidget):
-    title = "Apex Charts"
-    subtitle = "Line Chart (AJAX)"
+    """
+    Wrapper around the :class:`~demo.core.wildewidgets.ApexLineChart` widget.
+    """
+
+    #: The title of the card.
+    title: str = "Apex Charts"
+    #: The subtitle of the card.
+    subtitle: str = "Line Chart (AJAX)"
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -546,7 +888,12 @@ class ApexChart1Card(CardWidget):
 
 
 class ApexSparkLineChart(ApexSparkline):
-    chart_type = "bar"
+    """
+    Apex spark line chart.
+    """
+
+    #: The type of the chart.
+    chart_type: str = "bar"
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -570,8 +917,14 @@ class ApexSparkLineChart(ApexSparkline):
 
 
 class ApexSparklineCard(CardWidget):
-    title = "Apex Charts"
-    subtitle = "Sparkline"
+    """
+    Wrapper around the :class:`~demo.core.wildewidgets.ApexSparkLineChart` widget.
+    """
+
+    #: The title of the card.
+    title: str = "Apex Charts"
+    #: The subtitle of the card.
+    subtitle: str = "Sparkline"
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -583,6 +936,11 @@ class ApexSparklineCard(CardWidget):
 
 
 class MarkdownCard(CardWidget):
+    """
+    Demonstration of the :class:`~wildewidgets.MarkdownWidget` widget.
+    """
+
+    #: The markdown text.
     MARKDOWN: str = """
 # Markdown Example
 
@@ -611,11 +969,19 @@ fugiat nulla pariatur.
         tab = WidgetCodeTab(code=code, widget=self.get_markdown_widget())
         self.set_widget(tab, "mb-5")
 
-    def get_markdown_widget(self):
+    def get_markdown_widget(self) -> MarkdownWidget:
+        """
+        Return the Markdown widget.
+        """
         return MarkdownWidget(text=self.MARKDOWN)
 
 
 class HTMLCard(CardWidget):
+    """
+    Demonstration of the :class:`~wildewidgets.HTMLWidget` widget.
+    """
+
+    #: The HTML text.
     HTML: str = """
 <h1>HTML Example</h1>
 <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
@@ -647,24 +1013,50 @@ sed quia...</p>
         tab = WidgetCodeTab(code=code, widget=self.get_html_widget())
         self.set_widget(tab, "mb-5")
 
-    def get_html_widget(self):
+    def get_html_widget(self) -> HTMLWidget:
+        """
+        Return the HTML widget.
+        """
         return HTMLWidget(html=self.HTML)
 
 
 class CodeCard(CardWidget):
+    """
+    Demonstration of the :class:`~wildewidgets.CodeWidget` widget.
+    """
+
+    #: The title of the card.
+    title: str = "Code"
+    #: The subtitle of the card.
+    subtitle: str = "Code Widget"
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         code = get_code_block(CodeCard.get_code_widget)
         tab = WidgetCodeTab(code=code, widget=self.get_code_widget())
         self.set_widget(tab, "mb-5")
 
-    def get_code_widget(self):
+    def get_code_widget(self) -> CodeWidget:
+        """
+        Return the Code widget.
+        """
         return CodeWidget(code=inspect.getsource(MarkdownCard), language="python")
 
 
 class StringCard(CardWidget):
-    title = "Various String Blocks"
-    icon = "fonts"
+    """
+    Demonstration of these widgets:
+
+    - :class:`~wildewidgets.StringBlock`
+    - :class:`~wildewidgets.TimeStampBlock`
+    - :class:`~wildewidgets.LabelBlock`
+    - :class:`~wildewidgets.TagBlock`
+    """
+
+    #: The title of the card.
+    title: str = "Various String Blocks"
+    #: The icon of the card.
+    icon: str = "fonts"
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -672,7 +1064,10 @@ class StringCard(CardWidget):
         tab = WidgetCodeTab(code=code, widget=self.get_string_widget())
         self.set_widget(tab, "mb-5")
 
-    def get_string_widget(self):
+    def get_string_widget(self) -> Block:
+        """
+        Return the String widget.
+        """
         return Block(
             Block("This is a string block", css_class="mb-2"),
             TimeStamp("4:53 PM - this is a time block."),
@@ -682,7 +1077,15 @@ class StringCard(CardWidget):
 
 
 class BookModelWidget(Block):
-    def __init__(self, object: Model | None = None, **kwargs) -> None:
+    """
+    Simple demonstration of using a :class:`~wildewidgets.Block` to
+    display rows in a :class:`~wildewidgets.PagedModelWidget`.
+    """
+
+    #: The object to display.
+    object: Model | None = None
+
+    def __init__(self, object: Model | None = None, **kwargs) -> None:  # noqa: A002
         if object is None:
             msg = "object must be provided"
             raise ValueError(msg)
@@ -696,14 +1099,28 @@ class BookModelWidget(Block):
 
 
 class PagedBookWidget(PagedModelWidget):
+    """
+    Paged demonstration of using a :class:`~wildewidgets.PagedModelWidget` to
+    display a list of objects.
+    """
+
+    #: The model to use for the widget.
     model = Book
+    #: The widget to use for each object.
     model_widget = BookModelWidget
-    paginate_by = 5
+    #: The number of objects to display per page.
+    paginate_by: int = 5
 
 
 class PagedBookCard(CardWidget):
-    title = "Paged Model Widget"
-    icon = "book"
+    """
+    Wrapper around the :class:`~demo.core.wildewidgets.PagedBookWidget` widget.
+    """
+
+    #: The title of the card.
+    title: str = "Paged Model Widget"
+    #: The icon of the card.
+    icon: str = "book"
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -713,14 +1130,19 @@ class PagedBookCard(CardWidget):
         tab = WidgetCodeTab(code=code, widget=self.get_paged_book_widget())
         self.set_widget(tab, "mb-5")
 
-    def get_paged_book_widget(self):
-        widget = PagedBookWidget()
-        return widget
+    def get_paged_book_widget(self) -> PagedBookWidget:
+        return PagedBookWidget()
 
 
 class AuthorListCard(CardWidget):
-    title = "List Model Widget"
-    icon = "people"
+    """
+    Wrapper around the :class:`~demo.core.wildewidgets.AuthorListModelWidget` widget.
+    """
+
+    #: The title of the card.
+    title: str = "List Model Widget"
+    #: The icon of the card.
+    icon: str = "people"
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -728,12 +1150,21 @@ class AuthorListCard(CardWidget):
         tab = WidgetCodeTab(code=code, widget=self.get_author_list_widget())
         self.set_widget(tab, "mb-5")
 
-    def get_author_list_widget(self):
+    def get_author_list_widget(self) -> ListModelWidget:
+        """
+        Return the ListModelWidget.
+        """
         return ListModelWidget(queryset=Author.objects.all()[:10])
 
 
 class AuthorListModelCardWidgetCard(CardWidget):
-    title = "List Model Card Widget"
+    """
+    Wrapper around the :class:`~demo.core.wildewidgets.ListModelCardWidget` widget.
+    """
+
+    #: The title of the card.
+    title: str = "List Model Card Widget"
+    #: The icon of the card.
     icon = "person-square"
 
     def __init__(self, *args, **kwargs):
@@ -742,13 +1173,22 @@ class AuthorListModelCardWidgetCard(CardWidget):
         tab = WidgetCodeTab(code=code, widget=self.get_author_list_widget())
         self.set_widget(tab, "mb-5")
 
-    def get_author_list_widget(self):
+    def get_author_list_widget(self) -> ListModelCardWidget:
+        """
+        Return the ListModelCardWidget.
+        """
         return ListModelCardWidget(queryset=Author.objects.all()[:10])
 
 
 class TabCard(CardWidget):
-    title = "Tab Widget"
-    icon = "tab"
+    """
+    Wrapper around the :class:`~demo.core.wildewidgets.TabbedWidget` widget.
+    """
+
+    #: The title of the card.
+    title: str = "Tab Widget"
+    #: The icon of the card.
+    icon: str = "tab"
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -756,7 +1196,10 @@ class TabCard(CardWidget):
         tab = WidgetCodeTab(code=code, widget=self.get_tab_widget())
         self.set_widget(tab, "mb-5")
 
-    def get_tab_widget(self):
+    def get_tab_widget(self) -> TabbedWidget:
+        """
+        Return the TabbedWidget with two tabs.
+        """
         tab = TabbedWidget()
         tab.add_tab("Tab 1", Block("This is tab 1"))
         tab.add_tab("Tab 2", Block("This is tab 2"))
@@ -764,8 +1207,14 @@ class TabCard(CardWidget):
 
 
 class CardCard(CardWidget):
-    title = "Card Widget"
-    icon = "card"
+    """
+    Wrapper around the :class:`~demo.core.wildewidgets.CardWidget` widget.
+    """
+
+    #: The title of the card.
+    title: str = "Card Widget"
+    #: The icon of the card.
+    icon: str = "card"
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -773,15 +1222,24 @@ class CardCard(CardWidget):
         tab = WidgetCodeTab(code=code, widget=self.get_card_widget())
         self.set_widget(tab, "mb-5")
 
-    def get_card_widget(self):
+    def get_card_widget(self) -> CardWidget:
+        """
+        Return the CardWidget.
+        """
         card = CardWidget(header_text="This is the card's header")
         card.set_widget(Block("This is a the card's content."))
         return card
 
 
 class CrispyFormCard(CardWidget):
-    title = "Crispy Form Widget"
-    icon = "form"
+    """
+    Wrapper around the :class:`~demo.core.wildewidgets.CrispyFormWidget` widget.
+    """
+
+    #: The title of the card.
+    title: str = "Crispy Form Widget"
+    #: The icon of the card.
+    icon: str = "form"
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -789,15 +1247,24 @@ class CrispyFormCard(CardWidget):
         tab = WidgetCodeTab(code=code, widget=self.get_crispy_form_widget())
         self.set_widget(tab, "mb-5")
 
-    def get_crispy_form_widget(self):
+    def get_crispy_form_widget(self) -> CrispyFormWidget:
+        """
+        Return the CrispyFormWidget.
+        """
         form = MinimalBookForm()
         form.helper.form_method = "get"
         return CrispyFormWidget(form=form)
 
 
 class CollapseCard(CardWidget):
-    title = "Collapse Widget"
-    icon = "collapse"
+    """
+    Wrapper around the :class:`~demo.core.wildewidgets.CollapseWidget` widget.
+    """
+
+    #: The title of the card.
+    title: str = "Collapse Widget"
+    #: The icon of the card.
+    icon: str = "collapse"
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -805,7 +1272,10 @@ class CollapseCard(CardWidget):
         tab = WidgetCodeTab(code=code, widget=self.get_collapse_widget())
         self.set_widget(tab, "mb-5")
 
-    def get_collapse_widget(self):
+    def get_collapse_widget(self) -> Block:
+        """
+        Return the CollapseWidget.
+        """
         header = CardHeader(header_text="Collapse Widget")
         header.add_collapse_button(
             text="Show Form",
@@ -822,8 +1292,14 @@ class CollapseCard(CardWidget):
 
 
 class HorizontalLayoutCard(CardWidget):
-    title = "Horizontal Layout Widget"
-    icon = "layout"
+    """
+    Wrapper around the :class:`~demo.core.wildewidgets.HorizontalLayoutBlock` widget.
+    """
+
+    #: The title of the card.
+    title: str = "Horizontal Layout Widget"
+    #: The icon of the card.
+    icon: str = "layout"
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -831,7 +1307,7 @@ class HorizontalLayoutCard(CardWidget):
         tab = WidgetCodeTab(code=code, widget=self.get_horizontal_layout_widget())
         self.set_widget(tab, "mb-5")
 
-    def get_horizontal_layout_widget(self):
+    def get_horizontal_layout_widget(self) -> HorizontalLayoutBlock:
         return HorizontalLayoutBlock(
             Block("This is a string block", css_class="border p-3 bg-azure"),
             Block("This is a string block", css_class="border p-3 bg-yellow"),
@@ -841,8 +1317,14 @@ class HorizontalLayoutCard(CardWidget):
 
 
 class ModalCard(CardWidget):
-    title = "Modal Widget"
-    icon = "modal"
+    """
+    Wrapper around the :class:`~demo.core.wildewidgets.ModalWidget` widget.
+    """
+
+    #: The title of the card.
+    title: str = "Modal Widget"
+    #: The icon of the card.
+    icon: str = "modal"
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -850,7 +1332,10 @@ class ModalCard(CardWidget):
         tab = WidgetCodeTab(code=code, widget=self.get_modal_widget())
         self.set_widget(tab, "mb-5")
 
-    def get_modal_widget(self):
+    def get_modal_widget(self) -> Block:
+        """
+        Return the ModalWidget.
+        """
         header = CardHeader(header_text="Modal Widget")
         header.add_modal_button(
             text="Show Modal",
@@ -860,14 +1345,20 @@ class ModalCard(CardWidget):
         modal = ModalWidget(
             modal_id="modal1",
             modal_title="Modal Title",
-            modal_body=Block("This is a modal widget"),
+            modal_body="This is a modal widget",
         )
         return Block(header, modal)
 
 
 class CrispyFormModalCard(CardWidget):
-    title = "Crispy Form Modal Widget"
-    icon = "form"
+    """
+    Wrapper around the :class:`~demo.core.wildewidgets.CrispyFormModalWidget` widget.
+    """
+
+    #: The title of the card.
+    title: str = "Crispy Form Modal Widget"
+    #: The icon of the card.
+    icon: str = "form"
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -875,7 +1366,10 @@ class CrispyFormModalCard(CardWidget):
         tab = WidgetCodeTab(code=code, widget=self.get_crispy_form_modal_widget())
         self.set_widget(tab, "mb-5")
 
-    def get_crispy_form_modal_widget(self):
+    def get_crispy_form_modal_widget(self) -> Block:
+        """
+        Return the CrispyFormModalWidget.
+        """
         header = CardHeader(header_text="Crispy Form Modal Widget")
         header.add_modal_button(
             text="Show Modal",
@@ -893,27 +1387,51 @@ class CrispyFormModalCard(CardWidget):
 
 
 class HomeTable(BasicModelTable):
-    model = Book
-    fields = ["title", "isbn", "binding"]  # noqa: RUF012
-    hide_controls = True
-    page_length = 25
-    striped = True
-    small = True
-    unsearchable = ["binding"]  # noqa: RUF012
+    """
+    Demonstration of the :class:`~demo.core.wildewidgets.BasicModelTable` widget.
+    """
+
+    #: The model of the table.
+    model: type[Model] = Book
+    #: The fields of the table.
+    fields: ClassVar[list[str]] = ["title", "isbn", "binding"]  # type: ignore[misc]
+    #: Whether to hide the controls.
+    hide_controls: bool = True
+    #: The page length of the table.
+    page_length: int = 25
+    #: Whether to stripe the table.
+    striped: bool = True
+    #: Whether to make the table small.
+    small: bool = True
+    #: Whether to make the table unsearchable.
+    unsearchable: ClassVar[list[str]] = ["binding"]  # type: ignore[misc]
 
 
 class AuthorListModelWidget(ListModelWidget):
-    def get_object_text(self, obj):
+    """
+    Wrapper around the :class:`~demo.core.wildewidgets.ListModelWidget` widget.
+    """
+
+    def get_object_text(self, obj) -> str:
+        """
+        Return the object text.
+        """
         return f"{FontIcon(icon='person-fill', css_class='pe-2')!s} {obj!s}"
 
 
 class HomeBlock(Block):
+    """
+    Main block for the demo home page.
+    """
+
+    #: The description of the demo project
     description = """
 django-wildewidgets is a Django design library providing several tools for
 building full-featured, widget-based web applications with a standard,
 consistent design, based on Bootstrap.
 """
-    features = [  # noqa: RUF012
+    #: The features of wildewidgets.
+    features: ClassVar[list[str]] = [
         "Large library of standard widgets",
         "Custom widgets",
         "Widgets can be composable",
@@ -921,7 +1439,8 @@ consistent design, based on Bootstrap.
         "AJAX data for tables, charts, and other data based widgets",
         "Several supporting views",
     ]
-    standard_widgets = [  # noqa: RUF012
+    #: The standard widgets of wildewidgets.
+    standard_widgets: ClassVar[list[str]] = [
         "Basic blocks",
         "Template based widgets",
         "Basic Buttons",
@@ -936,7 +1455,8 @@ consistent design, based on Bootstrap.
         "Other miscillaneous widgets, like Breadcrumb, "
         "Gravatar, and KeyValueList widgets.",
     ]
-    notice = (
+    #: Footer notice for the demo project.
+    notice: str = (
         "This entire site is built using django-wildewidgets, "
         "with only a single shared template."
     )
