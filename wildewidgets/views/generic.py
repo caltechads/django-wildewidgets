@@ -122,8 +122,8 @@ class AbstractFormPageLayout(Block):
         **kwargs,
     ):
         self.view = view
-        self.title = title if title else self.title
-        self.subtitle = subtitle if subtitle else self.subtitle
+        self.title = title or self.title
+        self.subtitle = subtitle or self.subtitle
         if not self.title:
             if isinstance(self.view, DjangoCreateView):
                 self.title = f"Create {self.view.model_verbose_name}"

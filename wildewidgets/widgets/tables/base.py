@@ -159,12 +159,8 @@ class BaseDataTable(Widget, WidgetInitKwargsMixin, DatatableAJAXView):  # type: 
         self.width = width if width is not None else self.width
         self.height = height if height is not None else self.height
         self.title = title if title is not None else self.title
-        self.searchable = (
-            searchable if searchable is not None else self.searchable
-        )
-        self.page_length = (
-            page_length if page_length is not None else self.page_length
-        )
+        self.searchable = searchable if searchable is not None else self.searchable
+        self.page_length = page_length if page_length is not None else self.page_length
         self.small = small if small is not None else self.small
         self.buttons = buttons if buttons is not None else self.buttons
         self.striped = striped if striped is not None else self.striped
@@ -190,38 +186,28 @@ class BaseDataTable(Widget, WidgetInitKwargsMixin, DatatableAJAXView):  # type: 
             "has_select_all": self.has_select_all,
         }
         #: The CSS id for this table
-        self.table_id = table_id if table_id else self.table_id
+        self.table_id = table_id or self.table_id
         if self.table_id is None:
             self.table_id = str(random.randrange(0, 1000))  # noqa: S311
         self.table_name = f"datatable_table_{self.table_id}"
         # We have to do this this way instead of naming it above in the kwargs
         # because ``async`` is a reserved keyword
-        self.async_if_empty: bool = (
-            is_async if is_async is not None else self.is_async
-        )
+        self.async_if_empty: bool = is_async if is_async is not None else self.is_async
         #: A mapping of field name to column definition
         self.column_fields: dict[str, DataTableColumn] = {}
         #: A mapping of field name to column filter definition
         self.column_filters: dict[str, DataTableFilter] = {}
         #: A list of column styles to apply
         self.column_styles: list[DataTableStyler] = []
-        self.data = data if data else []
+        self.data = data or []
         self.sort_ascending = (
-            sort_ascending
-            if sort_ascending is not None
-            else self.sort_ascending
+            sort_ascending if sort_ascending is not None else self.sort_ascending
         )
-        self.form_actions = (
-            form_actions if form_actions else deepcopy(self.form_actions)
-        )
-        self.form_url = form_url if form_url else self.form_url
-        self.ajax_url_name = (
-            ajax_url_name if ajax_url_name else self.ajax_url_name
-        )
-        self.column_wrap_fields = (
-            column_wrap_fields
-            if column_wrap_fields
-            else deepcopy(self.column_wrap_fields)
+        self.form_actions = form_actions or deepcopy(self.form_actions)
+        self.form_url = form_url or self.form_url
+        self.ajax_url_name = ajax_url_name or self.ajax_url_name
+        self.column_wrap_fields = column_wrap_fields or deepcopy(
+            self.column_wrap_fields
         )
         if self.has_form_actions():
             self.column_fields["checkbox"] = DataTableColumn(
@@ -429,9 +415,7 @@ class BaseDataTable(Widget, WidgetInitKwargsMixin, DatatableAJAXView):  # type: 
                 )
 
         """
-        styler.test_index = list(self.column_fields.keys()).index(
-            styler.test_cell
-        )
+        styler.test_index = list(self.column_fields.keys()).index(styler.test_cell)
         if styler.target_cell:
             styler.target_index = list(self.column_fields.keys()).index(
                 styler.target_cell
@@ -496,9 +480,7 @@ class BaseDataTable(Widget, WidgetInitKwargsMixin, DatatableAJAXView):  # type: 
         kwargs["has_filters"] = has_filters
         kwargs["has_filter_defaults"] = has_filter_defaults
         kwargs["options"] = self.datatable_options
-        table_id = (
-            self.table_id if self.table_id else str(random.randrange(0, 1000))  # noqa: S311
-        )
+        table_id = self.table_id or str(random.randrange(0, 1000))  # noqa: S311
         kwargs["name"] = f"datatable_table_{table_id}"
         kwargs["sort_ascending"] = self.sort_ascending
         kwargs["column_wrap_fields"] = self.column_wrap_fields

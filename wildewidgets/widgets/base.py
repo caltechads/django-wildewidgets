@@ -49,8 +49,8 @@ class Widget:
             **kwargs: Arbitrary keyword arguments passed to parent.
 
         """
-        self.title = title if title else self.title
-        self.icon = icon if icon else self.icon
+        self.title = title or self.title
+        self.icon = icon or self.icon
         super().__init__(*args, **kwargs)
 
     def get_title(self) -> str | Widget | None:
@@ -508,7 +508,7 @@ class Container(Block):
     def __init__(
         self, *blocks: str | Widget, size: str | None = None, **kwargs: Any
     ) -> None:
-        self.size = size if size else self.size
+        self.size = size or self.size
         if self.size and self.size not in self.VALID_SIZES:
             valid_sizes = ", ".join(self.VALID_SIZES)
             msg = (
@@ -584,10 +584,10 @@ class Link(Block):
         target: str | None = None,
         **kwargs: Any,
     ) -> None:
-        self.url = url if url else self.url
-        self.role = role if role else self.role
-        self.title = title if title else self.title
-        self.target = target if target else self.target
+        self.url = url or self.url
+        self.role = role or self.role
+        self.title = title or self.title
+        self.target = target or self.target
         # TODO: validate url
         # TODO: validate that title and role are htmleescaped
         if contents:
@@ -789,13 +789,13 @@ class Image(Block):
         alt: str | None = None,
         **kwargs: Any,
     ) -> None:
-        self.src = src if src else self.src
+        self.src = src or self.src
         if not self.src:
             self.src = static("wildewidgets/images/placeholder.png")
         # TODO: validate src as a URL/Path
-        self.width = width if width else self.width
-        self.height = height if height else self.height
-        self.alt = alt if alt else self.alt
+        self.width = width or self.width
+        self.height = height or self.height
+        self.alt = alt or self.alt
         super().__init__(**kwargs)
         if self.src:
             self._attributes["src"] = self.src
@@ -865,11 +865,11 @@ class LinkedImage(Link):
         image_alt: str | None = None,
         **kwargs: Any,
     ) -> None:
-        self.image_src = image_src if image_src else self.image_src
+        self.image_src = image_src or self.image_src
         if not self.image_src:
             self.image_src = static("sphinx_hosting/images/placeholder.png")
-        self.image_width = image_width if image_width else self.image_width
-        self.image_alt = image_alt if image_alt else self.image_alt
+        self.image_width = image_width or self.image_width
+        self.image_alt = image_alt or self.image_alt
         #: The actual image block that we will wrap with an ``<a>``
         self.image: Image = Image(
             src=self.image_src, width=self.image_width, alt=self.image_alt
@@ -921,7 +921,7 @@ class WidgetStream(Block):
             **kwargs: Additional keyword arguments passed to parent class
 
         """
-        self._widgets = widgets if widgets else deepcopy(self.widgets)
+        self._widgets = widgets or deepcopy(self.widgets)
         super().__init__(**kwargs)
 
     @property

@@ -1,4 +1,5 @@
 import uuid
+
 from ..base import Block
 
 # -----------------------------------------------------------------------------
@@ -291,8 +292,7 @@ class StaticTableWidget(Block):
             heading: the heading to add to the table
 
         """
-        self.header.add_block(
-            Block(heading, tag="th", css_class=self.cell_css_class))
+        self.header.add_block(Block(heading, tag="th", css_class=self.cell_css_class))
         if self.header not in self.blocks:
             self.add_block(self.header)
 
@@ -300,6 +300,8 @@ class StaticTableWidget(Block):
         """
         Add a single row to the table.  Do this after adding headings.
         """
-        self.body.add_block(StaticTableRowWidget(row, cell_css_class=self.cell_css_class))
+        self.body.add_block(
+            StaticTableRowWidget(row, cell_css_class=self.cell_css_class)
+        )
         if self.body not in self.blocks:
             self.add_block(self.body)

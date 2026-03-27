@@ -178,18 +178,14 @@ class ModelTableMixin:
         if not self.model:
             msg = f"{self.__class__.__name__} requires a model to be set"
             raise ImproperlyConfigured(msg)
-        self.fields = fields if fields else deepcopy(self.fields)
-        self.hidden = hidden if hidden else deepcopy(self.hidden)
-        self.verbose_names = (
-            verbose_names if verbose_names else deepcopy(self.verbose_names)
-        )
-        self.unsortable = unsortable if unsortable else deepcopy(self.unsortable)
-        self.unsearchable = (
-            unsearchable if unsearchable else deepcopy(self.unsearchable)
-        )
-        self.field_types = field_types if field_types else deepcopy(self.field_types)
-        self.alignment = alignment if alignment else deepcopy(self.alignment)
-        self.bool_icons = bool_icons if bool_icons else deepcopy(self.bool_icons)
+        self.fields = fields or deepcopy(self.fields)
+        self.hidden = hidden or deepcopy(self.hidden)
+        self.verbose_names = verbose_names or deepcopy(self.verbose_names)
+        self.unsortable = unsortable or deepcopy(self.unsortable)
+        self.unsearchable = unsearchable or deepcopy(self.unsearchable)
+        self.field_types = field_types or deepcopy(self.field_types)
+        self.alignment = alignment or deepcopy(self.alignment)
+        self.bool_icons = bool_icons or deepcopy(self.bool_icons)
         super().__init__(*args, **kwargs)
 
         #: A mapping of field name to Django field class

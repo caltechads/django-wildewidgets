@@ -104,12 +104,10 @@ class Column(Block):
         self_alignment: str | None = None,
         **kwargs: Any,
     ):
-        self.base_width = base_width if base_width else self.base_width
-        self.viewport_widths = (
-            viewport_widths if viewport_widths else deepcopy(self.viewport_widths)
-        )
-        self.alignment = alignment if alignment else self.alignment
-        self.self_alignment = self_alignment if self_alignment else self.self_alignment
+        self.base_width = base_width or self.base_width
+        self.viewport_widths = viewport_widths or deepcopy(self.viewport_widths)
+        self.alignment = alignment or self.alignment
+        self.self_alignment = self_alignment or self.self_alignment
         self.check_widths()
         self.check_alignments()
         super().__init__(*blocks, **kwargs)
@@ -279,17 +277,13 @@ class Row(Block):
         vertical_alignment: str | None = None,
         **kwargs: Any,
     ):
-        self.horizontal_alignment = (
-            horizontal_alignment if horizontal_alignment else self.horizontal_alignment
-        )
-        self.vertical_alignment = (
-            vertical_alignment if vertical_alignment else self.vertical_alignment
-        )
+        self.horizontal_alignment = horizontal_alignment or self.horizontal_alignment
+        self.vertical_alignment = vertical_alignment or self.vertical_alignment
         self.check_alignments()
         self.columns: list[Block] = list(columns)
         self.columns_map: dict[str, Block] = {}
         for i, column in enumerate(self.columns):
-            name = column._name if column._name else f"column-{i + 1}"
+            name = column._name or f"column-{i + 1}"
             self.columns_map[name] = column
             self._add_helper_method(name)
         super().__init__(**kwargs)
@@ -513,9 +507,7 @@ class TwoColumnLayout(Row):
         **kwargs: Any,
     ):
         super().__init__(**kwargs)
-        self.left_column_width = (
-            left_column_width if left_column_width else self.left_column_width
-        )
+        self.left_column_width = left_column_width or self.left_column_width
         self.left_column_widgets = (
             left_column_widgets
             if left_column_widgets is not None

@@ -70,7 +70,7 @@ class DatagridItem(Block):
         url: str | None = None,
         **kwargs: Any,
     ) -> None:
-        self.title = title if title else self.title
+        self.title = title or self.title
         assert self.title is not None, "title is required"  # noqa: S101
         if not self.title:
             msg = (
@@ -78,7 +78,7 @@ class DatagridItem(Block):
                 "attribute"
             )
             raise ValueError(msg)
-        self.url = url if url else self.url
+        self.url = url or self.url
         super().__init__(*blocks, **kwargs)
 
     def add_blocks(self) -> None:

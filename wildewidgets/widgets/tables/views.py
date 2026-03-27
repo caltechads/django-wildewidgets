@@ -87,14 +87,12 @@ class DatatableMixin:
         escape_values: bool | None = None,
         **kwargs,
     ):
-        self.model = model if model else self.model
-        self.order_columns = order_columns if order_columns else self.order_columns
-        self.max_display_length = (
-            max_display_length if max_display_length else self.max_display_length
-        )
-        self.none_string = none_string if none_string else self.none_string
-        self.is_data_list = is_data_list if is_data_list else self.is_data_list
-        self.escape_values = escape_values if escape_values else self.escape_values
+        self.model = model or self.model
+        self.order_columns = order_columns or self.order_columns
+        self.max_display_length = max_display_length or self.max_display_length
+        self.none_string = none_string or self.none_string
+        self.is_data_list = is_data_list or self.is_data_list
+        self.escape_values = escape_values or self.escape_values
         super().__init__(**kwargs)
 
     @property
@@ -733,7 +731,7 @@ class DatatableAJAXView(BaseDatatableView):
 
         return by_name
 
-    @lru_cache(maxsize=4)
+    @lru_cache(maxsize=4)  # noqa: B019
     def searchable_columns(self) -> list[str]:
         """
         Get the list of column names that are marked as searchable.

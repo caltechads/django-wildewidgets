@@ -107,7 +107,8 @@ class TableActionFormView(View):
         checkboxes = request.POST.getlist("checkbox")
         action = request.POST.get("action")
         if not action or not checkboxes:
-            raise Http404("POST request did not include the necessary fields")
+            msg = "POST request did not include the necessary fields"
+            raise Http404(msg)
         self.process_form_action(action, checkboxes)
         if not self.url:
             msg = f"You must set a url attribute on {self.__class__.__name__}"

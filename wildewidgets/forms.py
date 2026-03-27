@@ -399,14 +399,14 @@ class AbstractRelatedFieldForm(Form):
         #: The instance whose :py:class:`django.db.models.ManyToManyField` we
         #: want to manage
         self.instance = instance
-        self.field_name = field_name if field_name else self.field_name
+        self.field_name = field_name or self.field_name
         if not self.field_name:
             msg = (
                 'You must provide "field_name" as either a constructor keyword '
                 "argument or as a class attribute"
             )
             raise ImproperlyConfigured(msg)
-        self.form_action = form_action if form_action else self.form_action
+        self.form_action = form_action or self.form_action
         super().__init__(*args, **kwargs)
         #: The field instance for our related field
         self.field = instance._meta.get_field(self.field_name)

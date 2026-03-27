@@ -73,15 +73,15 @@ class CodeWidget(Block):
         if not (get_lexer_by_name and highlight and HtmlFormatter):
             msg = "Pygments is not installed. Please install it to use CodeWidget."
             raise RuntimeError(msg)
-        self.code = code if code else self.code
-        self.language = language if language else self.language
+        self.code = code or self.code
+        self.language = language or self.language
         if not self.language:
             msg = (
                 f'{self.__class__.__name__}: "language" must be defined either as a '
                 "class attribute or a keyword arg"
             )
             raise ValueError(msg)
-        self.line_numbers = line_numbers if line_numbers else self.line_numbers
+        self.line_numbers = line_numbers or self.line_numbers
         super().__init__(**kwargs)
         self.add_code(self.code, language=self.language, line_numbers=self.line_numbers)
 

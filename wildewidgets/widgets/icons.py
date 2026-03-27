@@ -69,7 +69,7 @@ class FontIcon(Block):
         background: str | None = None,
         **kwargs: Any,
     ) -> None:
-        self.icon = icon if icon else self.icon
+        self.icon = icon or self.icon
         if not self.icon:
             # If icon is not set, we can't render this widget
             msg = "icon must be defined as a keyword argument or class attribute"
@@ -79,8 +79,8 @@ class FontIcon(Block):
             msg = f"icon must be a string, not {type(self.icon).__name__}"
             raise ImproperlyConfigured(msg)
         super().__init__(**kwargs)
-        self.color = color if color else self.color
-        self.background = background if background else self.background
+        self.color = color or self.color
+        self.background = background or self.background
         self.icon = f"{self.prefix}-{icon}"
         self.add_class(self.icon)
         if self.color:

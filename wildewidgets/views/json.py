@@ -212,4 +212,5 @@ class WildewidgetDispatch(WidgetInitKwargsMixin, View):
                         instance.args = initargs
                         instance.kwargs = initkwargs
                         return instance.dispatch(request, *args, **kwargs)
-        raise Http404("Not Found: Wildewidget class not found")
+        msg = "Not Found: Wildewidget class not found"
+        raise Http404(msg)

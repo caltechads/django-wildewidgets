@@ -100,8 +100,8 @@ class PageTabbedWidget(Block):
         overflow: str | None = None,
         **kwargs,
     ):
-        self.slug_suffix = slug_suffix if slug_suffix else self.slug_suffix
-        self.overflow = overflow if overflow else self.overflow
+        self.slug_suffix = slug_suffix or self.slug_suffix
+        self.overflow = overflow or self.overflow
         super().__init__(*blocks, **kwargs)
         if "style" in self._attributes:
             self._attributes["style"] += f" overflow: {self.overflow};"
@@ -212,8 +212,8 @@ class TabbedWidget(Block):
         overflow: str | None = None,
         **kwargs,
     ):
-        self.slug_suffix = slug_suffix if slug_suffix else self.slug_suffix
-        self.overflow = overflow if overflow else self.overflow
+        self.slug_suffix = slug_suffix or self.slug_suffix
+        self.overflow = overflow or self.overflow
         super().__init__(*blocks, **kwargs)
         if "style" in self._attributes:
             self._attributes["style"] += f" overflow: {self.overflow};"
@@ -342,16 +342,16 @@ class CardWidget(Block):
         overflow: str | None = None,
         **kwargs,
     ):
-        self.header = header if header else deepcopy(self.header)
-        self.header_text = header_text if header_text else self.header_text
-        self.header_css = header_css if header_css else self.header_css
+        self.header = header or deepcopy(self.header)
+        self.header_text = header_text or self.header_text
+        self.header_css = header_css or self.header_css
         if self.header_text and not self.header:
             self.header = CardHeader(header_text=self.header_text)
-        self.card_title = card_title if card_title else self.card_title
-        self.card_subtitle = card_subtitle if card_subtitle else self.card_subtitle
-        self.widget = widget if widget else deepcopy(self.widget)
-        self.overflow = overflow if overflow else self.overflow
-        self.widget_css = widget_css if widget_css else self.widget_css
+        self.card_title = card_title or self.card_title
+        self.card_subtitle = card_subtitle or self.card_subtitle
+        self.widget = widget or deepcopy(self.widget)
+        self.overflow = overflow or self.overflow
+        self.widget_css = widget_css or self.widget_css
         super().__init__(*blocks, **kwargs)
         if "style" in self._attributes:
             self._attributes["style"] += f" overflow: {self.overflow};"
@@ -484,19 +484,15 @@ class MultipleModelWidget(Block):
         item_label: str | None = None,
         **kwargs,
     ) -> None:
-        self.model = model if model else self.model
+        self.model = model or self.model
         self.queryset = queryset if queryset is not None else self.queryset
         if self.model and self.queryset:
             msg = "You must define either model or queryset, but not both."
             raise ImproperlyConfigured(msg)
-        self.model_widget = (
-            model_widget if model_widget else deepcopy(self.model_widget)
-        )
-        self.model_kwargs = (
-            model_kwargs if model_kwargs else deepcopy(self.model_kwargs)
-        )
-        self.ordering = ordering if ordering else self.ordering
-        self.item_label = item_label if item_label else self.item_label
+        self.model_widget = model_widget or deepcopy(self.model_widget)
+        self.model_kwargs = model_kwargs or deepcopy(self.model_kwargs)
+        self.ordering = ordering or self.ordering
+        self.item_label = item_label or self.item_label
         super().__init__(*blocks, **kwargs)
 
     def get_item_label(self, instance: Model) -> str:  # noqa: ARG002
@@ -658,9 +654,9 @@ class PagedModelWidget(MultipleModelWidget):
         extra_url: dict[str, Any] | None = None,
         **kwargs,
     ):
-        self.page_kwarg = page_kwarg if page_kwarg else self.page_kwarg
-        self.paginate_by = paginate_by if paginate_by else self.paginate_by
-        self.extra_url = extra_url if extra_url else {}
+        self.page_kwarg = page_kwarg or self.page_kwarg
+        self.paginate_by = paginate_by or self.paginate_by
+        self.extra_url = extra_url or {}
         super().__init__(*blocks, **kwargs)
 
     def get_context_data(self, *args, **kwargs):
@@ -839,9 +835,9 @@ class HorizontalLayoutBlock(Block):
         flex_size: str | None = None,
         **kwargs,
     ):
-        self.align = align if align else self.align
-        self.justify = justify if justify else self.justify
-        self.flex_size = flex_size if flex_size else self.flex_size
+        self.align = align or self.align
+        self.justify = justify or self.justify
+        self.flex_size = flex_size or self.flex_size
         if self.align not in self.VALID_ALIGNMENTS:
             msg = (
                 f'"{self.align}" is not a valid vertical alignment value.  Valid '
@@ -915,7 +911,7 @@ class ListModelWidget(MultipleModelWidget):
     remove_url: str | None = None
 
     def __init__(self, *args, remove_url: str | None = None, **kwargs: Any) -> None:
-        self.remove_url = remove_url if remove_url else self.remove_url
+        self.remove_url = remove_url or self.remove_url
         super().__init__(*args, **kwargs)
         result = self.get_queryset()
         if not isinstance(result, list):
@@ -1137,14 +1133,10 @@ filter_input.onkeyup = function(e) {{
         self.list_model_widget_id = f"{self.id_base}_list_model_widget"
         self.filter_id = f"{self.id_base}_filter"
         self.list_model_widget_class = (
-            list_model_widget_class
-            if list_model_widget_class
-            else self.list_model_widget_class
+            list_model_widget_class or self.list_model_widget_class
         )
         self.list_model_header_class = (
-            list_model_header_class
-            if list_model_header_class
-            else self.list_model_header_class
+            list_model_header_class or self.list_model_header_class
         )
         # Pop the kwargs that are used to build the widget and header.
         # These will be passed to the widget and header constructors.

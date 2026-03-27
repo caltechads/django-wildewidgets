@@ -84,9 +84,9 @@ class InputBlock(Block):
         value: str | None = None,
         **kwargs: Any,
     ) -> None:
-        self.input_type = input_type if input_type else self.input_type
-        self.input_name = input_name if input_name else self.input_name
-        self.value = value if value else self.value
+        self.input_type = input_type or self.input_type
+        self.input_name = input_name or self.input_name
+        self.value = value or self.value
         super().__init__(**kwargs)
         if self.input_type is not None:
             self._attributes["type"] = self.input_type
@@ -181,10 +181,10 @@ class CheckboxInputBlock(Block):
         checked: bool = False,
         **kwargs: Any,
     ) -> None:
-        self.label_text = label_text if label_text else self.label_text
-        self.input_name = input_name if input_name else self.input_name
+        self.label_text = label_text or self.label_text
+        self.input_name = input_name or self.input_name
         self.bold = bold if bold is not None else self.bold
-        self.value = value if value else self.value
+        self.value = value or self.value
         if not self.label_text:
             msg = "label_text"
             raise self.RequiredAttrOrKwarg(msg)
@@ -451,13 +451,13 @@ filter_input.onkeyup = function(e) {{
             )
             if not self.verbose_name_plural[0].isupper():
                 self.verbose_name_plural = self.verbose_name_plural.capitalize()
-        self.field_name = field_name if field_name else self.field_name
+        self.field_name = field_name or self.field_name
         if self.field_name is None:
             msg = "field_name must be provided"
             raise ValueError(msg)
         self.field = self.instance._meta.get_field(self.field_name)
         self.related_model = self.field.related_model
-        self.form_class = form_class if form_class else self.form_class
+        self.form_class = form_class or self.form_class
         self.form_action = form_action if form_action is not None else self.form_action
         if not self.form_action:
             url_name = self.get_url_name()

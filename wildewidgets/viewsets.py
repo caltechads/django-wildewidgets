@@ -178,7 +178,7 @@ class ModelViewSet:
     ):
         #: The model we're describing in this view. It must have
         #: :py:class:`wildewidgets.models.ViewSetMixin` in its class heirarchy
-        self.model: type[ViewSetMixin] = model if model else self.model
+        self.model: type[ViewSetMixin] = model or self.model
         if not self.model or not issubclass(self.model, ViewSetMixin):
             msg = (
                 "model must be either set as a class attribute or passed in as "
@@ -194,7 +194,7 @@ class ModelViewSet:
         # Tell the model we are its viewset
         self.model.viewset = self
         self.name = slugify(self.model._meta.verbose_name.lower())
-        self.url_prefix = url_prefix if url_prefix else self.name
+        self.url_prefix = url_prefix or self.name
         self.url_namespace = url_namespace
 
         for key, value in kwargs.items():

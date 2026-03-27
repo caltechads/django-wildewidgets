@@ -113,7 +113,7 @@ class ModalButton(Button):
     target: str | None = None
 
     def __init__(self, target: str | None = None, **kwargs: Any) -> None:
-        self.target = target if target else self.target
+        self.target = target or self.target
         assert self.target is not None, "ModalButton requires a target"  # noqa: S101
         super().__init__(**kwargs)
         self._data_attributes["toggle"] = "modal"
@@ -151,7 +151,7 @@ class CollapseButton(Button):
     target: str | None = None
 
     def __init__(self, target: str | None = None, **kwargs: Any) -> None:
-        self.target = target if target else self.target
+        self.target = target or self.target
         assert self.target is not None, "CollapseButton requires a target"  # noqa: S101
         super().__init__(**kwargs)
         self._data_attributes["toggle"] = "collapse"
@@ -194,7 +194,7 @@ class LinkButton(Button):
     url: str | None = None
 
     def __init__(self, url: str | None = None, **kwargs: Any) -> None:
-        self.url = url if url else self.url
+        self.url = url or self.url
         assert self.url is not None, "LinkButton requires a url"  # noqa: S101
         super().__init__(**kwargs)
         del self._attributes["type"]
@@ -232,7 +232,7 @@ class InputButton(Button):
     confirm_text: str | None = None
 
     def __init__(self, confirm_text: str | None = None, **kwargs: Any) -> None:
-        self.confirm_text = confirm_text if confirm_text else self.confirm_text
+        self.confirm_text = confirm_text or self.confirm_text
         super().__init__(**kwargs)
         self._attributes["type"] = "submit"
         self._attributes["value"] = self.text

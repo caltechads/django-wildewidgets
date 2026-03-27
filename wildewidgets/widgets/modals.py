@@ -62,10 +62,10 @@ class ModalWidget(Block):
         modal_size: str | None = None,
         **kwargs: Any,
     ):
-        self.modal_id = modal_id if modal_id else self.modal_id
-        self.modal_title = modal_title if modal_title else self.modal_title
-        self.modal_body = modal_body if modal_body else self.modal_body
-        self.modal_size = modal_size if modal_size else self.modal_size
+        self.modal_id = modal_id or self.modal_id
+        self.modal_title = modal_title or self.modal_title
+        self.modal_body = modal_body or self.modal_body
+        self.modal_size = modal_size or self.modal_size
         super().__init__(**kwargs)
 
     def get_context_data(self, *args: Any, **kwargs: Any) -> dict[str, Any]:

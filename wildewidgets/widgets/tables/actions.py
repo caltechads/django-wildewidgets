@@ -113,11 +113,11 @@ class RowActionButton(Block):
         permission: str | None = None,
         **kwargs,
     ):
-        self.text = text if text else self.text
-        self.url = url if url else self.url
-        self.color = color if color else self.color
-        self.size = size if size else self.size
-        self.permission = permission if permission else self.permission
+        self.text = text or self.text
+        self.url = url or self.url
+        self.color = color or self.color
+        self.size = size or self.size
+        self.permission = permission or self.permission
         super().__init__(cast("str", self.text), **kwargs)
 
         #: The table will set this
@@ -341,7 +341,7 @@ class RowModelUrlButton(RowActionButton):
     text: str | None = "View"
 
     def __init__(self, attribute: str | None = None, **kwargs):
-        self.attribute = attribute if attribute else self.attribute
+        self.attribute = attribute or self.attribute
         super().__init__(**kwargs)
 
     def get_url(self, row: Any) -> str:
@@ -445,9 +445,9 @@ class RowDjangoUrlButton(RowActionButton):
         url_kwargs: dict[str, str] | None = None,
         **kwargs,
     ):
-        self.url_path = url_path if url_path else self.url_path
-        self.url_args = url_args if url_args else copy(self.url_args)
-        self.url_kwargs = url_kwargs if url_kwargs else copy(self.url_kwargs)
+        self.url_path = url_path or self.url_path
+        self.url_args = url_args or copy(self.url_args)
+        self.url_kwargs = url_kwargs or copy(self.url_kwargs)
         if not self.url_path:
             msg = "url_path"
             raise self.RequiredAttrOrKwarg(msg)
@@ -476,10 +476,7 @@ class RowDjangoUrlButton(RowActionButton):
             args = [getattr(row, arg) for arg in self.url_args]
             url = reverse(self.url_path, args=args)
         if self.url_kwargs:
-            kwargs = {
-                kwarg: getattr(self.row, attr)
-                for kwarg, attr in self.url_kwargs
-            }
+            kwargs = {kwarg: getattr(self.row, attr) for kwarg, attr in self.url_kwargs}
             url = reverse(self.url_path, kwargs=kwargs)
         return url
 
@@ -560,10 +557,8 @@ class RowFormButton(RowModelUrlButton):
         confirm_text: str | None = None,
         **kwargs,
     ):
-        self.form_fields = (
-            form_fields if form_fields else deepcopy(self.form_fields)
-        )
-        self.confirm_text = confirm_text if confirm_text else self.confirm_text
+        self.form_fields = form_fields or deepcopy(self.form_fields)
+        self.confirm_text = confirm_text or self.confirm_text
         if not self.confirm_text:
             msg = "RowFormButton requires a 'confirm_text' argument or class attribute"
             raise ImproperlyConfigured(msg)
@@ -589,9 +584,7 @@ class RowFormButton(RowModelUrlButton):
         """
         return self.confirm_text  # type: ignore[return-value]
 
-    def bind(
-        self, row: Any, table: Any, size: str | None = None
-    ) -> RowFormButton:
+    def bind(self, row: Any, table: Any, size: str | None = None) -> RowFormButton:
         """
         Bind this button to a specific row and create a form.
 
@@ -614,9 +607,7 @@ class RowFormButton(RowModelUrlButton):
             size = self.size
         action = deepcopy(self)
         action.add_block(
-            HiddenInputBlock(
-                input_name="csrfmiddlewaretoken", value=table.csrf_token
-            )
+            HiddenInputBlock(input_name="csrfmiddlewaretoken", value=table.csrf_token)
         )
         action._attributes["action"] = self.get_url(row)
         for field in self.form_fields:
@@ -844,20 +835,12 @@ class ActionsButtonsBySpecMixin:
         **kwargs,
     ):
         self.actions = actions if actions is not None else self.actions
-        self.action_button_size = (
-            action_button_size
-            if action_button_size
-            else self.action_button_size
-        )
+        self.action_button_size = action_button_size or self.action_button_size
         self.default_action_button_label = (
-            default_action_button_label
-            if default_action_button_label
-            else self.default_action_button_label
+            default_action_button_label or self.default_action_button_label
         )
         self.default_action_button_color_class = (
-            default_action_button_color_class
-            if default_action_button_color_class
-            else self.default_action_button_color_class
+            default_action_button_color_class or self.default_action_button_color_class
         )
         if self.action_button_size != "normal":
             self.action_button_size_class = f"btn-{self.action_button_size}"
@@ -1108,9 +1091,7 @@ class ActionButtonBlockMixin:
 
     #: A list of :py:class:`RowActionButton` subclasses to display in the
     #: "Actions" column.
-    actions: list[RowActionButton] = [
-        RowModelUrlButton(text="View", color="secondary")
-    ]  # noqa: RUF012
+    actions: list[RowActionButton] = [RowModelUrlButton(text="View", color="secondary")]  # noqa: RUF012
 
     def __init__(
         self,
@@ -1120,11 +1101,9 @@ class ActionButtonBlockMixin:
         justify: Literal["start", "center", "end"] | None = None,
         **kwargs,
     ):
-        self.actions = (
-            actions if actions is not None else deepcopy(self.actions)
-        )
-        self.button_size = button_size if button_size else self.button_size
-        self.justify = justify if justify else self.justify
+        self.actions = actions if actions is not None else deepcopy(self.actions)
+        self.button_size = button_size or self.button_size
+        self.justify = justify or self.justify
         super().__init__(*args, **kwargs)
 
     def get_actions(self) -> list[RowActionButton]:
@@ -1219,9 +1198,7 @@ class StandardModelActionButtonBlockMixin(ActionButtonBlockMixin):
     """
 
     actions: list[RowActionButton] = [  # noqa: RUF012
-        RowModelUrlButton(
-            text="Edit", color="primary", attribute="get_update_url"
-        ),
+        RowModelUrlButton(text="Edit", color="primary", attribute="get_update_url"),
         # TODO: change this to RowFormButton
         RowModelUrlButton(
             text="delete",

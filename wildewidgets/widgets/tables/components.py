@@ -52,9 +52,7 @@ class DataTableColumn:
         wrap: bool = True,
     ):
         self.field = field
-        self.verbose_name = (
-            verbose_name if verbose_name else self.field.capitalize()
-        )
+        self.verbose_name = verbose_name or self.field.capitalize()
         self.searchable = searchable
         self.sortable = sortable
         self.align = align
@@ -99,9 +97,7 @@ class DataTableFilter:
         self.default_value: str | None = None
         self.default_label: str | None = None
 
-    def add_choice(
-        self, label: str, value: str, default: bool = False
-    ) -> None:
+    def add_choice(self, label: str, value: str, default: bool = False) -> None:
         """
         Add a filter option to the choices list.
 

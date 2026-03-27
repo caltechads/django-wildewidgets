@@ -73,13 +73,13 @@ class BasicHeader(TemplateWidget):
         badge_rounded_pill: bool | None = None,
         **kwargs: Any,
     ):
-        self.header_level = header_level if header_level else self.header_level
-        self.header_type = header_type if header_type else self.header_type
-        self.header_text = header_text if header_text else self.header_text
-        self.css_class = css_class if css_class else self.css_class
-        self.css_id = css_id if css_id else self.css_id
-        self.badge_text = badge_text if badge_text else self.badge_text
-        self.badge_class = badge_class if badge_class else self.badge_class
+        self.header_level = header_level or self.header_level
+        self.header_type = header_type or self.header_type
+        self.header_text = header_text or self.header_text
+        self.css_class = css_class or self.css_class
+        self.css_id = css_id or self.css_id
+        self.badge_text = badge_text or self.badge_text
+        self.badge_class = badge_class or self.badge_class
         self.badge_rounded_pill = (
             badge_rounded_pill
             if badge_rounded_pill is not None
@@ -171,9 +171,9 @@ class HeaderWithLinkButton(BasicHeader):
             DeprecationWarning,
             stacklevel=2,
         )
-        self.url = url if url else self.url
-        self.link_text = link_text if link_text else self.link_text
-        self.button_class = button_class if button_class else self.button_class
+        self.url = url or self.url
+        self.link_text = link_text or self.link_text
+        self.button_class = button_class or self.button_class
         super().__init__(**kwargs)
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
@@ -241,8 +241,8 @@ class HeaderWithFormButton(BasicHeader):
             DeprecationWarning,
             stacklevel=2,
         )
-        self.url = url if url else self.url
-        self.button_text = button_text if button_text else self.button_text
+        self.url = url or self.url
+        self.button_text = button_text or self.button_text
         super().__init__(**kwargs)
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
@@ -316,9 +316,9 @@ class HeaderWithCollapseButton(BasicHeader):
             DeprecationWarning,
             stacklevel=2,
         )
-        self.collapse_id = collapse_id if collapse_id else self.collapse_id
-        self.button_text = button_text if button_text else self.button_text
-        self.button_class = button_class if button_class else self.button_class
+        self.collapse_id = collapse_id or self.collapse_id
+        self.button_text = button_text or self.button_text
+        self.button_class = button_class or self.button_class
         super().__init__(**kwargs)
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
