@@ -1,4 +1,4 @@
-__version__ = "1.4.3"
+__version__ = "1.4.4"
 
 from .forms import *  # noqa: F403
 from .menus import *  # noqa: F403
