@@ -8,15 +8,15 @@
     <div class="d-flex justify-content-between align-items-center">
       {% if not options.hide_controls %}
       <div class='table-control-container'>
-          <div class="btn-group controls" role="group" aria-label="Show/Hide Table Controls">
-            <a href="#" role="button" class="btn btn-secondary label-btn"  aria-disabled="true">Table Controls</a>
-            <button class="btn btn-outline-secondary" type="button" data-bs-toggle="collapse"
-                    data-bs-target="#{{name}}__columns" aria-expanded="false" aria-controls="#{{name}}__columns">Columns</button>
-            {% if has_filters %}
-              <button class="btn btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#{{name}}__filters"
-                    aria-expanded="false" aria-controls="#{{name}}__filters">Filter by</button>
-            {% endif %}
-          </div> <!-- end show/hide table controls -->
+        <button
+          class="btn btn-outline-secondary table-controls-button"
+          type="button"
+          data-bs-toggle="modal"
+          data-bs-target="#{{name}}__controls_modal"
+          aria-controls="{{name}}__controls_modal"
+        >
+          Table Controls
+        </button>
       </div>
       {% endif %}
 
@@ -36,76 +36,107 @@
       {% endif %}
 
     </div>
-    <div class="d-flex flex-column align-items-start border-left border-secondary">
-      <div
-        id="{{name}}__columns"
-        class="ms-3 mt-3 mw-auto toolbar__columns {{name}}__columns collapse"
-        role="group"
-        aria-label="Show/Hide Columns"
-      >
-        <div class="d-flex">
-          <a href="#" role="button" class="btn btn-info label-btn btn-square"  aria-disabled="true">Columns</a>
-          <div class="" >
-            <div class="btn-toolbar">
-              <div class="btn-group" display="block">
-              {% for key,item in header.items %}
-                {% if item.verbose_name.strip %}
-                  <button type="button" data-bs-toggle="button" aria-pressed="true" autocomplete="off" class="toggle-vis btn btn-square btn-outline-secondary border-secondary {{item.visible|yesno:'active,'}}" data-column="{{forloop.counter0}}">{{item.verbose_name}}</button>
-                {% endif %}
-                {% if key in column_wrap_fields %}
+    {% if not options.hide_controls %}
+    <div
+      class="modal fade wildewidgets-table-controls-modal"
+      id="{{name}}__controls_modal"
+      tabindex="-1"
+      aria-labelledby="{{name}}__controls_modal_label"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h1 class="modal-title fs-5" id="{{name}}__controls_modal_label">Table Controls</h1>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <div class="wildewidgets-table-controls-layout {% if has_filters %}wildewidgets-table-controls-layout--split{% endif %}">
+              <div
+                id="{{name}}__columns"
+                class="wildewidgets-table-controls-section toolbar__columns {{name}}__columns"
+              >
+                <h2 class="wildewidgets-table-controls-heading">Columns</h2>
+                <div class="wildewidgets-column-toggle-grid" role="group" aria-label="Show/Hide Columns">
+                  {% for key,item in header.items %}
+                    {% if item.verbose_name.strip %}
+                    <div class="form-check form-switch wildewidgets-column-toggle">
+                      <input
+                        class="form-check-input toggle-vis"
+                        type="checkbox"
+                        role="switch"
+                        id="{{name}}__column_{{forloop.counter0}}"
+                        data-column="{{forloop.counter0}}"
+                        {% if item.visible %}checked{% endif %}
+                      >
+                      <label class="form-check-label" for="{{name}}__column_{{forloop.counter0}}">
+                        {{item.verbose_name}}
+                      </label>
+                    </div>
+                    {% endif %}
+                    {% if key in column_wrap_fields %}
+                    <div class="wildewidgets-column-toggle-break"></div>
+                    {% endif %}
+                  {% endfor %}
+                </div>
               </div>
-            </div>
-            <div class="btn-toolbar">
-              <div class="btn-group" display="block">
-                {% endif %}
-              {% endfor %}
+
+              {% if has_filters %}
+              <div
+                id="{{name}}__filters"
+                class="wildewidgets-table-controls-section {{name}}__filters"
+              >
+                <h2 class="wildewidgets-table-controls-heading">Filters</h2>
+                <div class="wildewidgets-filter-list" role="group" aria-label="Search Filters">
+                  {% for batch in filters %}
+                    {% with field_counter=forloop.counter0 filter=batch.1 item=batch.0 %}
+                      {% if filter %}
+                      <div class="dropdown wildewidgets-filter-control">
+                        <button
+                          id="{{name}}__{{item.field}}-group"
+                          type="button"
+                          data-bs-toggle="dropdown"
+                          data-bs-boundary="viewport"
+                          aria-haspopup="true"
+                          aria-expanded="false"
+                          class="btn btn-light border dropdown-toggle wildewidgets-filter-button {% if filter.default %}active{% endif %}"
+                          {% if filter.default %}data-default="{{filter.default_value}}"{% endif %}
+                        >
+                          <span class="wildewidgets-filter-label">{{item.verbose_name}}</span>
+                          <span class="filter-target">
+                            {% if filter.default %}
+                              {{filter.default_label}}
+                            {% else %}
+                              Any
+                            {% endif %}
+                          </span>
+                        </button>
+                        <div class="dropdown-menu" aria-labelledby="{{name}}__{{item.field}}-group">
+                          <h6 class="dropdown-header">Filter by {{item.verbose_name}}?</h6>
+                          {% for choice in filter.choices %}
+                            <button
+                              type="button"
+                              class="dropdown-item {% if choice.1 == filter.default_value %}active{% endif %}"
+                              data-column="{{field_counter}}"
+                              data-search="{{choice.1}}"
+                            >
+                              {{choice.0}}
+                            </button>
+                          {% endfor %}
+                        </div>
+                      </div>
+                      {% endif %}
+                    {% endwith %}
+                  {% endfor %}
+                </div>
               </div>
+              {% endif %}
             </div>
           </div>
         </div>
       </div>
-      <div id="{{name}}__filters" class="btn-group ms-3 mt-3 {{name}}__filters collapse {{has_filter_defaults|yesno:'show,'}}" role="group" aria-label="Search Filters">
-        <a href="#" role="button" class="btn btn-info label-btn btn-square"  aria-disabled="true">Filter by</a>
-        {% for batch in filters %}
-          {% with field_counter=forloop.counter0 filter=batch.1 item=batch.0 %}
-            {% if filter %}
-              <div class="btn-group" role="group">
-                <button
-                  id="{{item.field}}-group"
-                  type="button"
-                  data-bs-toggle="dropdown"
-                  aria-haspopup="true"
-                  aria-expanded="false"
-                  class="btn btn-outline-secondary dropdown-toggle {% if filter.default %}active{% endif %}"
-                  {% if filter.default %}data-default="{{filter.default_value}}"{% endif %}
-                >{{item.verbose_name}}?:
-                  <span class="filter-target">
-                    {% if filter.default %}
-                      {{filter.default_label}}
-                    {% else %}
-                      Any
-                    {% endif %}
-                  </span>
-                </button>
-                <div class="dropdown-menu" aria-labelledby="{{item.field}}-group">
-                  <h6 class="dropdown-header">Filter by {{item.verbose_name}}?</h6>
-                  {% for choice in filter.choices %}
-                    <button
-                      class="dropdown-item {% if choice.1 == filter.default_value %}active{% endif %}"
-                      href="#"
-                      data-column="{{field_counter}}"
-                      data-search="{{choice.1}}"
-                    >
-                      {{choice.0}}
-                    </button>
-                  {% endfor %}
-                </div>
-              </div>
-            {% endif %}
-          {% endwith %}
-        {% endfor %}
-      </div>
     </div>
+    {% endif %}
   </div> <!-- end table controls -->
 
   <table id="{{name}}" class="wildewidgets-table table {{options.small|yesno:'table-sm,,'}} {{options.striped|yesno:'stripe,,'}} {{name}}" style="width: {{options.width}}; overflow-x:auto;">
@@ -248,10 +279,10 @@
       {% endif %}
     });
 
-    $('.{{name}}-controls button.toggle-vis').on('click', function (e) {
+    $('.{{name}}-controls .toggle-vis').on('change', function (e) {
         e.preventDefault();
         var column = {{name}}.column( $(this).attr('data-column') );
-        column.visible( ! column.visible() );
+        column.visible( this.checked );
     });
 
     $('.{{name}}-controls .dropdown-item').on('click', function(e) {
