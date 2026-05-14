@@ -15,7 +15,7 @@
           data-bs-target="#{{name}}__controls_modal"
           aria-controls="{{name}}__controls_modal"
         >
-          Table Controls
+          <span class="bi-funnel me-2"></span>View/Filter
         </button>
       </div>
       {% endif %}
@@ -44,23 +44,22 @@
       aria-labelledby="{{name}}__controls_modal_label"
       aria-hidden="true"
     >
-      <div class="modal-dialog modal-xl">
+      <div class="modal-dialog modal-lg">
         <div class="modal-content">
           <div class="modal-header">
-            <h1 class="modal-title fs-5" id="{{name}}__controls_modal_label">Table Controls</h1>
+            <h5 class="modal-title" id="{{name}}__controls_modal_label">Table Controls</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
-            <div class="wildewidgets-table-controls-layout {% if has_filters %}wildewidgets-table-controls-layout--split{% endif %}">
+            <div class="d-flex justify-content-start">
               <div
                 id="{{name}}__columns"
-                class="wildewidgets-table-controls-section toolbar__columns {{name}}__columns"
               >
-                <h2 class="wildewidgets-table-controls-heading">Columns</h2>
-                <div class="wildewidgets-column-toggle-grid" role="group" aria-label="Show/Hide Columns">
+                <h4>Columns</h4>
+                <div role="group" aria-label="Show/Hide Columns">
                   {% for key,item in header.items %}
                     {% if item.verbose_name.strip %}
-                    <div class="form-check form-switch wildewidgets-column-toggle">
+                    <div class="form-check form-switch">
                       <input
                         class="form-check-input toggle-vis"
                         type="checkbox"
@@ -74,9 +73,6 @@
                       </label>
                     </div>
                     {% endif %}
-                    {% if key in column_wrap_fields %}
-                    <div class="wildewidgets-column-toggle-break"></div>
-                    {% endif %}
                   {% endfor %}
                 </div>
               </div>
@@ -84,14 +80,14 @@
               {% if has_filters %}
               <div
                 id="{{name}}__filters"
-                class="wildewidgets-table-controls-section {{name}}__filters"
+                class="ms-5 border-start ps-3"
               >
-                <h2 class="wildewidgets-table-controls-heading">Filters</h2>
-                <div class="wildewidgets-filter-list" role="group" aria-label="Search Filters">
+                <h4>Filters</h4>
+                <div role="group" aria-label="Search Filters">
                   {% for batch in filters %}
                     {% with field_counter=forloop.counter0 filter=batch.1 item=batch.0 %}
                       {% if filter %}
-                      <div class="dropdown wildewidgets-filter-control">
+                      <div class="dropdown mb-3">
                         <button
                           id="{{name}}__{{item.field}}-group"
                           type="button"
@@ -99,10 +95,10 @@
                           data-bs-boundary="viewport"
                           aria-haspopup="true"
                           aria-expanded="false"
-                          class="btn btn-light border dropdown-toggle wildewidgets-filter-button {% if filter.default %}active{% endif %}"
+                          class="btn btn-lightx borderx dropdown-toggle {% if filter.default %}active{% endif %}"
                           {% if filter.default %}data-default="{{filter.default_value}}"{% endif %}
                         >
-                          <span class="wildewidgets-filter-label">{{item.verbose_name}}</span>
+                          <span class="me-2">{{item.verbose_name}}:</span>
                           <span class="filter-target">
                             {% if filter.default %}
                               {{filter.default_label}}
