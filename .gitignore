@@ -136,3 +136,7 @@ config.codekit3
 local_storage
 
 django-wildewidgets.tar.gz
+
+# local tools
+.aidex
+.cursor
