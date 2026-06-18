@@ -1153,7 +1153,7 @@ class ActionButtonBlockMixin:
             for the current user.
 
         """
-        container = HorizontalLayoutBlock(justify=self.justify)
+        container = HorizontalLayoutBlock(justify=self.justify, css_class="gap-2")
         for action in self.get_actions():
             button = action.bind(row, self, size=self.button_size)
             user = None
@@ -1161,9 +1161,7 @@ class ActionButtonBlockMixin:
                 user = self.request.user
             if not button.is_visible(row, user):
                 continue
-            button.add_class("me-2")
             container.add_block(button)
-        button.remove_class("me-2")
         return str(container)
 
 
