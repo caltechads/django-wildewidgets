@@ -1345,7 +1345,7 @@ class ModalCard(CardWidget):
         modal = ModalWidget(
             modal_id="modal1",
             modal_title="Modal Title",
-            modal_body="This is a modal widget",
+            modal_body=Block("This is a modal widget"),
         )
         return Block(header, modal)
 
