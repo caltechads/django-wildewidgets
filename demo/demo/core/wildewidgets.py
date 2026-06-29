@@ -76,8 +76,8 @@ def get_code_block(fn):
     if len(lines) < 2:  # noqa: PLR2004
         return None
     space_len = len(lines[1]) - len(lines[1].strip())
-    for line in lines[1:-1]:
-        code += line[space_len - 1 :]
+    for line in lines:
+        code += line  # [space_len - 1 :]
     return code
 
 

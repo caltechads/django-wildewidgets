@@ -329,16 +329,40 @@ wheels = [
 
 [[package]]
 name = "django-wildewidgets"
-version = "1.2.5"
-source = { registry = "https://pypi.org/simple" }
+version = "1.6.1"
+source = { editable = "../" }
 dependencies = [
     { name = "crispy-bootstrap5" },
     { name = "django" },
     { name = "django-crispy-forms" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/78/1e/a87a9a81fccd3f1c20a135a834738e27ae4d2fa3479d8950ae745334755a/django_wildewidgets-1.2.5.tar.gz", hash = "sha256:43107017a4d262a9e3ad7cde8e4a0ed4a09279367ff3468be220238fbe692ef3", size = 180096, upload-time = "2026-01-08T23:57:22.843Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/34/9f/4971de05f2abf7df6ad46e964df9e5184617db353b19bbd793dcf6e1847e/django_wildewidgets-1.2.5-py3-none-any.whl", hash = "sha256:ff51042d6baa73e17e7db7dab6914e14fcc17c57ef0f1cde6ccadf84c972e7c8", size = 216631, upload-time = "2026-01-08T23:57:21.348Z" },
+
+[package.metadata]
+requires-dist = [
+    { name = "crispy-bootstrap5", specifier = ">=2025.6" },
+    { name = "django", specifier = ">=5.1" },
+    { name = "django-crispy-forms", specifier = ">=2.4" },
+]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "build", specifier = ">=1.6.1.post1" },
+    { name = "django-stubs", specifier = "==5.1.1" },
+    { name = "ipython", specifier = ">=7.27.0" },
+]
+docs = [
+    { name = "pydata-sphinx-theme", specifier = "<=2.0.0" },
+    { name = "setuptools", specifier = ">=75.1.0" },
+    { name = "sphinx", specifier = "<7" },
+    { name = "sphinxcontrib-django", specifier = ">=2.5" },
+    { name = "sphinxcontrib-images", specifier = ">=0.9.4" },
+]
+test = [
+    { name = "coverage", specifier = ">=5.0.3" },
+    { name = "django-coverage-plugin", specifier = ">=1.8.0" },
+    { name = "factory-boy", specifier = ">=2.12.0" },
+    { name = "testfixtures", specifier = ">=6.17.0" },
+    { name = "unittest-xml-reporting", specifier = ">=3.0.4" },
 ]
 
 [[package]]
@@ -627,7 +651,7 @@ name = "pexpect"
 version = "4.9.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "ptyprocess" },
+    { name = "ptyprocess", marker = "sys_platform != 'emscripten' and sys_platform != 'win32'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/42/92/cc564bf6381ff43ce1f4d06852fc19a2f11d180f23dc32d9588bee2f149d/pexpect-4.9.0.tar.gz", hash = "sha256:ee7d41123f3c9911050ea2c2dac107568dc43b2d3b0c7557a33212c398ead30f", size = 166450, upload-time = "2023-11-25T09:07:26.339Z" }
 wheels = [
@@ -893,7 +917,7 @@ wheels = [
 
 [[package]]
 name = "wildewidgets-demo"
-version = "1.2.5"
+version = "1.6.1"
 source = { editable = "." }
 dependencies = [
     { name = "altair" },
@@ -946,11 +970,11 @@ requires-dist = [
     { name = "django-js-reverse", specifier = ">=0.9.1" },
     { name = "django-markdownify", specifier = ">=0.9.2" },
     { name = "django-redis", specifier = ">=4.11.0" },
-    { name = "django-sass-processor", specifier = ">=1.4.1" },
+    { name = "django-sass-processor", specifier = ">=1.4.2" },
     { name = "django-storages", specifier = ">=1.14.4" },
     { name = "django-theme-academy", specifier = ">=0.3.2" },
-    { name = "django-wildewidgets", specifier = ">=1.2.5" },
-    { name = "django-xff", specifier = ">=1.3.0" },
+    { name = "django-wildewidgets", editable = "../" },
+    { name = "django-xff", specifier = ">=1.5.0" },
     { name = "gunicorn", specifier = ">=20.1.0" },
     { name = "ipython", specifier = ">=8.6.0" },
     { name = "libsass", specifier = ">=0.22.0" },

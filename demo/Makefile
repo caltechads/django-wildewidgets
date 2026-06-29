@@ -25,6 +25,9 @@ force-build:: package
 	docker tag ${PACKAGE}:${VERSION} ${PACKAGE}:latest
 	docker image prune -f
 
+local::
+	export DEVELOPMENT=True; export DEBUG=True; uv run python manage.py runserver
+
 dev::
 	docker-compose -f docker-compose.yml up
 
