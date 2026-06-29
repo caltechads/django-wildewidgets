@@ -3,7 +3,7 @@ name = "django_wildewidgets"
 version = "1.6.2"
 description = "django-wildewidgets is a Django design library providing several tools for building full-featured, widget-based web applications with a standard, consistent design, based on Bootstrap."
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.14"
 authors = [
     {name = "Caltech IMSS ADS", email = "imss-ads-staff@caltech.edu"}
 ]
@@ -34,7 +34,7 @@ Homepage = "https://github.com/caltechads/django-wildewidgets"
 
 
 [tool.uv]
-python-preference = "only-system"
+# python-preference = "only-system"
 default-groups = ["docs", "test"]
 
 [dependency-groups]

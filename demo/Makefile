@@ -14,6 +14,7 @@ dist:: clean
 package::
 	(cd ..; uv build --sdist)
 	cp ../dist/django_wildewidgets-${VERSION}.tar.gz django_wildewidgets.tar.gz
+	uv lock --refresh-package django-wildewidgets
 
 build:: package
 	docker build -t ${PACKAGE}:${VERSION} .
