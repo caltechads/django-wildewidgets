@@ -17,6 +17,7 @@ from wildewidgets import (
     BasicHeader,
     BasicModelTable,
     Block,
+    Button,
     CardHeader,
     CardWidget,
     CodeWidget,
@@ -39,6 +40,7 @@ from wildewidgets import (
     MarkdownWidget,
     ModalButton,
     ModalWidget,
+    OffcanvasWidget,
     PagedModelWidget,
     PageHeader,
     PieChart,
@@ -75,9 +77,8 @@ def get_code_block(fn):
     code = ""
     if len(lines) < 2:  # noqa: PLR2004
         return None
-    space_len = len(lines[1]) - len(lines[1].strip())
     for line in lines:
-        code += line  # [space_len - 1 :]
+        code += line
     return code
 
 
@@ -1348,6 +1349,57 @@ class ModalCard(CardWidget):
             modal_body=Block("This is a modal widget"),
         )
         return Block(header, modal)
+
+
+class OffcanvasCard(CardWidget):
+    """
+    Wrapper around the :class:`~demo.core.wildewidgets.OffcanvasWidget` widget.
+    """
+
+    #: The title of the card.
+    title: str = "Offcanvas Widget"
+    #: The icon of the card.
+    icon: str = "layout-sidebar"
+
+    def __init__(self, *args, **kwargs):
+        """
+        Initialize the card with the offcanvas widget example.
+
+        Args:
+            *args: Positional arguments for the parent card.
+
+        Keyword Args:
+            **kwargs: Keyword arguments for the parent card.
+
+        """
+        super().__init__(*args, **kwargs)
+        code = get_code_block(OffcanvasCard.get_offcanvas_widget)
+        tab = WidgetCodeTab(code=code, widget=self.get_offcanvas_widget())
+        self.set_widget(tab, "mb-5")
+
+    def get_offcanvas_widget(self) -> Block:
+        """
+        Return the OffcanvasWidget.
+
+        Returns:
+            The offcanvas widget example.
+
+        """
+        header = CardHeader(header_text="Offcanvas Widget")
+        header.widget = Button(
+            text="Show Offcanvas",
+            color="primary",
+            data_attributes={"toggle": "offcanvas", "target": "#offcanvas1"},
+            aria_attributes={"controls": "offcanvas1"},
+        )
+        offcanvas = OffcanvasWidget(
+            offcanvas_id="offcanvas1",
+            offcanvas_title="Offcanvas Title",
+            widget=Block("This is an offcanvas widget"),
+            scroll=True,
+            backdrop=False,
+        )
+        return Block(header, offcanvas)
 
 
 class CrispyFormModalCard(CardWidget):

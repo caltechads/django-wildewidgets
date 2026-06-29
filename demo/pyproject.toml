@@ -63,7 +63,8 @@ dependencies = [
 # ]
 
 [tool.uv.sources]
-django-wildewidgets = {path = "./django_wildewidgets.tar.gz"}
+# django-wildewidgets = {path = "./django_wildewidgets.tar.gz"}
+django-wildewidgets = {path = "..", editable = true}
 
 [build-system]
 requires = [
