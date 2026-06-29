@@ -14,16 +14,14 @@ These requirements apply at the start of every new session in this repository.
 3. Confirm in an early progress update that the shared file was read.
 4. If .venv doesn't exist, run `uv sync`
 5. Activate the .venv
-6. Run `aidex init`
 
 ## Tooling Preflight Evidence (Required)
 
 Before planning or implementation, every agent must provide concise evidence of:
 
 1. `memory_search` for relevant prior context.
-2. At least one `aidex` call (`aidex_session` plus a query/signature/tree/files/status call as useful).
-3. At least one `code-index` call (search/find/symbol/summary as useful).
-4. `context7` and/or `package-registry-mcp` when external library/package behavior, versioning, or package details are relevant.
+2. At least one `code-index` call (search/find/symbol/summary as useful).
+3. `context7` and/or `package-registry-mcp` when external library/package behavior, versioning, or package details are relevant.
 
 In an early progress update, include the tool names used and one line on what each returned.
 If a tool is not relevant for the task, state that explicitly in one line.
