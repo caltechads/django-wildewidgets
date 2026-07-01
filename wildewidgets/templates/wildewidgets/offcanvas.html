@@ -1,0 +1,15 @@
+{% load wildewidgets %}
+<div class="offcanvas offcanvas-{{placement}}" data-bs-scroll="{{scroll}}" data-bs-backdrop="{{backdrop}}" tabindex="-1" id="{{offcanvas_id}}" aria-labelledby="{{offcanvas_id}}Label">
+  <div class="offcanvas-header">
+    <h5 class="offcanvas-title" id="{{offcanvas_id}}Label">{{offcanvas_title}}</h5>
+    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+  </div>
+  <div class="offcanvas-body">
+    {% if widget_css %}<div class="{{widget_css}}">{% endif %}
+      {% wildewidgets widget %}
+    {% if widget_css %}</div>{% endif %}
+  </div>
+</div>
+{% if script %}
+<script>{{script|safe}}</script>
+{% endif %}

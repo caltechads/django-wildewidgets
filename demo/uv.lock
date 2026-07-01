@@ -329,20 +329,40 @@ wheels = [
 
 [[package]]
 name = "django-wildewidgets"
-version = "1.6.2"
-source = { path = "django_wildewidgets.tar.gz" }
+version = "1.6.4"
+source = { editable = "../" }
 dependencies = [
     { name = "crispy-bootstrap5" },
     { name = "django" },
     { name = "django-crispy-forms" },
 ]
-sdist = { hash = "sha256:9d5b48af53730490d0809cf685d17fa71283dec42e4688df79c2f69f4d9514ee" }
 
 [package.metadata]
 requires-dist = [
     { name = "crispy-bootstrap5", specifier = ">=2025.6" },
     { name = "django", specifier = ">=5.1" },
     { name = "django-crispy-forms", specifier = ">=2.4" },
+]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "build", specifier = ">=1.6.1.post1" },
+    { name = "django-stubs", specifier = "==5.1.1" },
+    { name = "ipython", specifier = ">=7.27.0" },
+]
+docs = [
+    { name = "pydata-sphinx-theme", specifier = "<=2.0.0" },
+    { name = "setuptools", specifier = ">=75.1.0" },
+    { name = "sphinx", specifier = "<7" },
+    { name = "sphinxcontrib-django", specifier = ">=2.5" },
+    { name = "sphinxcontrib-images", specifier = ">=0.9.4" },
+]
+test = [
+    { name = "coverage", specifier = ">=5.0.3" },
+    { name = "django-coverage-plugin", specifier = ">=1.8.0" },
+    { name = "factory-boy", specifier = ">=2.12.0" },
+    { name = "testfixtures", specifier = ">=6.17.0" },
+    { name = "unittest-xml-reporting", specifier = ">=3.0.4" },
 ]
 
 [[package]]
@@ -897,7 +917,7 @@ wheels = [
 
 [[package]]
 name = "wildewidgets-demo"
-version = "1.6.3"
+version = "1.6.4"
 source = { editable = "." }
 dependencies = [
     { name = "altair" },
@@ -953,7 +973,7 @@ requires-dist = [
     { name = "django-sass-processor", specifier = ">=1.4.2" },
     { name = "django-storages", specifier = ">=1.14.4" },
     { name = "django-theme-academy", specifier = ">=0.3.2" },
-    { name = "django-wildewidgets", path = "django_wildewidgets.tar.gz" },
+    { name = "django-wildewidgets", editable = "../" },
     { name = "django-xff", specifier = ">=1.5.0" },
     { name = "gunicorn", specifier = ">=20.1.0" },
     { name = "ipython", specifier = ">=8.6.0" },

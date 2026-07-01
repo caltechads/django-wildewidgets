@@ -1,6 +1,6 @@
 [project]
 name = "wildewidgets-demo"
-version = "1.6.5"
+version = "1.7.1"
 description = "Cheetah Demo - Django application demonstrating django-wildewidgets"
 readme = "README.md"
 requires-python = ">=3.14"
@@ -64,6 +64,7 @@ dependencies = [
 
 [tool.uv.sources]
 django-wildewidgets = {path = "./django_wildewidgets.tar.gz"}
+# django-wildewidgets = {path = "..", editable = true}
 
 [build-system]
 requires = [

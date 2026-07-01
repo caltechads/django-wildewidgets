@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING, Any
 
 from django.core.exceptions import ImproperlyConfigured
 
-from .base import Block
+from .base import Block, Widget
 from .forms import CrispyFormWidget
 
 if TYPE_CHECKING:
@@ -88,6 +88,114 @@ class ModalWidget(Block):
         kwargs["modal_title"] = self.modal_title
         kwargs["modal_body"] = self.modal_body
         kwargs["modal_size"] = self.modal_size
+        return kwargs
+
+
+class OffcanvasWidget(Block):
+    """
+    Renders a Bootstrap 5 offcanvas panel.
+
+    The widget renders a header and places the supplied child widget inside the
+    offcanvas body.
+
+    Attributes:
+        template_name: Path to the template for rendering the offcanvas panel.
+        offcanvas_id: Unique identifier used by trigger elements.
+        offcanvas_title: Title displayed in the offcanvas header.
+        widget: Widget displayed in the offcanvas body.
+        placement: Bootstrap offcanvas placement suffix.
+        widget_css: Optional CSS classes applied around the body widget.
+        scroll: Whether body scrolling is enabled while the offcanvas is open.
+        backdrop: Whether the offcanvas backdrop is enabled.
+
+    Keyword Args:
+        offcanvas_id: The CSS ID of the offcanvas panel.
+        offcanvas_title: The title of the offcanvas panel.
+        widget: The widget to display in the offcanvas body.
+        placement: Bootstrap offcanvas placement suffix.
+        widget_css: Optional CSS classes applied around the body widget.
+        scroll: Whether body scrolling is enabled while the offcanvas is open.
+        backdrop: Whether the offcanvas backdrop is enabled.
+        **kwargs: Additional attributes passed to the parent Block class.
+
+    Raises:
+        ImproperlyConfigured: If the id, title, or body widget is missing.
+
+    """
+
+    #: Path to the template for rendering the offcanvas panel.
+    template_name: str = "wildewidgets/offcanvas.html"
+    #: Unique identifier used by trigger elements.
+    offcanvas_id: str | None = None
+    #: Title displayed in the offcanvas header.
+    offcanvas_title: str | None = None
+    #: Widget displayed in the offcanvas body.
+    widget: Widget | None = None
+    #: Bootstrap offcanvas placement suffix.
+    placement: str = "start"
+    #: Optional CSS classes applied around the body widget.
+    widget_css: str | None = None
+    #: Whether body scrolling is enabled while the offcanvas is open.
+    scroll: bool = False
+    #: Whether the offcanvas backdrop is enabled.
+    backdrop: bool = True
+
+    def __init__(
+        self,
+        offcanvas_id: str | None = None,
+        offcanvas_title: str | None = None,
+        widget: Widget | None = None,
+        placement: str | None = None,
+        widget_css: str | None = None,
+        scroll: bool | None = None,
+        backdrop: bool | None = None,
+        **kwargs: Any,
+    ):
+        #: Unique identifier used by trigger elements.
+        self.offcanvas_id = offcanvas_id or self.offcanvas_id
+        #: Title displayed in the offcanvas header.
+        self.offcanvas_title = offcanvas_title or self.offcanvas_title
+        #: Widget displayed in the offcanvas body.
+        self.widget = widget or self.widget
+        #: Bootstrap offcanvas placement suffix.
+        self.placement = placement or self.placement
+        #: Optional CSS classes applied around the body widget.
+        self.widget_css = widget_css or self.widget_css
+        #: Whether body scrolling is enabled while the offcanvas is open.
+        self.scroll = self.scroll if scroll is None else scroll
+        #: Whether the offcanvas backdrop is enabled.
+        self.backdrop = self.backdrop if backdrop is None else backdrop
+        super().__init__(**kwargs)
+        if not self.offcanvas_id:
+            msg = "You must define offcanvas_id."
+            raise ImproperlyConfigured(msg)
+        if not self.offcanvas_title:
+            msg = "You must define offcanvas_title."
+            raise ImproperlyConfigured(msg)
+        if not self.widget:
+            msg = "You must define widget."
+            raise ImproperlyConfigured(msg)
+
+    def get_context_data(self, *args: Any, **kwargs: Any) -> dict[str, Any]:
+        """
+        Prepare the context data for the offcanvas template.
+
+        Args:
+            *args: Variable length argument list.
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            The updated context dictionary with offcanvas attributes.
+
+        """
+        kwargs = super().get_context_data(*args, **kwargs)
+        kwargs["offcanvas_id"] = self.offcanvas_id
+        kwargs["offcanvas_title"] = self.offcanvas_title
+        kwargs["widget"] = self.widget
+        kwargs["placement"] = self.placement
+        kwargs["widget_css"] = self.widget_css
+        kwargs["scroll"] = str(self.scroll).lower()
+        kwargs["backdrop"] = str(self.backdrop).lower()
         return kwargs
 
 

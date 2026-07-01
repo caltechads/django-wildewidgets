@@ -34,6 +34,7 @@ from .wildewidgets import (
     HTMLCard,
     MarkdownCard,
     ModalCard,
+    OffcanvasCard,
     PagedBookCard,
     PieCard,
     SciChartCard,
@@ -331,6 +332,7 @@ class ModalView(DemoStandardMixin, TemplateView):  # type: ignore[misc]
     def get_content(self):
         layout = WidgetListLayout("Modal Widget", css_class="mt-4")
         layout.add_widget(ModalCard(), "Modal Widget", "window-fullscreen")
+        layout.add_widget(OffcanvasCard(), "Offcanvas Widget", "layout-sidebar")
         layout.add_widget(
             CrispyFormModalCard(), "Crispy Form Modal Widget", "ui-checks"
         )
