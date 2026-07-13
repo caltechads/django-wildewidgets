@@ -1,8 +1,56 @@
+from types import SimpleNamespace
+
 from django.core.exceptions import ImproperlyConfigured
-from django.test import TestCase
+from django.http import HttpResponse
+from django.test import SimpleTestCase, TestCase, override_settings
+from django.urls import path
 
 from .widgets.base import Block
 from .widgets.modals import OffcanvasWidget
+from .widgets.tables.actions import RowDjangoUrlButton
+
+
+def _edit_book_view(_request, pk: int) -> HttpResponse:
+    """Minimal view used only for URL reversing in unit tests."""
+    return HttpResponse(str(pk))
+
+
+urlpatterns = [
+    path("book/<int:pk>/edit/", _edit_book_view, name="edit_book"),
+]
+
+
+@override_settings(ROOT_URLCONF="wildewidgets.tests")
+class RowDjangoUrlButtonTest(SimpleTestCase):
+    """
+    Tests for :py:class:`~wildewidgets.widgets.tables.actions.RowDjangoUrlButton`.
+    """
+
+    def test_get_url_with_url_args(self) -> None:
+        """
+        Reverse a named URL using positional args taken from the row.
+        """
+        button = RowDjangoUrlButton(
+            text="Edit",
+            url_path="edit_book",
+            url_args=["pk"],
+        )
+        row = SimpleNamespace(pk=42)
+
+        self.assertEqual(button.get_url(row), "/book/42/edit/")
+
+    def test_get_url_with_url_kwargs(self) -> None:
+        """
+        Reverse a named URL using keyword args taken from the row.
+        """
+        button = RowDjangoUrlButton(
+            text="Edit",
+            url_path="edit_book",
+            url_kwargs={"pk": "id"},
+        )
+        row = SimpleNamespace(id=7)
+
+        self.assertEqual(button.get_url(row), "/book/7/edit/")
 
 
 class OffcanvasWidgetTest(TestCase):

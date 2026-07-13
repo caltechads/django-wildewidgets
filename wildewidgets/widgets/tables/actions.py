@@ -470,15 +470,15 @@ class RowDjangoUrlButton(RowActionButton):
             str: The resolved URL for the button
 
         """
-        if not (self.url_args and self.url_kwargs):
-            url = reverse(self.url_path)
         if self.url_args:
             args = [getattr(row, arg) for arg in self.url_args]
-            url = reverse(self.url_path, args=args)
+            return reverse(self.url_path, args=args)
         if self.url_kwargs:
-            kwargs = {kwarg: getattr(self.row, attr) for kwarg, attr in self.url_kwargs}
-            url = reverse(self.url_path, kwargs=kwargs)
-        return url
+            kwargs = {
+                kwarg: getattr(row, attr) for kwarg, attr in self.url_kwargs.items()
+            }
+            return reverse(self.url_path, kwargs=kwargs)
+        return reverse(self.url_path)
 
 
 class RowFormButton(RowModelUrlButton):
